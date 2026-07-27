@@ -1,0 +1,177 @@
+{
+  "source": {
+    "slug": "sdi-vol1-2e",
+    "title": "System Design Interview – An Insider's Guide (2nd Edition)",
+    "kind": "book",
+    "description": "Chapter scaffolding inspired by Alex Xu's book. Contains only original summaries and original interactive diagrams — no book text or images.",
+    "sortOrder": 1
+  },
+  "chapters": [
+    {
+      "slug": "scale-to-millions",
+      "title": "Scale From Zero To Millions Of Users",
+      "description": "The scaling journey: single server → load balancing → replication → caching → CDN → stateless tier → multi-datacenter → queues.",
+      "sortOrder": 0,
+      "sections": [
+        {
+          "slug": "overview",
+          "title": "Overview",
+          "contentMarkdown": "Our original walkthrough of how a single-server app evolves into a system serving millions of users. Work through the interactive diagrams in order: each one adds a component (load balancer, replicas, cache, CDN, message queue) and explains why it becomes necessary.",
+          "sourceUrl": null,
+          "sortOrder": 0,
+          "externalLinks": []
+        }
+      ]
+    },
+    {
+      "slug": "back-of-envelope",
+      "title": "Back-of-the-Envelope Estimation",
+      "description": "Powers of two, latency numbers, availability math, and quick capacity estimates.",
+      "sortOrder": 1,
+      "sections": [
+        { "slug": "overview", "title": "Overview", "contentMarkdown": "Practice quick capacity math: QPS, storage, bandwidth, and cache sizing from first principles.", "sourceUrl": null, "sortOrder": 0, "externalLinks": [] }
+      ]
+    },
+    {
+      "slug": "interview-framework",
+      "title": "A Framework For System Design Interviews",
+      "description": "A repeatable 4-step approach: understand the problem, propose a high-level design, deep dive, wrap up.",
+      "sortOrder": 2,
+      "sections": [
+        { "slug": "overview", "title": "Overview", "contentMarkdown": "A 4-step method for any design question: clarify requirements and scale, agree on a high-level blueprint, deep-dive the interesting components, then summarize trade-offs and follow-ups.", "sourceUrl": null, "sortOrder": 0, "externalLinks": [] }
+      ]
+    },
+    {
+      "slug": "rate-limiter",
+      "title": "Design A Rate Limiter",
+      "description": "Token bucket, leaking bucket, sliding windows; where the limiter lives and how counters are shared.",
+      "sortOrder": 3,
+      "sections": [
+        { "slug": "overview", "title": "Overview", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 0, "externalLinks": [] },
+        { "slug": "high-level-design", "title": "High-Level Design", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 1, "externalLinks": [] },
+        { "slug": "deep-dive", "title": "Deep Dive", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 2, "externalLinks": [] }
+      ]
+    },
+    {
+      "slug": "consistent-hashing",
+      "title": "Design Consistent Hashing",
+      "description": "Hash rings, virtual nodes, and minimizing key movement when servers join or leave.",
+      "sortOrder": 4,
+      "sections": [
+        { "slug": "overview", "title": "Overview", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 0, "externalLinks": [] },
+        { "slug": "high-level-design", "title": "High-Level Design", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 1, "externalLinks": [] },
+        { "slug": "deep-dive", "title": "Deep Dive", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 2, "externalLinks": [] }
+      ]
+    },
+    {
+      "slug": "key-value-store",
+      "title": "Design A Key-Value Store",
+      "description": "CAP trade-offs, data partitioning, replication, quorum consensus, and failure handling.",
+      "sortOrder": 5,
+      "sections": [
+        { "slug": "overview", "title": "Overview", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 0, "externalLinks": [] },
+        { "slug": "high-level-design", "title": "High-Level Design", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 1, "externalLinks": [] },
+        { "slug": "deep-dive", "title": "Deep Dive", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 2, "externalLinks": [] }
+      ]
+    },
+    {
+      "slug": "unique-id-generator",
+      "title": "Design A Unique ID Generator In Distributed Systems",
+      "description": "Multi-master sequences, UUIDs, ticket servers, and snowflake-style IDs.",
+      "sortOrder": 6,
+      "sections": [
+        { "slug": "overview", "title": "Overview", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 0, "externalLinks": [] },
+        { "slug": "high-level-design", "title": "High-Level Design", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 1, "externalLinks": [] },
+        { "slug": "deep-dive", "title": "Deep Dive", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 2, "externalLinks": [] }
+      ]
+    },
+    {
+      "slug": "url-shortener",
+      "title": "Design A URL Shortener",
+      "description": "Hashing vs base-62 encoding, redirect flows, and read-heavy caching.",
+      "sortOrder": 7,
+      "sections": [
+        { "slug": "overview", "title": "Overview", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 0, "externalLinks": [] },
+        { "slug": "high-level-design", "title": "High-Level Design", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 1, "externalLinks": [] },
+        { "slug": "deep-dive", "title": "Deep Dive", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 2, "externalLinks": [] }
+      ]
+    },
+    {
+      "slug": "web-crawler",
+      "title": "Design A Web Crawler",
+      "description": "URL frontier, politeness, dedup, content storage, and crawl traps.",
+      "sortOrder": 8,
+      "sections": [
+        { "slug": "overview", "title": "Overview", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 0, "externalLinks": [] },
+        { "slug": "high-level-design", "title": "High-Level Design", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 1, "externalLinks": [] },
+        { "slug": "deep-dive", "title": "Deep Dive", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 2, "externalLinks": [] }
+      ]
+    },
+    {
+      "slug": "notification-system",
+      "title": "Design A Notification System",
+      "description": "Push/SMS/email fan-out through provider gateways, queues, retries, and rate limiting.",
+      "sortOrder": 9,
+      "sections": [
+        { "slug": "overview", "title": "Overview", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 0, "externalLinks": [] },
+        { "slug": "high-level-design", "title": "High-Level Design", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 1, "externalLinks": [] },
+        { "slug": "deep-dive", "title": "Deep Dive", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 2, "externalLinks": [] }
+      ]
+    },
+    {
+      "slug": "news-feed",
+      "title": "Design A News Feed System",
+      "description": "Fan-out on write vs read, feed cache layers, and ranking pipelines.",
+      "sortOrder": 10,
+      "sections": [
+        { "slug": "overview", "title": "Overview", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 0, "externalLinks": [] },
+        { "slug": "high-level-design", "title": "High-Level Design", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 1, "externalLinks": [] },
+        { "slug": "deep-dive", "title": "Deep Dive", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 2, "externalLinks": [] }
+      ]
+    },
+    {
+      "slug": "chat-system",
+      "title": "Design A Chat System",
+      "description": "WebSocket connections, message sync across devices, presence, and group chat fan-out.",
+      "sortOrder": 11,
+      "sections": [
+        { "slug": "overview", "title": "Overview", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 0, "externalLinks": [] },
+        { "slug": "high-level-design", "title": "High-Level Design", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 1, "externalLinks": [] },
+        { "slug": "deep-dive", "title": "Deep Dive", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 2, "externalLinks": [] }
+      ]
+    },
+    {
+      "slug": "search-autocomplete",
+      "title": "Design A Search Autocomplete System",
+      "description": "Trie-based suggestion serving, top-k aggregation, and data-gathering pipelines.",
+      "sortOrder": 12,
+      "sections": [
+        { "slug": "overview", "title": "Overview", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 0, "externalLinks": [] },
+        { "slug": "high-level-design", "title": "High-Level Design", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 1, "externalLinks": [] },
+        { "slug": "deep-dive", "title": "Deep Dive", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 2, "externalLinks": [] }
+      ]
+    },
+    {
+      "slug": "youtube",
+      "title": "Design YouTube",
+      "description": "Video upload/transcoding pipelines, CDN delivery, and metadata at scale.",
+      "sortOrder": 13,
+      "sections": [
+        { "slug": "overview", "title": "Overview", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 0, "externalLinks": [] },
+        { "slug": "high-level-design", "title": "High-Level Design", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 1, "externalLinks": [] },
+        { "slug": "deep-dive", "title": "Deep Dive", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 2, "externalLinks": [] }
+      ]
+    },
+    {
+      "slug": "google-drive",
+      "title": "Design Google Drive",
+      "description": "File chunking, sync conflicts, block storage, and notification of changes.",
+      "sortOrder": 14,
+      "sections": [
+        { "slug": "overview", "title": "Overview", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 0, "externalLinks": [] },
+        { "slug": "high-level-design", "title": "High-Level Design", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 1, "externalLinks": [] },
+        { "slug": "deep-dive", "title": "Deep Dive", "contentMarkdown": "", "sourceUrl": null, "sortOrder": 2, "externalLinks": [] }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "source": {
+    "slug": "primer",
+    "title": "The System Design Primer",
+    "kind": "repo",
+    "description": "Learn how to design large-scale systems. MIT © Donne Martin.",
+    "sortOrder": 0
+  },
+  "readmeChapters": [
+    {
+      "slug": "how-to-approach",
+      "heading": "How to approach a system design interview question",
+      "sortOrder": 0
+    },
+    {
+      "slug": "performance-vs-scalability",
+      "heading": "Performance vs scalability",
+      "sortOrder": 1
+    },
+    {
+      "slug": "latency-vs-throughput",
+      "heading": "Latency vs throughput",
+      "sortOrder": 2
+    },
+    {
+      "slug": "cap-theorem",
+      "heading": "Availability vs consistency",
+      "sortOrder": 3
+    },
+    {
+      "slug": "consistency-patterns",
+      "heading": "Consistency patterns",
+      "sortOrder": 4
+    },
+    {
+      "slug": "availability-patterns",
+      "heading": "Availability patterns",
+      "sortOrder": 5
+    },
+    {
+      "slug": "dns",
+      "heading": "Domain name system",
+      "sortOrder": 6
+    },
+    {
+      "slug": "cdn",
+      "heading": "Content delivery network",
+      "sortOrder": 7
+    },
+    {
+      "slug": "load-balancer",
+      "heading": "Load balancer",
+      "sortOrder": 8
+    },
+    {
+      "slug": "reverse-proxy",
+      "heading": "Reverse proxy (web server)",
+      "sortOrder": 9
+    },
+    {
+      "slug": "application-layer",
+      "heading": "Application layer",
+      "sortOrder": 10
+    },
+    {
+      "slug": "database",
+      "heading": "Database",
+      "sortOrder": 11
+    },
+    {
+      "slug": "cache",
+      "heading": "Cache",
+      "sortOrder": 12
+    },
+    {
+      "slug": "asynchronism",
+      "heading": "Asynchronism",
+      "sortOrder": 13
+    },
+    {
+      "slug": "communication",
+      "heading": "Communication",
+      "sortOrder": 14
+    },
+    {
+      "slug": "security",
+      "heading": "Security",
+      "sortOrder": 15
+    }
+  ],
+  "solutionChapters": [
+    {
+      "slug": "design-pastebin",
+      "dir": "solutions/system_design/pastebin",
+      "title": "Design Pastebin.com",
+      "sortOrder": 20
+    },
+    {
+      "slug": "design-twitter",
+      "dir": "solutions/system_design/twitter",
+      "title": "Design the Twitter timeline",
+      "sortOrder": 21
+    },
+    {
+      "slug": "design-web-crawler",
+      "dir": "solutions/system_design/web_crawler",
+      "title": "Design a web crawler",
+      "sortOrder": 22
+    },
+    {
+      "slug": "design-mint",
+      "dir": "solutions/system_design/mint",
+      "title": "Design Mint.com",
+      "sortOrder": 23
+    },
+    {
+      "slug": "design-sales-rank",
+      "dir": "solutions/system_design/sales_rank",
+      "title": "Design Amazon's sales rank",
+      "sortOrder": 24
+    },
+    {
+      "slug": "design-scaling-aws",
+      "dir": "solutions/system_design/scaling_aws",
+      "title": "Design a system that scales to millions of users on AWS",
+      "sortOrder": 25
+    },
+    {
+      "slug": "design-query-cache",
+      "dir": "solutions/system_design/query_cache",
+      "title": "Design a key-value cache for search queries",
+      "sortOrder": 26
+    },
+    {
+      "slug": "design-social-graph",
+      "dir": "solutions/system_design/social_graph",
+      "title": "Design the data structures for a social network",
+      "sortOrder": 27
+    }
+  ]
+}

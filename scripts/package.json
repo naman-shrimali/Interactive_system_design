@@ -1,0 +1,18 @@
+{
+  "name": "isd-scripts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "ingest": "tsx ingest/parse-primer.ts",
+    "validate:diagrams": "tsx validate-diagrams.ts"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
