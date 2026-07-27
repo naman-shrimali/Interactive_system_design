@@ -18,6 +18,8 @@ const OVERRIDES = path.join(__dirname, 'primer-overrides.json');
 const OUT = path.join(REPO_ROOT, 'content', 'curriculum.json');
 
 const PRIMER_ATTRIBUTION = 'The System Design Primer — MIT © Donne Martin';
+/** Below this, a topic is flagged `stub` and reported as a content backlog item. */
+const THIN_TOPIC_WORDS = 800;
 const SECTION_KINDS = ['overview', 'concepts', 'deep-dive', 'tradeoffs', 'checklist'] as const;
 type SectionKind = (typeof SECTION_KINDS)[number];
 
@@ -290,7 +292,12 @@ function main(): void {
       );
     }
 
-    const authoredMissingHere = missingAuthored.filter((m) => m.startsWith(`${t.slug}:`)).length;
+    // "stub" means the page is genuinely thin for a reader — not merely that some
+    // planned authored file is absent. It clears itself as content lands.
+    const topicWords = sections.reduce(
+      (n, s) => n + s.contentMarkdown.split(/\s+/).filter(Boolean).length,
+      0,
+    );
     topics.push({
       slug: t.slug,
       trackSlug: t.track,
@@ -299,7 +306,7 @@ function main(): void {
       difficulty: t.difficulty,
       estimatedMinutes: t.estimatedMinutes,
       accent: t.accent ?? trackAccent.get(t.track) ?? '#64748b',
-      status: authoredMissingHere > 0 ? 'stub' : 'published',
+      status: topicWords < THIN_TOPIC_WORDS ? 'stub' : 'published',
       sortOrder: t.sortOrder,
       sections,
       links,

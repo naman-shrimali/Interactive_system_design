@@ -5,7 +5,17 @@ import Ajv from 'ajv';
 
 const ROOT = path.join(__dirname, '..');
 const DIAGRAMS_DIR = path.join(ROOT, 'content', 'diagrams');
+const TOPIC_MAP = path.join(ROOT, 'content', 'topic-map.json');
 const SCHEMA = JSON.parse(fs.readFileSync(path.join(__dirname, 'diagram.schema.json'), 'utf-8'));
+
+/** Diagram directories are named for the topic that owns them. */
+const KNOWN_TOPICS: Set<string> = fs.existsSync(TOPIC_MAP)
+  ? new Set(
+      (JSON.parse(fs.readFileSync(TOPIC_MAP, 'utf-8')).topics as { slug: string }[]).map(
+        (t) => t.slug,
+      ),
+    )
+  : new Set();
 
 const ajv = new Ajv({ allErrors: true, useDefaults: false });
 const validate = ajv.compile(SCHEMA);
@@ -68,14 +78,13 @@ function main(): void {
   for (const dir of fs.readdirSync(DIAGRAMS_DIR).sort()) {
     const dirPath = path.join(DIAGRAMS_DIR, dir);
     if (!fs.statSync(dirPath).isDirectory()) continue;
-    const parts = dir.split('__');
-    const dirOk = parts.length === 3 && parts.every((p) => p.length > 0);
+    const dirOk = KNOWN_TOPICS.size === 0 || KNOWN_TOPICS.has(dir);
     for (const file of fs.readdirSync(dirPath).sort()) {
       if (!file.endsWith('.json')) continue;
       checked++;
       const rel = `${dir}/${file}`;
       const errors: string[] = [];
-      if (!dirOk) errors.push(`directory name must be source__chapter__section: ${dir}`);
+      if (!dirOk) errors.push(`directory "${dir}" is not a topic slug in content/topic-map.json`);
       let spec: Spec | null = null;
       try {
         spec = JSON.parse(fs.readFileSync(path.join(dirPath, file), 'utf-8'));

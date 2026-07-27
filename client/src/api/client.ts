@@ -1,9 +1,9 @@
 import type {
-  CurriculumSource,
-  SectionDetail,
+  CurriculumTrack,
+  TopicDetail,
   InteractiveDiagram,
   ProgressStatus,
-  ProgressSummarySource,
+  ProgressSummaryTrack,
   Note,
   NoteWithAnchor,
 } from '../types';
@@ -20,11 +20,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export function fetchCurriculum(): Promise<CurriculumSource[]> {
-  return request<{ sources: CurriculumSource[] }>('/api/curriculum').then((d) => d.sources);
+export function fetchCurriculum(): Promise<CurriculumTrack[]> {
+  return request<{ tracks: CurriculumTrack[] }>('/api/curriculum').then((d) => d.tracks);
 }
-export function fetchSection(id: number): Promise<SectionDetail> {
-  return request<SectionDetail>(`/api/sections/${id}`);
+/** Accepts a topic slug (canonical) or numeric id. */
+export function fetchTopic(idOrSlug: string | number): Promise<TopicDetail> {
+  return request<TopicDetail>(`/api/topics/${idOrSlug}`);
 }
 export function fetchDiagram(
   id: number,
@@ -49,12 +50,12 @@ export function markDiagramViewed(id: number): Promise<void> {
     body: JSON.stringify({ viewed: true }),
   });
 }
-export function fetchProgressSummary(): Promise<ProgressSummarySource[]> {
-  return request<{ sources: ProgressSummarySource[] }>('/api/progress/summary').then((d) => d.sources);
+export function fetchProgressSummary(): Promise<ProgressSummaryTrack[]> {
+  return request<{ tracks: ProgressSummaryTrack[] }>('/api/progress/summary').then((d) => d.tracks);
 }
-export function fetchNotes(anchor: { sectionId: number } | { chapterId: number }): Promise<Note[]> {
+export function fetchNotes(anchor: { sectionId: number } | { topicId: number }): Promise<Note[]> {
   const qs =
-    'sectionId' in anchor ? `sectionId=${anchor.sectionId}` : `chapterId=${anchor.chapterId}`;
+    'sectionId' in anchor ? `sectionId=${anchor.sectionId}` : `topicId=${anchor.topicId}`;
   return request<{ notes: Note[] }>(`/api/notes?${qs}`).then((d) => d.notes);
 }
 export function fetchAllNotes(): Promise<NoteWithAnchor[]> {
@@ -62,7 +63,7 @@ export function fetchAllNotes(): Promise<NoteWithAnchor[]> {
 }
 export function createNote(input: {
   sectionId?: number;
-  chapterId?: number;
+  topicId?: number;
   contentMarkdown: string;
 }): Promise<Note> {
   return request<Note>('/api/notes', { method: 'POST', body: JSON.stringify(input) });

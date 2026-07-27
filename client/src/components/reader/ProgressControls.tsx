@@ -1,55 +1,58 @@
-import { useMemo, useState } from 'react';
-import { useAppStore } from '../../store/useAppStore';
+import { useState } from 'react';
 import { setSectionProgress } from '../../api/client';
+import { cn } from '../../lib/cn';
 import type { ProgressStatus } from '../../types';
 
 const OPTIONS: { value: ProgressStatus; label: string }[] = [
-  { value: 'not_started', label: 'Not started' },
-  { value: 'in_progress', label: 'In progress' },
-  { value: 'completed', label: 'Completed' },
+  { value: 'not_started', label: 'To do' },
+  { value: 'in_progress', label: 'Reading' },
+  { value: 'completed', label: 'Done' },
 ];
 
-function activeClasses(status: ProgressStatus): string {
-  if (status === 'in_progress') return 'bg-blue-600 text-white';
-  if (status === 'completed') return 'bg-green-600 text-white';
-  return 'bg-slate-200 text-slate-700';
-}
-
-export function ProgressControls({ sectionId }: { sectionId: number }) {
-  const curriculum = useAppStore((s) => s.curriculum);
-  const refresh = useAppStore((s) => s.refreshCurriculum);
+export function ProgressControls({
+  sectionId,
+  status,
+  accent,
+  onChanged,
+}: {
+  sectionId: number;
+  status: ProgressStatus;
+  accent: string;
+  onChanged: () => Promise<void> | void;
+}) {
   const [busy, setBusy] = useState(false);
 
-  const current = useMemo<ProgressStatus>(() => {
-    for (const src of curriculum ?? [])
-      for (const ch of src.chapters)
-        for (const sec of ch.sections) if (sec.id === sectionId) return sec.progressStatus;
-    return 'not_started';
-  }, [curriculum, sectionId]);
-
-  const onSet = async (status: ProgressStatus) => {
-    if (status === current || busy) return;
+  const onSet = async (next: ProgressStatus) => {
+    if (next === status || busy) return;
     setBusy(true);
     try {
-      await setSectionProgress(sectionId, status);
-      await refresh();
+      await setSectionProgress(sectionId, next);
+      await onChanged();
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <div className="inline-flex rounded-lg border border-slate-300 overflow-hidden text-sm">
+    <div className="inline-flex shrink-0 overflow-hidden rounded-full border border-line text-[12px]">
       {OPTIONS.map((o) => {
-        const isActive = o.value === current;
+        const active = o.value === status;
         return (
           <button
             key={o.value}
             disabled={busy}
             onClick={() => onSet(o.value)}
-            className={`px-3 py-1.5 border-r border-slate-200 last:border-r-0 disabled:opacity-60 ${
-              isActive ? activeClasses(o.value) : 'bg-white text-slate-500 hover:bg-slate-50'
-            }`}
+            className={cn(
+              'px-3 py-1 transition-colors disabled:opacity-60',
+              !active && 'text-ink-muted hover:bg-surface',
+            )}
+            style={
+              active
+                ? o.value === 'completed'
+                  ? { background: accent, color: '#fff' }
+                  : { background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }
+                : undefined
+            }
           >
             {o.label}
           </button>

@@ -190,7 +190,7 @@
       "difficulty": "foundation",
       "estimatedMinutes": 60,
       "accent": "#10b981",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 3,
       "sections": [
         {
@@ -715,7 +715,7 @@
       "difficulty": "intermediate",
       "estimatedMinutes": 50,
       "accent": "#0ea5e9",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 3,
       "sections": [
         {
@@ -924,7 +924,7 @@
       "difficulty": "intermediate",
       "estimatedMinutes": 55,
       "accent": "#f59e0b",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 0,
       "sections": [
         {
@@ -1051,7 +1051,7 @@
       "difficulty": "intermediate",
       "estimatedMinutes": 45,
       "accent": "#f59e0b",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 1,
       "sections": [
         {
@@ -1220,7 +1220,7 @@
       "difficulty": "intermediate",
       "estimatedMinutes": 55,
       "accent": "#f59e0b",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 2,
       "sections": [
         {
@@ -1338,7 +1338,7 @@
       "difficulty": "advanced",
       "estimatedMinutes": 60,
       "accent": "#f59e0b",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 3,
       "sections": [
         {
@@ -1388,7 +1388,7 @@
       "difficulty": "advanced",
       "estimatedMinutes": 45,
       "accent": "#f59e0b",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 4,
       "sections": [
         {
@@ -1637,7 +1637,7 @@
       "difficulty": "advanced",
       "estimatedMinutes": 55,
       "accent": "#f59e0b",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 7,
       "sections": [
         {
@@ -1755,7 +1755,7 @@
       "difficulty": "intermediate",
       "estimatedMinutes": 55,
       "accent": "#f43f5e",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 0,
       "sections": [
         {
@@ -1821,7 +1821,7 @@
       "difficulty": "advanced",
       "estimatedMinutes": 60,
       "accent": "#f43f5e",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 1,
       "sections": [
         {
@@ -1882,7 +1882,7 @@
       "difficulty": "advanced",
       "estimatedMinutes": 60,
       "accent": "#f43f5e",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 2,
       "sections": [
         {

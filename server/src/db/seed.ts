@@ -1,166 +1,174 @@
 /**
- * TASK-004: Idempotently seed curriculum JSON + diagram files into SQLite.
- * All natural keys are slugs, so re-running updates content in place while
- * preserving row ids (and therefore progress/notes).
+ * Seed content/curriculum.json (+ content/diagrams/<topicSlug>/*.json) into SQLite.
+ *
+ * Idempotent: all natural keys are slugs, so re-seeding updates content in place
+ * while row ids — and therefore progress and notes — survive.
  */
 import fs from 'fs';
 import path from 'path';
 import { db } from './index';
 
-const CONTENT_DIR = path.join(__dirname, '..', '..', '..', 'content');
-const DIAGRAMS_DIR = path.join(CONTENT_DIR, 'diagrams');
-const CURRICULUM_FILES = ['primer-curriculum.json', 'book-curriculum.json'];
+const REPO_ROOT = path.join(__dirname, '..', '..', '..');
+const CURRICULUM = path.join(REPO_ROOT, 'content', 'curriculum.json');
+const DIAGRAMS_DIR = path.join(REPO_ROOT, 'content', 'diagrams');
 
-interface InLink { url: string; title: string; sortOrder: number }
 interface InSection {
   slug: string;
   title: string;
+  kind: string;
   contentMarkdown: string;
-  sourceUrl: string | null;
+  provenance: 'primer' | 'authored';
+  attributionUrl: string | null;
+  attributionNote: string | null;
+  contentRef: string;
   sortOrder: number;
-  externalLinks: InLink[];
+  diagrams: string[];
 }
-interface InChapter {
+interface InTopic {
   slug: string;
+  trackSlug: string;
   title: string;
-  description: string;
+  summary: string;
+  difficulty: string;
+  estimatedMinutes: number;
+  accent: string;
+  status: string;
   sortOrder: number;
   sections: InSection[];
+  links: { url: string; title: string; sortOrder: number }[];
 }
 interface InCurriculum {
-  source: { slug: string; title: string; kind: 'repo' | 'book'; description: string; sortOrder: number };
-  chapters: InChapter[];
+  tracks: { slug: string; title: string; subtitle: string; accent: string; sortOrder: number }[];
+  topics: InTopic[];
 }
 
-const upsertSource = db.prepare(`
-  INSERT INTO sources (slug, title, kind, description, sort_order)
-  VALUES (@slug, @title, @kind, @description, @sortOrder)
+const upsertTrack = db.prepare(`
+  INSERT INTO tracks (slug, title, subtitle, accent, sort_order)
+  VALUES (@slug, @title, @subtitle, @accent, @sortOrder)
   ON CONFLICT(slug) DO UPDATE SET
-    title = excluded.title, kind = excluded.kind,
-    description = excluded.description, sort_order = excluded.sort_order
+    title = excluded.title, subtitle = excluded.subtitle,
+    accent = excluded.accent, sort_order = excluded.sort_order
 `);
-const getSourceId = db.prepare(`SELECT id FROM sources WHERE slug = ?`);
+const getTrackId = db.prepare(`SELECT id FROM tracks WHERE slug = ?`);
 
-const upsertChapter = db.prepare(`
-  INSERT INTO chapters (source_id, slug, title, description, sort_order)
-  VALUES (@sourceId, @slug, @title, @description, @sortOrder)
-  ON CONFLICT(source_id, slug) DO UPDATE SET
-    title = excluded.title, description = excluded.description, sort_order = excluded.sort_order
+const upsertTopic = db.prepare(`
+  INSERT INTO topics (track_id, slug, title, summary, difficulty, estimated_minutes, accent, status, sort_order)
+  VALUES (@trackId, @slug, @title, @summary, @difficulty, @estimatedMinutes, @accent, @status, @sortOrder)
+  ON CONFLICT(slug) DO UPDATE SET
+    track_id = excluded.track_id, title = excluded.title, summary = excluded.summary,
+    difficulty = excluded.difficulty, estimated_minutes = excluded.estimated_minutes,
+    accent = excluded.accent, status = excluded.status, sort_order = excluded.sort_order
 `);
-const getChapterId = db.prepare(`SELECT id FROM chapters WHERE source_id = ? AND slug = ?`);
+const getTopicId = db.prepare(`SELECT id FROM topics WHERE slug = ?`);
 
 const upsertSection = db.prepare(`
-  INSERT INTO sections (chapter_id, slug, title, content_markdown, source_url, sort_order)
-  VALUES (@chapterId, @slug, @title, @contentMarkdown, @sourceUrl, @sortOrder)
-  ON CONFLICT(chapter_id, slug) DO UPDATE SET
-    title = excluded.title, content_markdown = excluded.content_markdown,
-    source_url = excluded.source_url, sort_order = excluded.sort_order
+  INSERT INTO sections (topic_id, slug, title, kind, content_markdown, provenance,
+                        attribution_url, attribution_note, content_ref, sort_order)
+  VALUES (@topicId, @slug, @title, @kind, @contentMarkdown, @provenance,
+          @attributionUrl, @attributionNote, @contentRef, @sortOrder)
+  ON CONFLICT(topic_id, slug) DO UPDATE SET
+    title = excluded.title, kind = excluded.kind,
+    content_markdown = excluded.content_markdown, provenance = excluded.provenance,
+    attribution_url = excluded.attribution_url, attribution_note = excluded.attribution_note,
+    content_ref = excluded.content_ref, sort_order = excluded.sort_order
 `);
-const getSectionId = db.prepare(`SELECT id FROM sections WHERE chapter_id = ? AND slug = ?`);
+const getSectionId = db.prepare(`SELECT id FROM sections WHERE topic_id = ? AND slug = ?`);
 
 const upsertLink = db.prepare(`
-  INSERT INTO external_links (section_id, url, title, sort_order)
-  VALUES (@sectionId, @url, @title, @sortOrder)
-  ON CONFLICT(section_id, url) DO UPDATE SET
+  INSERT INTO external_links (topic_id, url, title, sort_order)
+  VALUES (@topicId, @url, @title, @sortOrder)
+  ON CONFLICT(topic_id, url) DO UPDATE SET
     title = excluded.title, sort_order = excluded.sort_order
 `);
 
-const findSectionBySlugs = db.prepare(`
-  SELECT sec.id FROM sections sec
-  JOIN chapters c ON c.id = sec.chapter_id
-  JOIN sources s  ON s.id = c.source_id
-  WHERE s.slug = ? AND c.slug = ? AND sec.slug = ?
-`);
 const upsertDiagram = db.prepare(`
-  INSERT INTO diagrams (section_id, slug, title, spec_json, sort_order)
-  VALUES (@sectionId, @slug, @title, @specJson, @sortOrder)
-  ON CONFLICT(section_id, slug) DO UPDATE SET
-    title = excluded.title, spec_json = excluded.spec_json, sort_order = excluded.sort_order
+  INSERT INTO diagrams (topic_id, section_id, slug, title, spec_json, sort_order)
+  VALUES (@topicId, @sectionId, @slug, @title, @specJson, @sortOrder)
+  ON CONFLICT(topic_id, slug) DO UPDATE SET
+    section_id = excluded.section_id, title = excluded.title,
+    spec_json = excluded.spec_json, sort_order = excluded.sort_order
 `);
-
-function seedCurriculum(data: InCurriculum): void {
-  upsertSource.run(data.source);
-  const sourceId = (getSourceId.get(data.source.slug) as { id: number }).id;
-  for (const ch of data.chapters) {
-    upsertChapter.run({ sourceId, slug: ch.slug, title: ch.title, description: ch.description, sortOrder: ch.sortOrder });
-    const chapterId = (getChapterId.get(sourceId, ch.slug) as { id: number }).id;
-    for (const sec of ch.sections) {
-      upsertSection.run({
-        chapterId,
-        slug: sec.slug,
-        title: sec.title,
-        contentMarkdown: sec.contentMarkdown,
-        sourceUrl: sec.sourceUrl,
-        sortOrder: sec.sortOrder,
-      });
-      const sectionId = (getSectionId.get(chapterId, sec.slug) as { id: number }).id;
-      for (const link of sec.externalLinks ?? []) {
-        upsertLink.run({ sectionId, url: link.url, title: link.title, sortOrder: link.sortOrder });
-      }
-    }
-  }
-}
-
-function seedDiagrams(): number {
-  if (!fs.existsSync(DIAGRAMS_DIR)) return 0;
-  let count = 0;
-  for (const dirName of fs.readdirSync(DIAGRAMS_DIR).sort()) {
-    const dirPath = path.join(DIAGRAMS_DIR, dirName);
-    if (!fs.statSync(dirPath).isDirectory()) continue;
-    const parts = dirName.split('__');
-    if (parts.length !== 3 || parts.some((p) => p.length === 0)) {
-      throw new Error(`Malformed diagram directory name (expected source__chapter__section): ${dirName}`);
-    }
-    const [sourceSlug, chapterSlug, sectionSlug] = parts;
-    const row = findSectionBySlugs.get(sourceSlug, chapterSlug, sectionSlug) as { id: number } | undefined;
-    if (!row) {
-      throw new Error(`No section for diagram dir ${dirName} (source=${sourceSlug}, chapter=${chapterSlug}, section=${sectionSlug})`);
-    }
-    for (const file of fs.readdirSync(dirPath).sort()) {
-      if (!file.endsWith('.json')) continue;
-      const raw = fs.readFileSync(path.join(dirPath, file), 'utf-8');
-      let parsed: { title?: string };
-      try {
-        parsed = JSON.parse(raw);
-      } catch (e) {
-        throw new Error(`Invalid JSON in ${dirName}/${file}: ${(e as Error).message}`);
-      }
-      const slug = file.replace(/\.json$/, '');
-      upsertDiagram.run({
-        sectionId: row.id,
-        slug,
-        title: parsed.title ?? slug,
-        specJson: raw,
-        sortOrder: count,
-      });
-      count++;
-    }
-  }
-  return count;
-}
 
 function main(): void {
-  const seedAll = db.transaction(() => {
-    for (const fileName of CURRICULUM_FILES) {
-      const filePath = path.join(CONTENT_DIR, fileName);
-      if (!fs.existsSync(filePath)) {
-        console.warn(`skip (missing): ${fileName}`);
-        continue;
-      }
-      seedCurriculum(JSON.parse(fs.readFileSync(filePath, 'utf-8')));
-    }
-    return seedDiagrams();
-  });
-  const diagrams = seedAll();
+  if (!fs.existsSync(CURRICULUM)) {
+    throw new Error(
+      `Missing ${path.relative(REPO_ROOT, CURRICULUM)}. Run: (cd scripts && npm run ingest)`,
+    );
+  }
+  const data: InCurriculum = JSON.parse(fs.readFileSync(CURRICULUM, 'utf-8'));
 
-  const count = (sql: string): number => (db.prepare(sql).get() as { n: number }).n;
+  let diagramCount = 0;
+
+  db.transaction(() => {
+    for (const track of data.tracks) upsertTrack.run(track);
+
+    for (const topic of data.topics) {
+      const trackRow = getTrackId.get(topic.trackSlug) as { id: number } | undefined;
+      if (!trackRow) throw new Error(`topic ${topic.slug}: unknown track ${topic.trackSlug}`);
+
+      upsertTopic.run({ ...topic, trackId: trackRow.id });
+      const topicId = (getTopicId.get(topic.slug) as { id: number }).id;
+
+      // section slug -> id, so diagrams can anchor to the section that declared them
+      const sectionIds = new Map<string, number>();
+      for (const section of topic.sections) {
+        upsertSection.run({ ...section, topicId });
+        sectionIds.set(section.slug, (getSectionId.get(topicId, section.slug) as { id: number }).id);
+      }
+      const diagramOwner = new Map<string, number>();
+      for (const section of topic.sections) {
+        for (const d of section.diagrams) diagramOwner.set(d, sectionIds.get(section.slug)!);
+      }
+
+      for (const link of topic.links) upsertLink.run({ ...link, topicId });
+
+      // Diagram files live at content/diagrams/<topicSlug>/<slug>.json
+      const dir = path.join(DIAGRAMS_DIR, topic.slug);
+      if (!fs.existsSync(dir)) continue;
+      let order = 0;
+      for (const file of fs.readdirSync(dir).sort()) {
+        if (!file.endsWith('.json')) continue;
+        const raw = fs.readFileSync(path.join(dir, file), 'utf-8');
+        let parsed: { title?: string };
+        try {
+          parsed = JSON.parse(raw);
+        } catch (e) {
+          throw new Error(`Invalid JSON in diagrams/${topic.slug}/${file}: ${(e as Error).message}`);
+        }
+        const slug = file.replace(/\.json$/, '');
+        upsertDiagram.run({
+          topicId,
+          sectionId: diagramOwner.get(slug) ?? null,
+          slug,
+          title: parsed.title ?? slug,
+          specJson: raw,
+          sortOrder: order++,
+        });
+        diagramCount++;
+      }
+    }
+  })();
+
+  const n = (sql: string): number => (db.prepare(sql).get() as { n: number }).n;
   console.log(
-    `Seeded: ${count('SELECT COUNT(*) n FROM sources')} sources, ` +
-      `${count('SELECT COUNT(*) n FROM chapters')} chapters, ` +
-      `${count('SELECT COUNT(*) n FROM sections')} sections, ` +
-      `${count('SELECT COUNT(*) n FROM external_links')} links, ` +
-      `${diagrams} diagrams.`,
+    `Seeded: ${n('SELECT COUNT(*) n FROM tracks')} tracks, ` +
+      `${n('SELECT COUNT(*) n FROM topics')} topics, ` +
+      `${n('SELECT COUNT(*) n FROM sections')} sections, ` +
+      `${n('SELECT COUNT(*) n FROM external_links')} links, ` +
+      `${diagramCount} diagrams.`,
   );
+
+  const orphanDirs = fs.existsSync(DIAGRAMS_DIR)
+    ? fs
+        .readdirSync(DIAGRAMS_DIR)
+        .filter((d) => fs.statSync(path.join(DIAGRAMS_DIR, d)).isDirectory())
+        .filter((d) => !data.topics.some((t) => t.slug === d))
+    : [];
+  if (orphanDirs.length > 0) {
+    console.log(
+      `\n  WARNING: diagram directories match no topic slug (not seeded): ${orphanDirs.join(', ')}`,
+    );
+  }
 }
 
 main();

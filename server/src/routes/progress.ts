@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { db, USER_ID } from '../db';
-import type { ProgressSummarySource } from '../types';
+import type { ProgressSummaryTrack } from '../types';
 
 export const progressRouter = Router();
 
@@ -69,6 +69,9 @@ progressRouter.put('/progress/diagram/:id', (req, res) => {
 interface SummaryRow {
   slug: string;
   title: string;
+  accent: string;
+  topics_total: number;
+  topics_completed: number;
   sections_total: number;
   sections_completed: number;
   links_total: number;
@@ -80,31 +83,42 @@ interface SummaryRow {
 progressRouter.get('/progress/summary', (_req, res) => {
   const rows = db
     .prepare(
-      `SELECT so.slug, so.title,
-        (SELECT COUNT(*) FROM sections sec JOIN chapters c ON sec.chapter_id = c.id
-          WHERE c.source_id = so.id) AS sections_total,
-        (SELECT COUNT(*) FROM sections sec JOIN chapters c ON sec.chapter_id = c.id
-          JOIN section_progress sp ON sp.section_id = sec.id AND sp.user_id = ${USER_ID} AND sp.status = 'completed'
-          WHERE c.source_id = so.id) AS sections_completed,
-        (SELECT COUNT(*) FROM external_links el JOIN sections sec ON el.section_id = sec.id
-          JOIN chapters c ON sec.chapter_id = c.id WHERE c.source_id = so.id) AS links_total,
-        (SELECT COUNT(*) FROM external_links el JOIN sections sec ON el.section_id = sec.id
-          JOIN chapters c ON sec.chapter_id = c.id
-          JOIN link_progress lp ON lp.link_id = el.id AND lp.user_id = ${USER_ID} AND lp.completed = 1
-          WHERE c.source_id = so.id) AS links_completed,
-        (SELECT COUNT(*) FROM diagrams d JOIN sections sec ON d.section_id = sec.id
-          JOIN chapters c ON sec.chapter_id = c.id WHERE c.source_id = so.id) AS diagrams_total,
-        (SELECT COUNT(*) FROM diagrams d JOIN sections sec ON d.section_id = sec.id
-          JOIN chapters c ON sec.chapter_id = c.id
-          JOIN diagram_progress dp ON dp.diagram_id = d.id AND dp.user_id = ${USER_ID} AND dp.viewed = 1
-          WHERE c.source_id = so.id) AS diagrams_viewed
-      FROM sources so ORDER BY so.sort_order`,
+      `SELECT tr.slug, tr.title, tr.accent,
+        (SELECT COUNT(*) FROM topics tp WHERE tp.track_id = tr.id) AS topics_total,
+        -- a topic counts as complete when it has sections and all of them are complete
+        (SELECT COUNT(*) FROM topics tp
+          WHERE tp.track_id = tr.id
+            AND (SELECT COUNT(*) FROM sections s WHERE s.topic_id = tp.id) > 0
+            AND (SELECT COUNT(*) FROM sections s WHERE s.topic_id = tp.id)
+              = (SELECT COUNT(*) FROM sections s
+                   JOIN section_progress sp ON sp.section_id = s.id
+                    AND sp.user_id = ? AND sp.status = 'completed'
+                 WHERE s.topic_id = tp.id)) AS topics_completed,
+        (SELECT COUNT(*) FROM sections s JOIN topics tp ON s.topic_id = tp.id
+          WHERE tp.track_id = tr.id) AS sections_total,
+        (SELECT COUNT(*) FROM sections s JOIN topics tp ON s.topic_id = tp.id
+          JOIN section_progress sp ON sp.section_id = s.id AND sp.user_id = ? AND sp.status = 'completed'
+          WHERE tp.track_id = tr.id) AS sections_completed,
+        (SELECT COUNT(*) FROM external_links el JOIN topics tp ON el.topic_id = tp.id
+          WHERE tp.track_id = tr.id) AS links_total,
+        (SELECT COUNT(*) FROM external_links el JOIN topics tp ON el.topic_id = tp.id
+          JOIN link_progress lp ON lp.link_id = el.id AND lp.user_id = ? AND lp.completed = 1
+          WHERE tp.track_id = tr.id) AS links_completed,
+        (SELECT COUNT(*) FROM diagrams d JOIN topics tp ON d.topic_id = tp.id
+          WHERE tp.track_id = tr.id) AS diagrams_total,
+        (SELECT COUNT(*) FROM diagrams d JOIN topics tp ON d.topic_id = tp.id
+          JOIN diagram_progress dp ON dp.diagram_id = d.id AND dp.user_id = ? AND dp.viewed = 1
+          WHERE tp.track_id = tr.id) AS diagrams_viewed
+      FROM tracks tr ORDER BY tr.sort_order`,
     )
-    .all() as SummaryRow[];
+    .all(USER_ID, USER_ID, USER_ID, USER_ID) as SummaryRow[];
 
-  const sources: ProgressSummarySource[] = rows.map((r) => ({
+  const tracks: ProgressSummaryTrack[] = rows.map((r) => ({
     slug: r.slug,
     title: r.title,
+    accent: r.accent,
+    topicsTotal: r.topics_total,
+    topicsCompleted: r.topics_completed,
     sectionsTotal: r.sections_total,
     sectionsCompleted: r.sections_completed,
     linksTotal: r.links_total,
@@ -112,5 +126,5 @@ progressRouter.get('/progress/summary', (_req, res) => {
     diagramsTotal: r.diagrams_total,
     diagramsViewed: r.diagrams_viewed,
   }));
-  res.json({ sources });
+  res.json({ tracks });
 });

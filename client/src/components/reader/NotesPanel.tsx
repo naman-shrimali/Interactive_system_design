@@ -4,7 +4,7 @@ import { MarkdownView } from './MarkdownView';
 import { fetchNotes, createNote, updateNote, deleteNote } from '../../api/client';
 import type { Note } from '../../types';
 
-type NotesAnchor = { sectionId: number } | { chapterId: number };
+type NotesAnchor = { sectionId: number } | { topicId: number };
 
 export function NotesPanel({ anchor }: { anchor: NotesAnchor }) {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -58,25 +58,25 @@ export function NotesPanel({ anchor }: { anchor: NotesAnchor }) {
     });
 
   return (
-    <section className="border border-slate-200 rounded-lg p-4 mt-8">
-      <div className="flex items-center gap-2 mb-3">
-        <StickyNote size={16} className="text-slate-500" />
-        <h2 className="font-semibold text-slate-800">My notes</h2>
-        <span className="ml-auto text-sm text-slate-500">{notes.length}</span>
+    <section className="mt-6 rounded-2xl border border-line bg-raised p-5">
+      <div className="mb-4 flex items-center gap-2">
+        <StickyNote size={15} className="text-ink-faint" />
+        <h2 className="font-semibold tracking-tight">My notes</h2>
+        <span className="ml-auto text-[12px] tabular-nums text-ink-faint">{notes.length}</span>
       </div>
 
-      <div className="mb-4">
+      <div className="mb-5">
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           rows={4}
           placeholder="Write a note in markdown…"
-          className="w-full border border-slate-300 rounded p-2 font-mono text-sm"
+          className="w-full rounded-xl border border-line bg-canvas p-3 font-mono text-[13px] text-ink placeholder:text-ink-faint"
         />
         <button
           onClick={add}
           disabled={busy || draft.trim() === ''}
-          className="mt-2 px-3 py-1.5 rounded bg-blue-600 text-white text-sm disabled:opacity-50"
+          className="mt-2 rounded-full px-4 py-1.5 text-[13px] font-medium text-white disabled:opacity-50" style={{ background: 'var(--accent)' }}
         >
           Add note
         </button>
@@ -84,26 +84,26 @@ export function NotesPanel({ anchor }: { anchor: NotesAnchor }) {
 
       <ul className="space-y-4">
         {notes.map((note) => (
-          <li key={note.id} className="border-t border-slate-100 pt-3">
+          <li key={note.id} className="border-t border-line pt-3">
             {editingId === note.id ? (
               <>
                 <textarea
                   value={editDraft}
                   onChange={(e) => setEditDraft(e.target.value)}
                   rows={4}
-                  className="w-full border border-slate-300 rounded p-2 font-mono text-sm"
+                  className="w-full rounded-xl border border-line bg-canvas p-3 font-mono text-[13px] text-ink placeholder:text-ink-faint"
                 />
                 <div className="flex gap-2 mt-2">
                   <button
                     onClick={() => save(note.id)}
                     disabled={busy || editDraft.trim() === ''}
-                    className="px-2 py-1 rounded bg-green-600 text-white text-xs disabled:opacity-50"
+                    className="rounded-full bg-emerald-600 px-3 py-1 text-[12px] text-white disabled:opacity-50"
                   >
                     Save
                   </button>
                   <button
                     onClick={() => setEditingId(null)}
-                    className="px-2 py-1 rounded border text-xs text-slate-600"
+                    className="rounded-full border border-line px-3 py-1 text-[12px] text-ink-muted"
                   >
                     Cancel
                   </button>
@@ -112,18 +112,18 @@ export function NotesPanel({ anchor }: { anchor: NotesAnchor }) {
             ) : (
               <>
                 <MarkdownView markdown={note.contentMarkdown} />
-                <div className="flex items-center gap-3 mt-2 text-xs text-slate-400">
+                <div className="mt-2 flex items-center gap-3 text-[11px] text-ink-faint">
                   <span>{new Date(note.updatedAt.replace(' ', 'T') + 'Z').toLocaleString()}</span>
                   <button
                     onClick={() => {
                       setEditingId(note.id);
                       setEditDraft(note.contentMarkdown);
                     }}
-                    className="hover:text-slate-700"
+                    className="hover:text-ink"
                   >
                     Edit
                   </button>
-                  <button onClick={() => remove(note.id)} className="hover:text-red-600">
+                  <button onClick={() => remove(note.id)} className="hover:text-red-500">
                     Delete
                   </button>
                 </div>

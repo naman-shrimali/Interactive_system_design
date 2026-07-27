@@ -1,9 +1,9 @@
 import { create } from 'zustand';
-import type { CurriculumSource } from '../types';
+import type { CurriculumTrack } from '../types';
 import { fetchCurriculum } from '../api/client';
 
 interface AppState {
-  curriculum: CurriculumSource[] | null;
+  curriculum: CurriculumTrack[] | null;
   curriculumError: string | null;
   loadCurriculum: () => Promise<void>;
   refreshCurriculum: () => Promise<void>;
@@ -18,8 +18,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   refreshCurriculum: async () => {
     try {
-      const sources = await fetchCurriculum();
-      set({ curriculum: sources, curriculumError: null });
+      const tracks = await fetchCurriculum();
+      set({ curriculum: tracks, curriculumError: null });
     } catch (e) {
       set({ curriculumError: (e as Error).message });
     }

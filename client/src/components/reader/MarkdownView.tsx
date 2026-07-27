@@ -3,7 +3,7 @@ import remarkGfm from 'remark-gfm';
 
 export function MarkdownView({ markdown }: { markdown: string }) {
   return (
-    <div className="prose prose-slate max-w-none prose-img:max-w-full prose-pre:overflow-x-auto prose-table:overflow-x-auto">
+    <div className="prose-reader">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{

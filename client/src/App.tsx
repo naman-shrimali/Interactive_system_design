@@ -1,31 +1,35 @@
-import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAppStore } from './store/useAppStore';
 import { Sidebar } from './components/layout/Sidebar';
 import { TopBar } from './components/layout/TopBar';
 import { HomePage } from './pages/HomePage';
-import { SectionPage } from './pages/SectionPage';
-import { ChapterPage } from './pages/ChapterPage';
+import { TopicPage } from './pages/TopicPage';
 import { NotesPage } from './pages/NotesPage';
 
 export default function App() {
   const loadCurriculum = useAppStore((s) => s.loadCurriculum);
+  const [navOpen, setNavOpen] = useState(false);
+
   useEffect(() => {
     void loadCurriculum();
   }, [loadCurriculum]);
 
   return (
     <BrowserRouter>
-      <div className="flex h-screen text-slate-800">
-        <Sidebar />
-        <div className="flex flex-col flex-1 min-w-0">
-          <TopBar />
+      <div className="flex h-full">
+        <Sidebar open={navOpen} onClose={() => setNavOpen(false)} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <TopBar onMenu={() => setNavOpen(true)} />
           <main className="flex-1 overflow-y-auto">
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/sections/:id" element={<SectionPage />} />
-              <Route path="/chapters/:id" element={<ChapterPage />} />
+              <Route path="/topics/:slug" element={<TopicPage />} />
               <Route path="/notes" element={<NotesPage />} />
+              {/* Legacy links from the pre-topic-model structure */}
+              <Route path="/sections/:id" element={<Navigate to="/" replace />} />
+              <Route path="/chapters/:id" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
         </div>

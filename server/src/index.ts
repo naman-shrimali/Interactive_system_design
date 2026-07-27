@@ -2,7 +2,7 @@ import './db';
 import express from 'express';
 import cors from 'cors';
 import { curriculumRouter } from './routes/curriculum';
-import { sectionsRouter } from './routes/sections';
+import { topicsRouter } from './routes/topics';
 import { progressRouter } from './routes/progress';
 import { notesRouter } from './routes/notes';
 import { diagramsRouter } from './routes/diagrams';
@@ -14,7 +14,7 @@ app.use(express.json());
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api', curriculumRouter);
-app.use('/api', sectionsRouter);
+app.use('/api', topicsRouter);
 app.use('/api', progressRouter);
 app.use('/api', notesRouter);
 app.use('/api', diagramsRouter);

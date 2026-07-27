@@ -7,7 +7,7 @@ export const notesRouter = Router();
 
 interface NoteRow {
   id: number;
-  chapter_id: number | null;
+  topic_id: number | null;
   section_id: number | null;
   content_markdown: string;
   created_at: string;
@@ -16,7 +16,7 @@ interface NoteRow {
 function toNote(r: NoteRow): Note {
   return {
     id: r.id,
-    chapterId: r.chapter_id,
+    topicId: r.topic_id,
     sectionId: r.section_id,
     contentMarkdown: r.content_markdown,
     createdAt: r.created_at,
@@ -27,31 +27,35 @@ function toNote(r: NoteRow): Note {
 const createSchema = z
   .object({
     sectionId: z.number().int().positive().optional(),
-    chapterId: z.number().int().positive().optional(),
+    topicId: z.number().int().positive().optional(),
     contentMarkdown: z.string().min(1),
   })
-  .refine((b) => (b.sectionId === undefined) !== (b.chapterId === undefined), {
-    message: 'provide exactly one of sectionId / chapterId',
+  .refine((b) => (b.sectionId === undefined) !== (b.topicId === undefined), {
+    message: 'provide exactly one of sectionId / topicId',
   });
 const updateSchema = z.object({ contentMarkdown: z.string().min(1) });
 
 // --- GET /notes/all (must be registered before parameterized routes) ---
 interface AllRow extends NoteRow {
-  chapter_title: string | null;
+  topic_title: string | null;
+  topic_slug: string | null;
   section_title: string | null;
-  section_chapter_title: string | null;
+  section_topic_title: string | null;
+  section_topic_slug: string | null;
 }
 notesRouter.get('/notes/all', (_req, res) => {
   const rows = db
     .prepare(
-      `SELECT n.id, n.chapter_id, n.section_id, n.content_markdown, n.created_at, n.updated_at,
-              ch.title  AS chapter_title,
+      `SELECT n.id, n.topic_id, n.section_id, n.content_markdown, n.created_at, n.updated_at,
+              tp.title  AS topic_title,
+              tp.slug   AS topic_slug,
               sec.title AS section_title,
-              sch.title AS section_chapter_title
+              stp.title AS section_topic_title,
+              stp.slug  AS section_topic_slug
        FROM notes n
-       LEFT JOIN chapters ch  ON ch.id  = n.chapter_id
+       LEFT JOIN topics tp    ON tp.id  = n.topic_id
        LEFT JOIN sections sec ON sec.id = n.section_id
-       LEFT JOIN chapters sch ON sch.id = sec.chapter_id
+       LEFT JOIN topics stp   ON stp.id = sec.topic_id
        WHERE n.user_id = ?
        ORDER BY n.updated_at DESC`,
     )
@@ -62,32 +66,32 @@ notesRouter.get('/notes/all', (_req, res) => {
       return {
         ...toNote(r),
         anchorType: 'section',
-        anchorTitle: `${r.section_chapter_title} › ${r.section_title}`,
-        anchorId: r.section_id,
+        anchorTitle: `${r.section_topic_title} › ${r.section_title}`,
+        anchorTopicSlug: r.section_topic_slug ?? '',
       };
     }
     return {
       ...toNote(r),
-      anchorType: 'chapter',
-      anchorTitle: r.chapter_title ?? '',
-      anchorId: r.chapter_id as number,
+      anchorType: 'topic',
+      anchorTitle: r.topic_title ?? '',
+      anchorTopicSlug: r.topic_slug ?? '',
     };
   });
   res.json({ notes });
 });
 
-// --- GET /notes?sectionId= | ?chapterId= ---
+// --- GET /notes?sectionId= | ?topicId= ---
 notesRouter.get('/notes', (req, res) => {
   const hasSection = req.query.sectionId !== undefined;
-  const hasChapter = req.query.chapterId !== undefined;
-  if (hasSection === hasChapter) {
-    return res.status(400).json({ error: 'provide exactly one of sectionId / chapterId' });
+  const hasTopic = req.query.topicId !== undefined;
+  if (hasSection === hasTopic) {
+    return res.status(400).json({ error: 'provide exactly one of sectionId / topicId' });
   }
-  const raw = (hasSection ? req.query.sectionId : req.query.chapterId) as string;
+  const raw = (hasSection ? req.query.sectionId : req.query.topicId) as string;
   const id = Number.parseInt(raw, 10);
   if (Number.isNaN(id)) return res.status(400).json({ error: 'invalid id' });
 
-  const col = hasSection ? 'section_id' : 'chapter_id';
+  const col = hasSection ? 'section_id' : 'topic_id';
   const rows = db
     .prepare(`SELECT * FROM notes WHERE user_id = ? AND ${col} = ? ORDER BY updated_at DESC`)
     .all(USER_ID, id) as NoteRow[];
@@ -98,21 +102,21 @@ notesRouter.get('/notes', (req, res) => {
 notesRouter.post('/notes', (req, res) => {
   const body = createSchema.safeParse(req.body);
   if (!body.success) return res.status(400).json({ error: body.error.issues[0].message });
-  const { sectionId, chapterId, contentMarkdown } = body.data;
+  const { sectionId, topicId, contentMarkdown } = body.data;
 
   if (sectionId !== undefined && db.prepare(`SELECT 1 FROM sections WHERE id = ?`).get(sectionId) === undefined) {
     return res.status(404).json({ error: 'section not found' });
   }
-  if (chapterId !== undefined && db.prepare(`SELECT 1 FROM chapters WHERE id = ?`).get(chapterId) === undefined) {
-    return res.status(404).json({ error: 'chapter not found' });
+  if (topicId !== undefined && db.prepare(`SELECT 1 FROM topics WHERE id = ?`).get(topicId) === undefined) {
+    return res.status(404).json({ error: 'topic not found' });
   }
 
   const info = db
     .prepare(
-      `INSERT INTO notes (user_id, chapter_id, section_id, content_markdown)
+      `INSERT INTO notes (user_id, topic_id, section_id, content_markdown)
        VALUES (?, ?, ?, ?)`,
     )
-    .run(USER_ID, chapterId ?? null, sectionId ?? null, contentMarkdown);
+    .run(USER_ID, topicId ?? null, sectionId ?? null, contentMarkdown);
   const row = db.prepare(`SELECT * FROM notes WHERE id = ?`).get(info.lastInsertRowid) as NoteRow;
   res.status(201).json(toNote(row));
 });

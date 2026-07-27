@@ -6,7 +6,7 @@ import path from 'path';
 export const devRouter = Router();
 
 const DIAGRAMS_ROOT = path.resolve(path.join(__dirname, '..', '..', '..', 'content', 'diagrams'));
-const NAME_RE = /^[a-z0-9_-]+__[a-z0-9_-]+__[a-z0-9_-]+\/[a-z0-9-]+\.json$/;
+const NAME_RE = /^[a-z0-9-]+\/[a-z0-9-]+\.json$/;
 
 devRouter.get('/dev/diagram-files', (_req, res) => {
   if (!fs.existsSync(DIAGRAMS_ROOT)) return res.json({ files: [] });
