@@ -1,0 +1,29 @@
+{
+  "_comment": [
+    "Explicit drop list for primer sections that must NOT become pages in the topic model.",
+    "Every one of the 125 parsed primer sections must be either referenced by content/topic-map.json",
+    "or listed here — build-curriculum.ts hard-fails otherwise. Never drop by length or content hash:",
+    "the eight 'step-2-create-a-high-level-design' stubs are 142 chars each but carry DIFFERENT image",
+    "URLs (8 distinct hashes), and how-to-approach/step-2-create-a-high-level-design is 165 chars of",
+    "real prose that must be KEPT. Drops are by explicit (chapter, section) pair only."
+  ],
+  "drop": [
+    { "chapter": "design-pastebin", "section": "overview", "reason": "Replaced by an authored overview on the url-shortener topic." },
+    { "chapter": "design-twitter", "section": "overview", "reason": "Replaced by an authored overview on the news-feed topic." },
+    { "chapter": "design-web-crawler", "section": "overview", "reason": "Replaced by an authored overview on the web-crawler topic." },
+    { "chapter": "design-mint", "section": "overview", "reason": "Replaced by an authored overview on the batch-analytics topic." },
+    { "chapter": "design-sales-rank", "section": "overview", "reason": "Replaced by an authored overview on the batch-analytics topic." },
+    { "chapter": "design-scaling-aws", "section": "overview", "reason": "Replaced by an authored overview on the scaling-journey topic." },
+    { "chapter": "design-query-cache", "section": "overview", "reason": "Replaced by an authored overview on the key-value-store topic." },
+    { "chapter": "design-social-graph", "section": "overview", "reason": "Replaced by an authored overview on the graph-data-modeling topic." },
+
+    { "chapter": "design-pastebin", "section": "step-2-create-a-high-level-design", "reason": "142-char image-only stub; replaced by an interactive diagram." },
+    { "chapter": "design-twitter", "section": "step-2-create-a-high-level-design", "reason": "142-char image-only stub; replaced by an interactive diagram." },
+    { "chapter": "design-web-crawler", "section": "step-2-create-a-high-level-design", "reason": "142-char image-only stub; replaced by an interactive diagram." },
+    { "chapter": "design-mint", "section": "step-2-create-a-high-level-design", "reason": "142-char image-only stub; replaced by an interactive diagram." },
+    { "chapter": "design-sales-rank", "section": "step-2-create-a-high-level-design", "reason": "142-char image-only stub; replaced by an interactive diagram." },
+    { "chapter": "design-scaling-aws", "section": "step-2-create-a-high-level-design", "reason": "142-char image-only stub; replaced by an interactive diagram." },
+    { "chapter": "design-query-cache", "section": "step-2-create-a-high-level-design", "reason": "142-char image-only stub; replaced by an interactive diagram." },
+    { "chapter": "design-social-graph", "section": "step-2-create-a-high-level-design", "reason": "142-char image-only stub; replaced by an interactive diagram." }
+  ]
+}

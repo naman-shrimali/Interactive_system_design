@@ -4,7 +4,9 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "ingest": "tsx ingest/parse-primer.ts",
+    "ingest": "tsx ingest/parse-primer.ts && tsx ingest/build-curriculum.ts",
+    "ingest:parse": "tsx ingest/parse-primer.ts",
+    "ingest:build": "tsx ingest/build-curriculum.ts",
     "validate:diagrams": "tsx validate-diagrams.ts"
   },
   "dependencies": {
