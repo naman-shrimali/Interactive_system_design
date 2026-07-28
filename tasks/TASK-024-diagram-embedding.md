@@ -1,56 +1,85 @@
-# TASK-024: Embed diagrams in the section page + file-driven preview route
+# TASK-024: Embed diagrams in the topic page + file-driven preview route
 
 ## Objective
-Show a section's interactive diagrams on its reader page (spec fetched from the API), and upgrade `/diagram-preview` to load any diagram file straight from `content/diagrams/` for the authoring workflow.
+Render a topic's interactive diagrams on its page (spec fetched from the API), and upgrade
+`/diagram-preview` to load any file from `content/diagrams/` for the authoring loop.
 
 ## Prerequisites
-TASK-023 (DiagramViewer), TASK-012 (SectionPage slot), TASK-009 (`GET /api/diagrams/:id`).
+TASK-023 (DiagramViewer), TASK-009 (`GET /api/diagrams/:id`). The dev routes described below **already
+exist** in `server/src/routes/dev.ts` — verify them rather than rewriting.
 
 ## Context
-Section pages get diagram metadata in `SectionDetail.diagrams` (`{ id, slug, title, viewed }`); the heavy `spec` is fetched per diagram from `GET /api/diagrams/:id`. The preview route needs raw files (not yet seeded), so the server gets two small dev routes reading `content/diagrams/` directly — this makes authoring step 5 in docs/04 work: edit JSON → refresh browser → see it.
+`GET /api/topics/:idOrSlug` already returns diagram metadata in two places:
+- `topic.sections[].diagrams` — anchored to a section (declared via `diagrams: [...]` in the topic map)
+- `topic.topicDiagrams` — not anchored to any section
+
+Both are `DiagramMeta` (`{ id, slug, title, viewed }`). The heavy `spec` is fetched per diagram from
+`GET /api/diagrams/:id`. `TopicPage.tsx` currently renders a **placeholder card** where each
+section-anchored diagram belongs — replace that placeholder.
+
+Diagram files live at `content/diagrams/<topicSlug>/<diagramSlug>.json`.
 
 ## Files to create
 ```
-server/src/routes/dev.ts
 client/src/components/diagram/SectionDiagram.tsx
 ```
 ## Files to modify
 ```
-server/src/index.ts                       (mount devRouter)
-client/src/pages/SectionPage.tsx          (TASK-024 slot)
+client/src/pages/TopicPage.tsx            (replace the placeholder card; add topicDiagrams block)
 client/src/pages/DiagramPreviewPage.tsx   (file picker)
 client/src/api/client.ts                  (two dev fetchers)
 ```
 
-## Data contracts — dev routes (local-only app; still guard path traversal)
+## Data contracts — dev routes (already implemented; confirm they behave as stated)
 
 ### `GET /api/dev/diagram-files`
-→ `200 { "files": string[] }` — relative paths like `"sdi-vol1-2e__scale-to-millions__overview/web-data-tier.json"`, sorted; `[]` when the directory is missing.
+→ `200 { "files": string[] }` — relative paths like `"scaling-journey/web-data-tier.json"`, sorted;
+`[]` when the directory is missing.
 
 ### `GET /api/dev/diagram-file?name=<relativePath>`
-→ `200` raw parsed JSON of that file | `400` invalid name | `404` not found.
-Guard: reject any `name` that fails `/^[a-z0-9_-]+__[a-z0-9_-]+__[a-z0-9_-]+\/[a-z0-9-]+\.json$/`; additionally `path.resolve` the joined path and require it to start with the resolved `content/diagrams` directory.
+→ `200` the parsed JSON | `400` invalid name | `404` not found.
+Guard: `name` must match `/^[a-z0-9-]+\/[a-z0-9-]+\.json$/`, **and** the resolved path must start with
+the resolved `content/diagrams` directory (defence against traversal).
 
-Client fetchers: `fetchDiagramFiles(): Promise<string[]>`, `fetchDiagramFile(name: string): Promise<InteractiveDiagram>`.
+Client fetchers to add:
+```ts
+fetchDiagramFiles(): Promise<string[]>
+fetchDiagramFile(name: string): Promise<InteractiveDiagram>
+```
 
 ## Steps
-1. **Server `dev.ts`**: implement both routes with `fs.readdirSync` (outer dirs, inner files, only `.json`). Resolve the diagrams root as `path.join(__dirname, '..', '..', '..', 'content', 'diagrams')` (same root-resolution as seed.ts).
-2. **`SectionDiagram.tsx`** — props `{ meta: DiagramMeta }`:
-   - state: `spec: InteractiveDiagram | null`, `error: string | null`
+
+1. **`SectionDiagram.tsx`** — props `{ meta: DiagramMeta }`:
+   - state `spec: InteractiveDiagram | null`, `error: string | null`
    - on mount: `fetchDiagram(meta.id)` → store `.spec`
-   - render: loading skeleton (`h-24 bg-slate-100 animate-pulse rounded`) → then `<DiagramViewer spec diagramId={meta.id} viewed={meta.viewed} />`; error → small red box with the message.
-3. **SectionPage**: in the TASK-024 slot (between markdown and LinksPanel) render, when `section.diagrams.length > 0`:
-   `<h2 className="mt-8 text-lg font-semibold">Interactive diagrams</h2>` + one `<SectionDiagram key={d.id} meta={d} />` per entry.
-4. **DiagramPreviewPage**: top bar with a `<select>` populated from `fetchDiagramFiles()`; choosing one loads it via `fetchDiagramFile` and renders `<DiagramViewer spec />` (no `diagramId`). A "Reload file" button re-fetches the same name (authoring loop). Keep the node/edge showcase below, collapsed under a `<details>` element titled "Component showcase".
-5. Note for verification: after finishing a flow on the section page, the sidebar's diagram icon state and section rollups refresh via the existing `refreshCurriculum()` call inside DiagramViewer.
+   - render: `<Skeleton className="h-64" />` while loading → then
+     `<DiagramViewer spec={spec} diagramId={meta.id} viewed={meta.viewed} />`; on error a small red box.
+2. **TopicPage** — replace the placeholder block inside each section:
+   ```tsx
+   {section.diagrams.map((d) => <SectionDiagram key={d.id} meta={d} />)}
+   ```
+   Then, after the last section and before `LinksPanel`, render `topic.topicDiagrams` under an
+   `<h2>Diagrams</h2>` when non-empty (these are diagrams whose owning section hasn't been written yet).
+3. **DiagramPreviewPage** — top bar with a `<select>` populated from `fetchDiagramFiles()`; choosing one
+   loads it via `fetchDiagramFile` and renders `<DiagramViewer spec />` (**no** `diagramId` — preview
+   must never write progress). A "Reload file" button re-fetches the same name. Keep the node/edge
+   showcase below inside a `<details>` titled "Component showcase".
+4. The sticky table of contents in TopicPage should stay correct — diagrams render inside existing
+   `<section id="section-…">` elements, so no TOC change is needed.
 
 ## Acceptance criteria
-- [ ] `npx tsc --noEmit` passes in both packages.
-- [ ] `curl localhost:4000/api/dev/diagram-files` lists the committed example; `?name=` fetch returns its JSON; `?name=../../server/data/app.db` and other malformed names → 400.
-- [ ] The `scale-to-millions` overview section page shows the "Interactive diagrams" heading and the rendered web-data-tier diagram with its flow button.
-- [ ] Completing the flow there flips the diagram to `viewed ✓`, persists across reload, and `GET /api/curriculum` now reports `diagramsViewed: 1` for that section.
-- [ ] `/diagram-preview`: picking the file from the dropdown renders it; editing the JSON on disk and clicking "Reload file" shows the change without restarting anything.
-- [ ] Sections without diagrams render no diagrams heading.
+- [ ] `npx tsc --noEmit` passes in `client/` and `server/`.
+- [ ] `curl 'localhost:4000/api/dev/diagram-files'` lists `scaling-journey/web-data-tier.json`;
+      `?name=scaling-journey/web-data-tier.json` returns the spec;
+      `?name=../../server/data/app.db` → 400.
+- [ ] `/topics/scaling-journey` renders the web-data-tier diagram (currently it appears under
+      "Diagrams" as a topic-level diagram, because its owning section
+      `content/authored/scaling-journey/01-web-and-data-tier.md` is not written yet).
+- [ ] Completing the diagram's flow flips it to `viewed ✓`, persists across reload, and
+      `GET /api/curriculum` reports `diagramsViewed: 1` for that topic.
+- [ ] `/diagram-preview`: picking a file renders it; editing the JSON on disk and clicking "Reload file"
+      shows the change with no restart.
+- [ ] Topics with no diagrams render no diagram heading and no empty box.
 
 ## Out of scope
-Authoring new diagram content (Phase 6 tasks), hot-reload file watching, exporting diagrams as images.
+Authoring new diagram content (roadmap phase 7), file watching, image export.

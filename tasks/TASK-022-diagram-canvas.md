@@ -79,7 +79,7 @@ interface DiagramCanvasProps {
    </div>
    ```
    Import `@xyflow/react/dist/style.css` once here. Keep the React Flow attribution visible (MIT attribution requirement for the free tier).
-5. Preview page: import the example spec with `import spec from '../../../content/diagrams/sdi-vol1-2e__scale-to-millions__overview/web-data-tier.json'` — **if** Vite refuses imports outside root, instead copy the file to `client/src/devFixtures/web-data-tier.json` and add a comment that TASK-024 replaces this with server-fetched files. Render `<DiagramCanvas spec={spec as InteractiveDiagram} />` above the node showcase, plus a second instance with `highlightedEdgeIds={new Set(['e_lb'])}` to demo emphasis.
+5. Preview page: import the example spec with `import spec from '../../../content/diagrams/scaling-journey/web-data-tier.json'` — **if** Vite refuses imports outside root, instead copy the file to `client/src/devFixtures/web-data-tier.json` and add a comment that TASK-024 replaces this with server-fetched files. Render `<DiagramCanvas spec={spec as InteractiveDiagram} />` above the node showcase, plus a second instance with `highlightedEdgeIds={new Set(['e_lb'])}` to demo emphasis.
 
 ## Acceptance criteria
 - [ ] `npx tsc --noEmit` passes.

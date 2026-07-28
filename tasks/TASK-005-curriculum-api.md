@@ -1,5 +1,11 @@
 # TASK-005: `GET /api/curriculum` (tree + progress rollups)
 
+> ⚠️ **SUPERSEDED — historical record, not a specification.** This task shipped, but against
+> schema v1 (`sources → chapters → sections`) and the pre-redesign UI. Its DDL, API shapes, and
+> component names no longer match the code. For current contracts see
+> [docs/02-data-models.md](../docs/02-data-models.md); see [tasks/README.md](README.md) for status.
+
+
 ## Objective
 Implement the curriculum tree endpoint: sources → chapters → sections, each section carrying its progress status and link/diagram completion counts.
 

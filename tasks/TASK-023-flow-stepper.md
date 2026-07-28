@@ -7,7 +7,7 @@ Build the walkthrough UI: pick a flow, step through it with highlighted edges an
 TASK-022 (DiagramCanvas with `highlightedEdgeIds`), TASK-010 (`markDiagramViewed`).
 
 ## Context
-`spec.flows` encodes the book's numbered request narratives. The stepper drives `DiagramCanvas` purely through the `highlightedEdgeIds` prop. `DiagramViewer` is the composition used everywhere from now on (section pages, preview).
+`spec.flows` encodes the book's numbered request narratives. The stepper drives `DiagramCanvas` purely through the `highlightedEdgeIds` prop. `DiagramViewer` is the composition used everywhere from now on (TopicPage, preview).
 
 ## Files to create
 ```
@@ -54,8 +54,8 @@ interface DiagramViewerProps {
 - [ ] The example diagram shows a "A user reads data" flow button; starting it highlights `e_dns` only and shows the DNS narration.
 - [ ] Next/Prev and ←/→ move through all 5 steps; step 3 highlights BOTH lb→server edges; everything else dims including untouched nodes.
 - [ ] Finish exits to explore mode; Escape exits mid-flow; ✕ exits; all restore full brightness.
-- [ ] With a real `diagramId` (verify later on the section page, or via a temporary id): finishing fires exactly one `PUT /api/progress/diagram/:id` (check the network tab), and repeated finishes in one session don't re-fire.
+- [ ] With a real `diagramId` (verify later on the topic page, or via a temporary id): finishing fires exactly one `PUT /api/progress/diagram/:id` (check the network tab), and repeated finishes in one session don't re-fire.
 - [ ] A spec without flows renders the canvas with no stepper UI at all.
 
 ## Out of scope
-Embedding on the section page and spec fetching (TASK-024), per-step camera panning, autoplay.
+Embedding on the topic page and spec fetching (TASK-024), per-step camera panning, autoplay.

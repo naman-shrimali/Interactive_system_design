@@ -1,140 +1,134 @@
-# 03 — Resource Ingestion Strategy
+# 03 — Content Ingestion
 
-Two sources, two very different pipelines:
+Content reaches the database through a two-stage pipeline plus a seeder:
 
-| Source | Pipeline | Text stored? |
+```
+  vendor/system-design-primer/**.md ──┐
+                                      ├─► [1] parse-primer.ts    ─► content/primer-corpus.json
+  content/topic-map.json ─────────────┤
+  content/authored/**/*.md ───────────┼─► [2] build-curriculum.ts ─► content/curriculum.json
+  scripts/ingest/primer-overrides.json┘                                       │
+                                                                              ▼
+  content/diagrams/<topicSlug>/*.json ──────────────────────► [3] server/src/db/seed.ts ─► SQLite
+```
+
+Run it all with:
+
+```bash
+cd scripts && npm run ingest      # stages 1 + 2 (or ingest:parse / ingest:build individually)
+cd ../server && npm run seed      # stage 3
+```
+
+Both stages are **deterministic** — running twice produces byte-identical JSON.
+
+## Sources and licensing
+
+| Source | Handling | Text stored? |
 |---|---|---|
-| system-design-primer (MIT) | automated: clone → parse markdown → `content/primer-curriculum.json` → seed | ✅ full markdown |
-| Alex Xu book (copyrighted) | manual: hand-write `content/book-curriculum.json` (chapter scaffolding + original summaries) and hand-author diagram JSON | ❌ never |
+| The System Design Primer (MIT) | automated: cloned, parsed, attributed per section | ✅ yes, with `attribution_url` |
+| *System Design Interview* by Alex Xu (copyrighted) | used **only as a topic checklist** | ❌ never |
 
-## Pipeline A: system-design-primer → `content/primer-curriculum.json`
+Which problems are worth covering is a fact, not protected expression. Every word of a book-derived
+topic is written by us and stored with `provenance: 'authored'`. No text or image from the book enters
+the repo or the database. ByteByteGo informs visual design language only.
 
-### Step 1 — Fetch (in `scripts/ingest/parse-primer.ts`)
+## Stage 1 — `scripts/ingest/parse-primer.ts`
 
-```
-if vendor/system-design-primer does not exist:
-    run: git clone --depth 1 https://github.com/donnemartin/system-design-primer vendor/system-design-primer
-read vendor/system-design-primer/README.md
-```
-`vendor/` is git-ignored. Pinning: after first clone, record the commit hash into `content/primer-curriculum.json` under `source.description` suffix `(@<short-sha>)`.
+Produces a flat corpus keyed by chapter/section. Knows nothing about topics.
 
-### Step 2 — The manifest (`scripts/ingest/manifest.json`)
+1. **Fetch** — clones `donnemartin/system-design-primer` into `vendor/` (git-ignored) if absent, and
+   records the short commit SHA in the corpus.
+2. **Tokenize** — splits markdown into `{ level, text, bodyLines }` heading tokens. Fenced code blocks
+   never yield headings.
+3. **Chapters** — `scripts/ingest/manifest.json` lists which README headings become chapters
+   (`readmeChapters`) and which solution directories become chapters (`solutionChapters`). A heading
+   that matches nothing is a **hard error** listing every miss — never a silent skip.
+4. **Sections** — the body before the first subheading becomes `overview`; each subheading of
+   `chapterLevel + 1` becomes its own section. Bodies are rendered with the section heading at `##`.
+5. **HTML → markdown** — the primer's inline-HTML figures are converted (`<a>`, `<img>`, `<br>`) because
+   react-markdown runs with raw HTML disabled.
+6. **URL rewriting** — relative links become absolute: images to `raw.githubusercontent.com/…/master/`,
+   file links to `github.com/…/blob/master/`. Anchors are left alone.
+7. **Link extraction** — external, non-image, deduped, in order of appearance; the primer's own repo
+   URLs are excluded.
 
-The primer's README.md is one huge file. A **hand-curated manifest** decides what becomes a chapter. Two kinds of entries:
+> **Links are scanned, not regexed.** Markdown allows balanced parentheses inside a URL. The original
+> regex `\(([^)\s]+)\)` truncated 7 real links (`…/Load_balancing_(computing` lost its closing paren).
+> `scripts/ingest/lib/markdown.ts` implements a balanced-paren scanner — use `findLinks`/`mapLinkUrls`,
+> never a fresh regex.
 
-```json
-{
-  "source": {
-    "slug": "primer",
-    "title": "The System Design Primer",
-    "kind": "repo",
-    "description": "Learn how to design large-scale systems. MIT © Donne Martin.",
-    "sortOrder": 0
-  },
-  "readmeChapters": [
-    { "slug": "how-to-approach",        "heading": "How to approach a system design interview question", "sortOrder": 0 },
-    { "slug": "performance-vs-scalability", "heading": "Performance vs scalability",  "sortOrder": 1 },
-    { "slug": "latency-vs-throughput",  "heading": "Latency vs throughput",           "sortOrder": 2 },
-    { "slug": "cap-theorem",            "heading": "Availability vs consistency",     "sortOrder": 3 },
-    { "slug": "consistency-patterns",   "heading": "Consistency patterns",            "sortOrder": 4 },
-    { "slug": "availability-patterns",  "heading": "Availability patterns",           "sortOrder": 5 },
-    { "slug": "dns",                    "heading": "Domain name system",              "sortOrder": 6 },
-    { "slug": "cdn",                    "heading": "Content delivery network",        "sortOrder": 7 },
-    { "slug": "load-balancer",          "heading": "Load balancer",                   "sortOrder": 8 },
-    { "slug": "reverse-proxy",          "heading": "Reverse proxy (web server)",      "sortOrder": 9 },
-    { "slug": "application-layer",      "heading": "Application layer",               "sortOrder": 10 },
-    { "slug": "database",               "heading": "Database",                        "sortOrder": 11 },
-    { "slug": "cache",                  "heading": "Cache",                           "sortOrder": 12 },
-    { "slug": "asynchronism",           "heading": "Asynchronism",                    "sortOrder": 13 },
-    { "slug": "communication",          "heading": "Communication",                   "sortOrder": 14 },
-    { "slug": "security",               "heading": "Security",                        "sortOrder": 15 }
-  ],
-  "solutionChapters": [
-    { "slug": "design-pastebin",     "dir": "solutions/system_design/pastebin",      "title": "Design Pastebin.com",              "sortOrder": 20 },
-    { "slug": "design-twitter",      "dir": "solutions/system_design/twitter",       "title": "Design the Twitter timeline",      "sortOrder": 21 },
-    { "slug": "design-web-crawler",  "dir": "solutions/system_design/web_crawler",   "title": "Design a web crawler",             "sortOrder": 22 },
-    { "slug": "design-mint",         "dir": "solutions/system_design/mint",          "title": "Design Mint.com",                  "sortOrder": 23 },
-    { "slug": "design-sales-rank",   "dir": "solutions/system_design/sales_rank",    "title": "Design Amazon's sales rank",       "sortOrder": 24 },
-    { "slug": "design-scaling-aws",  "dir": "solutions/system_design/scaling_aws",   "title": "Design a system that scales to millions of users on AWS", "sortOrder": 25 },
-    { "slug": "design-query-cache",  "dir": "solutions/system_design/query_cache",   "title": "Design a key-value cache for search queries", "sortOrder": 26 },
-    { "slug": "design-social-graph", "dir": "solutions/system_design/social_graph",  "title": "Design the data structures for a social network", "sortOrder": 27 }
-  ]
-}
-```
+Output: `content/primer-corpus.json` — 24 chapters, 125 sections, 199 links.
 
-> Heading matching is **case-insensitive prefix match** on the rendered heading text (README headings may carry trailing anchors/links). If a manifest heading is not found, the script must **fail loudly** listing all unmatched headings — never skip silently.
+## Stage 2 — `scripts/ingest/build-curriculum.ts`
 
-### Step 3 — Parsing algorithm (pseudo-code)
+Compiles the corpus + `content/topic-map.json` + `content/authored/**` into `content/curriculum.json`.
+The topic-map contribution formats are specified in [docs/02-data-models.md §2](02-data-models.md).
 
-```
-parse README.md into a flat list: tokens = [{ level, text, bodyLines[] }]
-  - a heading line matches /^(#{1,6})\s+(.*)$/  (strip markdown links/anchors from text)
-  - bodyLines = all lines until the next heading of ANY level
-  - IMPORTANT: skip fenced code blocks (``` ... ```) when scanning for headings
+### `validateCoverage()` runs first, and it is the point of the whole stage
 
-for each manifest.readmeChapters entry:
-    find index i where tokens[i].text startsWith entry.heading (case-insensitive)
-    chapterLevel = tokens[i].level
-    capture tokens[i..j) where j = next token with level <= chapterLevel
-    sections = split captured range at level == chapterLevel + 1
-        - the chapter's own bodyLines (before the first subheading) form
-          section { slug: "overview", title: entry.heading, sortOrder: 0 }
-        - each subheading becomes section { slug: slugify(text), title: text, sortOrder: n }
-    for each section:
-        contentMarkdown = reassemble heading + body, demoting headings so the section's own title is h2
-        rewrite relative urls (Step 4)
-        externalLinks   = extract (Step 5)
-        sourceUrl       = "https://github.com/donnemartin/system-design-primer#" + githubSlug(heading)
+Every one of the 125 primer sections must be either referenced by the topic map or listed in
+`scripts/ingest/primer-overrides.json`. It also fails on references to sections that don't exist, drops
+of sections that don't exist, a primer section rendered as a page in two topics, unknown track slugs,
+duplicate topic or section slugs, and unknown section kinds. **Write coverage checks before mapping —
+silent content loss is the failure mode this pipeline exists to prevent.**
 
-for each manifest.solutionChapters entry:
-    read vendor/system-design-primer/<dir>/README.md
-    sections = split whole file at level-2 headings ("## "), same rules as above
+### The drop list
 
-write content/primer-curriculum.json  (shape: docs/02-data-models.md §2)
-```
+`primer-overrides.json` records the 16 deliberately-discarded sections with a reason each: the eight
+`design-*/overview` stubs (replaced by authored overviews) and the eight
+`design-*/step-2-create-a-high-level-design` stubs (replaced by diagrams).
 
-`slugify(text)`: lowercase → strip non-alphanumerics to `-` → collapse repeats → trim `-`.
+> **Never drop by length or content hash.** Those eight step-2 stubs are 142 chars each but embed
+> *different* image URLs, so they have eight distinct hashes — and a ninth section with the same slug,
+> `how-to-approach/step-2-create-a-high-level-design`, is 165 chars of real prose that must be **kept**.
+> Drops are by explicit `(chapter, section)` pair only.
 
-### Step 4 — URL rewriting (so images and cross-links work in our app)
+### Assembly
 
-For every markdown link/image `[t](path)` or `![t](path)` where `path` does NOT start with `http` or `#`:
-- image (`![`): prefix with `https://raw.githubusercontent.com/donnemartin/system-design-primer/master/` (resolve `../` relative to the file being parsed)
-- non-image file link: prefix with `https://github.com/donnemartin/system-design-primer/blob/master/`
-- pure anchor links (`#...`): leave unchanged.
+For each topic, contributions are processed in order:
 
-### Step 5 — External-link extraction (feature requirement #5)
+- **primer** → primer bodies are demoted one level (h2→h3) so they nest under the section title the UI
+  renders, and a leading heading that merely repeats that title is stripped. Listing several `sections`
+  concatenates them into one page. `attributionUrl` comes from the first source section.
+- **linksOnly** → links are harvested to the topic; no section is produced.
+- **authored** → front matter stripped, body used as-is.
 
-From each section's final markdown, collect every **non-image** link matching
-`/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g`:
-- `title` = link text (fallback: hostname), `url` = href
-- exclude: links to `github.com/donnemartin/system-design-primer` itself (internal), duplicate urls within a section (keep first), image links
-- order of appearance = `sortOrder`
+Links are deduped per topic — a URL cited in three sections of one topic collapses to one checkbox,
+which is why the link count drops from 199 to 183. A URL cited in two different topics stays two rows.
 
-These populate the section's **"External resources"** panel with per-link completion checkboxes (`link_progress` table).
+### Failure and warning behaviour
 
-## Pipeline B: book scaffolding → `content/book-curriculum.json`
+- A **missing authored file** is a warning: the section is skipped and reported.
+- A topic that compiles to **zero sections** is a hard error — that would be a blank page.
+- Topics under **800 words** get `status: 'stub'` (a "Being expanded" badge in the UI) and are printed
+  as a ranked list. **That list is the content backlog** — it is the measurable definition of "thin".
 
-Hand-authored once (already committed by planning). Chapters follow the actual PDF TOC:
+## Stage 3 — `server/src/db/seed.ts`
 
-Scale From Zero To Millions Of Users · Back-of-the-Envelope Estimation · A Framework For System Design Interviews · Design A Rate Limiter · Design Consistent Hashing · Design A Key-Value Store · Design A Unique ID Generator · Design A URL Shortener · Design A Web Crawler · Design A Notification System · Design A News Feed System · Design A Chat System · Design A Search Autocomplete System · Design YouTube · Design Google Drive
+Upserts `curriculum.json` into SQLite, then loads diagram specs from
+`content/diagrams/<topicSlug>/<diagramSlug>.json`, anchoring each to the section that declared it in
+`diagrams: [...]` (topic-level when nothing claims it). Diagram directories that match no topic slug are
+reported as a warning rather than failing the seed.
 
-Foundation chapters (1–3) have a single `overview` section; interview-question chapters (4–15) have `overview`, `high-level-design`, `deep-dive`. `contentMarkdown` is our own summary text (or empty until authored). Diagrams attach to sections via Pipeline C.
+**Idempotency:** every natural key is a slug (`tracks.slug`, `topics.slug`, `(topic_id, slug)` for
+sections and diagrams, `(topic_id, url)` for links), so re-seeding updates content in place while row
+ids — and therefore `section_progress`, `link_progress`, `diagram_progress`, and `notes` — survive.
+Rows removed from the content files are left behind as harmless orphans; the seed never deletes.
 
-## Pipeline C: seeding SQLite (`server/src/db/seed.ts`)
+## Rebuilding from scratch
 
-```
-open db (runs schema.sql first)
-upsert user id=1
-for each file in [content/primer-curriculum.json, content/book-curriculum.json]:
-    upsert source by slug            (ON CONFLICT(slug) DO UPDATE title/kind/description/sort_order)
-    for each chapter: upsert by (source_id, slug)
-    for each section: upsert by (chapter_id, slug)   -- updates content, KEEPS id
-    for each externalLink: upsert by (section_id, url)
-for each file in content/diagrams/**/*.json:
-    validate against scripts/diagram.schema.json (ajv) — abort seed on any invalid file
-    locate target section by convention: content/diagrams/<sourceSlug>__<chapterSlug>__<sectionSlug>/<diagramSlug>.json
-    upsert diagram by (section_id, slug), spec_json = file contents
-print summary counts (sources/chapters/sections/links/diagrams)
+The DDL is all `IF NOT EXISTS`, so an old database would boot half-migrated. `server/src/db/index.ts`
+detects that and refuses to start with the fix printed. To rebuild:
+
+```bash
+rm -f server/data/app.db server/data/app.db-wal server/data/app.db-shm
+cd scripts && npm run ingest
+cd ../server && npm run seed
 ```
 
-**Idempotency guarantee:** all natural keys are slugs, so re-running the seed after a content update changes text in place without changing row ids — `section_progress`, `link_progress`, `diagram_progress`, and `notes` all survive because they reference those stable ids. Rows removed from content files are left in the DB (harmless orphans by design; no destructive deletes during seed).
+This discards all progress and notes, which is acceptable for a local single-user app.
+
+## Adding content later
+
+The whole point of the topic-map indirection: **write a markdown file under `content/authored/`, point a
+contribution at it, re-run ingest + seed. No code changes.**

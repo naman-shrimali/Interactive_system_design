@@ -1,5 +1,11 @@
 # TASK-009: `GET /api/diagrams/:id` + diagram validation script
 
+> ⚠️ **SUPERSEDED — historical record, not a specification.** This task shipped, but against
+> schema v1 (`sources → chapters → sections`) and the pre-redesign UI. Its DDL, API shapes, and
+> component names no longer match the code. For current contracts see
+> [docs/02-data-models.md](../docs/02-data-models.md); see [tasks/README.md](README.md) for status.
+
+
 ## Objective
 Serve stored diagram specs over the API, and build the ajv-based `npm run validate:diagrams` script that gates all hand-authored diagram JSON.
 

@@ -1,5 +1,11 @@
 # TASK-014: Section progress controls + chapter progress bars
 
+> ⚠️ **SUPERSEDED — historical record, not a specification.** This task shipped, but against
+> schema v1 (`sources → chapters → sections`) and the pre-redesign UI. Its DDL, API shapes, and
+> component names no longer match the code. For current contracts see
+> [docs/02-data-models.md](../docs/02-data-models.md); see [tasks/README.md](README.md) for status.
+
+
 ## Objective
 Let the learner set a section's status (Not started / In progress / Completed) from the reader, and upgrade sidebar chapter fractions into visual progress bars.
 

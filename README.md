@@ -8,22 +8,32 @@ Track progress, complete external resources, and take markdown notes per chapter
 ## Run
 
 ```bash
-# 1. one-time content ingestion (clones the primer repo, generates content/primer-curriculum.json)
+# 1. content ingestion — clones the primer repo, then compiles the topic map
+#    into content/curriculum.json (prints the thin-topic backlog at the end)
 cd scripts && npm install && npm run ingest
 
-# 2. server (API on :4000) — applies schema, then seed the DB
+# 2. server (API on :4000) — applies schema v2, seeds, then serves
 cd ../server && npm install && npm run seed && npm run dev
 
 # 3. client (UI on :5173, proxies /api → :4000)
 cd ../client && npm install && npm run dev
 ```
 
+To rebuild the database from scratch (discards progress and notes):
+
+```bash
+rm -f server/data/app.db server/data/app.db-wal server/data/app.db-shm
+```
+
 See [PLAN.md](PLAN.md) for the full architecture and the atomic task breakdown in [tasks/](tasks/).
 
 ## Layout
 
-- `client/` — React + Vite + TypeScript + Tailwind + React Flow
+- `client/` — React + Vite + TypeScript + Tailwind (+ React Flow, for the diagram engine)
 - `server/` — Express + TypeScript + better-sqlite3 (REST API)
 - `scripts/` — content ingestion + diagram validation
-- `content/` — generated + hand-authored curriculum and diagram JSON
-- `docs/` — planning documentation
+- `content/` — `topic-map.json` and `authored/` are hand-written; `curriculum.json` is generated
+- `docs/` — architecture, data contracts, ingestion, diagrams, topic model
+
+Content is organised by **topic** (`tracks → topics → sections`), merging both sources — see
+[docs/06-topic-model.md](docs/06-topic-model.md). Adding content is a data change, not a code change.

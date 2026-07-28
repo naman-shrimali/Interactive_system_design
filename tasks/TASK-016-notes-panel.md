@@ -1,5 +1,11 @@
 # TASK-016: Notes panel (create / edit / delete, markdown preview)
 
+> ⚠️ **SUPERSEDED — historical record, not a specification.** This task shipped, but against
+> schema v1 (`sources → chapters → sections`) and the pre-redesign UI. Its DDL, API shapes, and
+> component names no longer match the code. For current contracts see
+> [docs/02-data-models.md](../docs/02-data-models.md); see [tasks/README.md](README.md) for status.
+
+
 ## Objective
 Build a reusable notes panel anchored to a section or a chapter, and mount it on the section page.
 

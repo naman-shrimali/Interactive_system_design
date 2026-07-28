@@ -54,7 +54,7 @@ Groups: rendered as React Flow nodes of type `group` behind children — `dashed
 For each book figure worth recreating (roughly 3–6 per chapter):
 
 1. **Study** the figure in the PDF. List components, tiers, and the numbered flow it narrates. *(Human/planning-model step — the PDF never enters the codebase.)*
-2. **Name it:** file `content/diagrams/<sourceSlug>__<chapterSlug>__<sectionSlug>/<diagramSlug>.json` (this path convention tells the seeder which section owns it).
+2. **Name it:** file `content/diagrams/<topicSlug>/<diagramSlug>.json`. The directory must match a topic slug in `content/topic-map.json`, and the filename must equal the spec's `id`. To anchor a diagram to a specific section, list its slug in that section's `diagrams: [...]` in the topic map; otherwise it renders as a topic-level diagram.
 3. **Author JSON** against the schema: pick `NodeKind`s from the catalog; lay out on a mental grid (grid unit = 40px; canvas ~1000×800; flow top→bottom like the book); wrap tiers in `groups`; label edges; encode the figure's numbered narrative as one or more `flows`.
 4. **Validate:** `npm run validate:diagrams` (ajv against `scripts/diagram.schema.json`).
 5. **Preview:** open `/diagram-preview?file=<path>` in the dev client, compare against the concept, adjust positions.
@@ -62,7 +62,7 @@ For each book figure worth recreating (roughly 3–6 per chapter):
 
 ## Reference example (recreates the *concept* of the classic "LB + web tier + data tier" architecture, book Fig 1-6)
 
-`content/diagrams/sdi-vol1-2e__scale-to-millions__overview/web-data-tier.json` *(this exact file is committed in the repo as the reference implementation)*
+`content/diagrams/scaling-journey/web-data-tier.json` *(this exact file is committed in the repo as the reference implementation)*
 
 ```json
 {

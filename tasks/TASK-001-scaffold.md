@@ -1,5 +1,11 @@
 # TASK-001: Scaffold the repository (client + server + scripts)
 
+> ⚠️ **SUPERSEDED — historical record, not a specification.** This task shipped, but against
+> schema v1 (`sources → chapters → sections`) and the pre-redesign UI. Its DDL, API shapes, and
+> component names no longer match the code. For current contracts see
+> [docs/02-data-models.md](../docs/02-data-models.md); see [tasks/README.md](README.md) for status.
+
+
 ## Objective
 Create the project skeleton: a Vite React TypeScript client, an Express TypeScript server with a health endpoint, and shared tooling — nothing else.
 

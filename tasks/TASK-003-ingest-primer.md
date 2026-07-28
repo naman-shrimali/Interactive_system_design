@@ -1,5 +1,11 @@
 # TASK-003: Primer ingestion script (README.md → primer-curriculum.json)
 
+> ⚠️ **SUPERSEDED — historical record, not a specification.** This task shipped, but against
+> schema v1 (`sources → chapters → sections`) and the pre-redesign UI. Its DDL, API shapes, and
+> component names no longer match the code. For current contracts see
+> [docs/02-data-models.md](../docs/02-data-models.md); see [tasks/README.md](README.md) for status.
+
+
 ## Objective
 Write `scripts/ingest/parse-primer.ts` that converts the system-design-primer repo's markdown into `content/primer-curriculum.json`, driven by a hand-curated manifest.
 
