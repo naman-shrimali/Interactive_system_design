@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "upload-transcode",
+  "title": "Upload, transcode, deliver — and why bytes skip your API",
+  "description": "The application tier issues a credential and records metadata. The file itself goes straight to object storage, and the expensive transcoding happens asynchronously afterwards.",
+  "nodes": [
+    { "id": "client", "type": "client", "label": "Uploader", "position": { "x": 40, "y": 230 } },
+    { "id": "api", "type": "service", "label": "Upload API", "sublabel": "issues pre-signed URL", "position": { "x": 320, "y": 50 }, "badge": 1 },
+    { "id": "blob", "type": "nosql", "label": "Object storage", "sublabel": "content-addressed chunks", "position": { "x": 640, "y": 230 }, "badge": 2 },
+    { "id": "queue", "type": "message_queue", "label": "Transcode queue", "position": { "x": 305, "y": 430 }, "badge": 3 },
+    { "id": "workers", "type": "worker_stack", "label": "Transcode workers", "sublabel": "one job per rendition", "position": { "x": 640, "y": 430 }, "badge": 4 },
+    { "id": "cdn", "type": "cdn", "label": "CDN", "sublabel": "segments + manifest", "position": { "x": 950, "y": 230 } },
+    { "id": "viewer", "type": "client_mobile", "label": "Viewers", "sublabel": "adaptive bitrate", "position": { "x": 1210, "y": 230 } }
+  ],
+  "edges": [
+    { "id": "e_ask", "source": "client", "target": "api", "label": "request upload URL", "step": 1, "sourceHandle": "right", "targetHandle": "left", "direction": "both" },
+    { "id": "e_upload", "source": "client", "target": "blob", "label": "upload chunks directly", "step": 2, "color": "green", "sourceHandle": "right", "targetHandle": "left" },
+    { "id": "e_enq", "source": "api", "target": "queue", "label": "enqueue job", "step": 3, "color": "purple", "sourceHandle": "bottom", "targetHandle": "top" },
+    { "id": "e_work", "source": "queue", "target": "workers", "label": "fan out per rendition", "step": 4, "color": "purple", "sourceHandle": "right", "targetHandle": "left" },
+    { "id": "e_write", "source": "workers", "target": "blob", "label": "write renditions", "step": 5, "color": "purple", "sourceHandle": "bottom", "targetHandle": "left" },
+    { "id": "e_origin", "source": "blob", "target": "cdn", "label": "origin fetch", "step": 6, "sourceHandle": "right", "targetHandle": "left" },
+    { "id": "e_play", "source": "cdn", "target": "viewer", "label": "stream", "step": 7, "color": "green", "sourceHandle": "right", "targetHandle": "left", "direction": "both" }
+  ],
+  "flows": [
+    {
+      "id": "upload",
+      "name": "Uploading",
+      "steps": [
+        { "edgeIds": ["e_ask"], "text": "The client asks the API for permission. The API authorises, records metadata, and returns a pre-signed URL — a time-limited credential to write one object." },
+        { "edgeIds": ["e_upload"], "text": "The file goes straight to object storage in chunks. It never touches the application tier: routing gigabytes through your API wastes bandwidth, occupies connections for minutes, and turns a stateless service into a bottleneck." },
+        { "edgeIds": ["e_upload"], "text": "Chunking pays three ways — a failed part retries alone, parts upload in parallel, and an interrupted upload resumes. Naming each chunk by its content hash makes the upload verifiable and deduplicates identical chunks for free." }
+      ]
+    },
+    {
+      "id": "transcode",
+      "name": "Transcoding",
+      "steps": [
+        { "edgeIds": ["e_enq"], "text": "Transcoding is enqueued, not done inline. The uploader's request has already returned." },
+        { "edgeIds": ["e_work"], "text": "One job per rendition — 240p through 4K — plus side jobs for thumbnails and captions. They are independent and embarrassingly parallel, which is why spot instances suit them: an evicted job simply retries." },
+        { "edgeIds": ["e_write"], "text": "Each rendition is written back as segments of a few seconds, and a manifest lists what exists. Because most uploads are barely watched, generating the full ladder eagerly wastes most of the spend — produce a couple of common renditions now and the rest on first demand." }
+      ]
+    },
+    {
+      "id": "playback",
+      "name": "Playback",
+      "steps": [
+        { "edgeIds": ["e_origin"], "text": "The first viewer in a region misses at the edge and the CDN pulls segments from origin." },
+        { "edgeIds": ["e_play"], "text": "Everyone after them is served from the edge. The player reads the manifest, starts conservatively, measures its own throughput, and switches rendition between segments — so quality changes rather than stalling when the network does." }
+      ]
+    }
+  ]
+}

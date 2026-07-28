@@ -482,7 +482,10 @@
             "slug": "overview",
             "title": "The rehashing problem",
             "kind": "overview"
-          }
+          },
+          "diagrams": [
+            "rehashing-problem"
+          ]
         },
         {
           "from": "authored",
@@ -645,7 +648,10 @@
             "title": "Push vs pull CDNs",
             "kind": "concepts"
           },
-          "harvestLinks": true
+          "harvestLinks": true,
+          "diagrams": [
+            "pull-cdn"
+          ]
         },
         {
           "from": "authored",
@@ -708,7 +714,10 @@
             "title": "What a load balancer does",
             "kind": "concepts"
           },
-          "harvestLinks": true
+          "harvestLinks": true,
+          "diagrams": [
+            "health-check-failover"
+          ]
         },
         {
           "from": "primer",
@@ -1063,7 +1072,10 @@
             "slug": "quorum",
             "title": "Replication & quorum",
             "kind": "deep-dive"
-          }
+          },
+          "diagrams": [
+            "quorum"
+          ]
         },
         {
           "from": "primer",
@@ -1573,7 +1585,10 @@
             "slug": "frontier",
             "title": "The URL frontier & politeness",
             "kind": "deep-dive"
-          }
+          },
+          "diagrams": [
+            "frontier-loop"
+          ]
         },
         {
           "from": "primer",
@@ -1776,7 +1791,10 @@
             "slug": "pipeline",
             "title": "The delivery pipeline",
             "kind": "concepts"
-          }
+          },
+          "diagrams": [
+            "channel-queues"
+          ]
         },
         {
           "from": "authored",
@@ -1823,7 +1841,10 @@
             "slug": "video-pipeline",
             "title": "Upload, transcode & deliver",
             "kind": "deep-dive"
-          }
+          },
+          "diagrams": [
+            "upload-transcode"
+          ]
         },
         {
           "from": "authored",

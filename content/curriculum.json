@@ -561,7 +561,9 @@
           "attributionNote": null,
           "contentRef": "authored:content/authored/consistent-hashing/00-overview.md",
           "sortOrder": 0,
-          "diagrams": []
+          "diagrams": [
+            "rehashing-problem"
+          ]
         },
         {
           "slug": "the-ring",
@@ -808,7 +810,9 @@
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:cdn/overview+push-cdns+pull-cdns",
           "sortOrder": 1,
-          "diagrams": []
+          "diagrams": [
+            "pull-cdn"
+          ]
         },
         {
           "slug": "invalidation",
@@ -896,7 +900,9 @@
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:load-balancer/overview",
           "sortOrder": 1,
-          "diagrams": []
+          "diagrams": [
+            "health-check-failover"
+          ]
         },
         {
           "slug": "l4-vs-l7",
@@ -1650,6 +1656,18 @@
       "sortOrder": 3,
       "sections": [
         {
+          "slug": "overview",
+          "title": "What we're building",
+          "kind": "overview",
+          "contentMarkdown": "We're designing a distributed key-value store: `put(key, value)` and `get(key)`, spread across many machines, surviving node failures without losing data or refusing service.\n\nIt's a favourite interview question because it has nowhere to hide. There is no product complexity to talk around — just the core distributed systems problems, in the open: how do you split data across nodes, how many copies do you keep, what happens when copies disagree, and how do you detect that a node has died.\n\n### Scoping it\n\n- **Interface:** `get(key)` and `put(key, value)`. No range scans — that constraint is what lets you hash keys and scatter them.\n- **Value size:** small, say under 10 KB. Large values push you toward object storage with the KV store holding pointers.\n- **Scale:** big enough that the data does not fit on one machine, which is the only reason to build this at all.\n- **Availability:** high — the system should keep serving through single-node failures without operator intervention.\n- **Consistency:** tunable. Some callers need the newest value; most would rather have a fast answer.\n\nThe last point is the one worth agreeing early, because \"strongly consistent\" and \"always available\" pull in opposite directions the moment the network misbehaves.\n\n### The four problems\n\nEverything in this topic is one of these:\n\n**Partitioning.** Which node holds which key? Modulo hashing collapses when the node count changes, so the answer is consistent hashing with virtual nodes — covered in its own topic, and worth naming rather than re-deriving.\n\n**Replication.** How many copies, and where? Walk the ring clockwise from the key's position and take the next `N` **distinct** physical nodes, skipping positions belonging to a node already chosen, and preferably spanning racks or availability zones. Three copies in one rack is one power event away from zero copies.\n\n**Consistency.** With `N` copies, how many must respond before you answer? This is the quorum dial, and it's the next section.\n\n**Failure detection and repair.** Nodes die, and the system must notice without a central monitor. Gossip spreads membership and health; temporary failures are absorbed by hinted handoff (a peer holds writes for the absent node and forwards them on recovery); permanent divergence is found by comparing Merkle trees between replicas so only differing ranges are transferred rather than the entire dataset.\n\n### The shape of the answer\n\nA Dynamo-style design has **no primary**. Every node knows the ring, so any node can coordinate any request — which removes the single point of failure and the failover machinery a primary would require.\n\nThe cost is that conflicts become possible: two clients can write the same key through different coordinators during a partition. That's why these systems carry versioning (vector clocks) to detect concurrent updates, and a resolution policy — last-write-wins for data that tolerates loss, or returning both versions and letting the application decide.\n\nSay that trade-off out loud. Choosing no primary is choosing to handle conflicts, and pretending otherwise is the most common gap in an answer to this question.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/key-value-store/00-overview.md",
+          "sortOrder": 0,
+          "diagrams": []
+        },
+        {
           "slug": "requirements",
           "title": "Use cases, constraints & estimates",
           "kind": "concepts",
@@ -1658,8 +1676,22 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/query_cache/README.md",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:design-query-cache/step-1-outline-use-cases-and-constraints",
-          "sortOrder": 0,
+          "sortOrder": 1,
           "diagrams": []
+        },
+        {
+          "slug": "quorum",
+          "title": "Replication & quorum",
+          "kind": "deep-dive",
+          "contentMarkdown": "With `N` replicas of every key, each operation chooses how many replicas must respond. That choice is the consistency dial, and it's set per operation rather than per database.\n\n### The rule\n\n- `N` — replicas per key\n- `W` — replicas that must acknowledge a write before it's confirmed\n- `R` — replicas that must respond to a read\n\n```\nR + W > N   ⟹   strong consistency\n```\n\nThe reasoning is a pigeonhole argument: if the write set and the read set together exceed the number of replicas, they must overlap on at least one node. That node saw the latest acknowledged write, so the read cannot miss it.\n\nWith `N = 3`:\n\n| R | W | Behaviour |\n|---|---|---|\n| 1 | 1 | fastest both ways; eventually consistent (2 ≯ 3) |\n| 2 | 2 | strongly consistent, tolerates one node down either way — the usual default |\n| 1 | 3 | fast reads, writes fail if any replica is down |\n| 3 | 1 | fast writes, reads fail if any replica is down |\n\n`R = W = 2` is the common choice because it satisfies the inequality *and* survives a single failure on both paths. `W = 3` looks safer and is worse: one unavailable replica blocks every write.\n\n### Latency is set by the k-th fastest, not the slowest\n\nA quorum write waits for `W` acknowledgements, not all `N`. With `W = 2` of 3, the coordinator returns as soon as the *second* replica responds — so one slow node doesn't slow the system. That is a quiet but significant advantage over waiting for every replica, and it's why quorums tolerate stragglers gracefully.\n\n### When replicas disagree\n\nQuorums guarantee you *see* the newest write; they don't prevent divergence. Two clients writing the same key through different coordinators during a partition produce two versions with no ordering between them.\n\n**Vector clocks** detect this. Each write carries a per-node counter; comparing two versions tells you whether one descends from the other (keep the newer) or whether they're genuinely concurrent (a real conflict). The value is the *detection* — knowing you have a conflict rather than silently discarding one side.\n\nResolution is then a policy decision:\n\n- **Last-write-wins** by timestamp — simple, and it silently destroys one of the two updates. It also depends on clocks agreeing, which they don't. Acceptable for a cache; risky for user data.\n- **Return both** and let the application merge, the way a shopping cart unions its items.\n- **CRDTs**, where the merge is defined so concurrent updates always converge without coordination.\n\n### Repair\n\nDivergence must be actively fixed or \"eventual consistency\" never arrives:\n\n- **Read repair** — when a read surfaces replicas with differing versions, the coordinator returns the newest and updates the stale ones in the background. Free, but only fixes keys that are actually read.\n- **Hinted handoff** — a write destined for a node that's down is held by a peer with a hint, and forwarded when it returns. Covers short outages without dropping writes.\n- **Anti-entropy with Merkle trees** — replicas exchange a hash tree of their key ranges and descend only where hashes differ, so a full comparison transfers a handful of hashes rather than the whole dataset. This is what catches keys nobody reads.\n\n### Saying it well\n\nThe strong version of this answer connects the dial to the product: *\"Reads of a user's own cart use R = 2 so they always see their last write; the recommendations cache reads at R = 1 because a stale suggestion is invisible and latency isn't.\"* Same store, two settings, each justified by what breaks when the data is stale.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/key-value-store/01-quorum.md",
+          "sortOrder": 2,
+          "diagrams": [
+            "quorum"
+          ]
         },
         {
           "slug": "core-components",
@@ -1670,7 +1702,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/query_cache/README.md",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:design-query-cache/step-3-design-core-components+step-4-scale-the-design",
-          "sortOrder": 1,
+          "sortOrder": 3,
           "diagrams": []
         },
         {
@@ -1682,7 +1714,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/query_cache/README.md",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:design-query-cache/additional-talking-points",
-          "sortOrder": 2,
+          "sortOrder": 4,
           "diagrams": []
         }
       ],
@@ -2272,6 +2304,18 @@
       "sortOrder": 2,
       "sections": [
         {
+          "slug": "overview",
+          "title": "What we're building",
+          "kind": "overview",
+          "contentMarkdown": "We're designing a crawler: start from a set of seed URLs, fetch pages, extract the links they contain, and repeat — building a corpus of the web for a search index, an archive, or a monitoring system.\n\nDescribed that way it sounds like a weekend project, and a naive version genuinely is about twenty lines. What makes it an interview question is everything that goes wrong once it runs against the real web at scale: the same pages fetched forever, a single site taken offline by your own traffic, and a crawl that never terminates because someone's calendar has an infinite \"next month\" link.\n\n### Scoping it\n\n- **Scale:** say a billion pages a month. That works out to roughly 400 pages per second sustained, which sets the size of the fetcher fleet.\n- **Politeness:** honour `robots.txt` and rate-limit per host. Non-negotiable — a crawler that ignores this is a denial-of-service tool.\n- **Content:** HTML only, unless asked. Media discovery is a different problem.\n- **Freshness:** pages are re-crawled on a schedule weighted by how often they change.\n- **Storage:** raw page content plus metadata, retained for downstream indexing.\n\nState that a billion pages at ~500 KB each is on the order of **500 TB per month**, and the storage question answers itself: object storage, with compression, and a retention policy.\n\n### The loop, and its four hard parts\n\nThe cycle is simple — frontier → fetch → parse → discover → back to frontier. The difficulty is concentrated in four places:\n\n**The frontier is not one queue.** If it were, fetchers would pull whatever is next and hammer whichever host dominates the queue. It's a queue *per host*, with a scheduler that respects a delay between requests to the same host while keeping the fleet busy across thousands of other hosts. Politeness and throughput are in tension, and the frontier's structure is how you get both.\n\n**Deduplication has to be cheap.** At a billion pages you cannot hold an exact set of visited URLs in memory. A Bloom filter answers \"definitely new\" or \"probably seen\" in constant space, accepting a small false-positive rate — meaning a few genuinely new pages get skipped. That is a good trade, and being explicit about accepting it is the point.\n\n**Traps exist and are common.** Infinite calendars, session IDs in URLs that make every request look novel, and deliberately generated link mazes. Defences: depth limits per host, URL normalisation that strips volatile query parameters, and a per-host page budget so one pathological domain can't consume the crawl.\n\n**Duplicate content is separate from duplicate URLs.** The same article appears at several URLs across syndication. Checksumming the content catches what URL deduplication cannot.\n\n### What the design looks like\n\nA queue-driven pipeline: a distributed frontier, a stateless fleet of fetchers, parsers, a shared dedup filter, and object storage for content. Fetchers are I/O-bound and scale horizontally; parsers are CPU-bound and scale separately. Because the whole thing is a loop through a queue, it restarts cleanly after a crash — nothing is lost, work simply resumes.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/web-crawler/00-overview.md",
+          "sortOrder": 0,
+          "diagrams": []
+        },
+        {
           "slug": "requirements",
           "title": "Use cases, constraints & estimates",
           "kind": "concepts",
@@ -2280,8 +2324,22 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/web_crawler/README.md",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:design-web-crawler/step-1-outline-use-cases-and-constraints",
-          "sortOrder": 0,
+          "sortOrder": 1,
           "diagrams": []
+        },
+        {
+          "slug": "frontier",
+          "title": "The URL frontier & politeness",
+          "kind": "deep-dive",
+          "contentMarkdown": "The frontier is the component that makes a crawler polite, prioritised and terminating. Get it wrong and you have a very efficient way to get your IP range blocked.\n\n### Why not one queue\n\nWith a single FIFO of URLs, fetchers pull whatever is next. Since a large site contributes thousands of links at once, consecutive URLs tend to share a host — so the fleet hits one server with hundreds of concurrent requests. You have built an accidental load test against someone else's website.\n\nAdding a global delay between requests fixes politeness and destroys throughput: the crawler now fetches one page per delay interval across the entire web.\n\nBoth requirements are satisfiable at once, but only if the queue knows about hosts.\n\n### The two-layer structure\n\n**Front queues — priority.** Several queues, one per priority band. A prioritiser assigns each URL a band from signals like PageRank, update frequency, or how long since it was last crawled. This is where \"important pages get crawled sooner\" is implemented.\n\n**Back queues — politeness.** Many queues, each dedicated to a single host, with a mapping from hostname to its queue. The invariant: **all URLs for one host live in exactly one back queue, and one worker drains that queue.**\n\nA scheduler holds a timestamp per back queue saying when that host may next be contacted. It hands a worker the queue whose delay has elapsed. So each host is contacted at a polite rate, while thousands of hosts are in flight simultaneously.\n\nThat structure is the whole trick, and it's worth drawing: priority is decided on the way in, politeness on the way out.\n\n### Where the delay comes from\n\n`robots.txt` may specify `Crawl-delay`; honour it. Otherwise, adapt: a common heuristic is to wait some multiple of the host's observed response time, so a slow server is automatically crawled more gently. Fetch and cache `robots.txt` per host, respecting its own expiry, and re-check periodically — sites change their rules.\n\n### Persistence\n\nThe frontier is large — billions of URLs — and losing it means restarting the crawl. It doesn't fit in memory, so the usual arrangement keeps queue heads and tails buffered in memory with the bulk on disk. It must survive a restart, which is what lets you deploy, crash, and resume without re-crawling from the seeds.\n\n### Deduplication, and what it costs\n\nBefore a URL enters the frontier it's checked against a seen-set. Exact membership for billions of URLs is far too large for memory, so a **Bloom filter** is standard: constant space per element, no false negatives, and a tunable false-positive rate.\n\nThe consequence is worth stating plainly: a false positive means a genuinely new URL is judged \"seen\" and never crawled. At a 1% rate you silently skip about 1% of discovered pages. For a web crawler that's an easy trade — the pages are usually reachable by another link anyway — but it is a real loss, and knowing it is the difference between using the tool and understanding it.\n\nNormalise before hashing, or you'll store the same page many times: lowercase the host, strip default ports and fragments, sort query parameters, and remove known-volatile ones like session IDs and tracking tags.\n\n### Traps, concretely\n\n- **Infinite spaces** — calendars, faceted search with unbounded filter combinations, deliberately generated mazes. The URLs really are new, so the dedup filter never fires. Bound crawl depth per host and cap pages per host.\n- **Session IDs** — every fetch mints a new URL for the same page. URL normalisation is the defence.\n- **Duplicate content across hosts** — syndicated articles. A checksum of the content catches these where URL comparison can't; near-duplicate detection via shingling catches the ones that differ by a byline.\n\n### Re-crawling\n\nPages change at wildly different rates, so a fixed schedule is wasteful at one end and stale at the other. Track observed change frequency per page and feed it back into the prioritiser, so a news homepage is revisited constantly and a decade-old archive page rarely. Storing a content checksum makes the re-crawl cheap to evaluate: if the bytes are unchanged, downstream indexing can be skipped entirely.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/web-crawler/01-frontier.md",
+          "sortOrder": 2,
+          "diagrams": [
+            "frontier-loop"
+          ]
         },
         {
           "slug": "core-components",
@@ -2292,7 +2350,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/web_crawler/README.md",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:design-web-crawler/step-3-design-core-components+step-4-scale-the-design",
-          "sortOrder": 1,
+          "sortOrder": 3,
           "diagrams": []
         },
         {
@@ -2304,7 +2362,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/web_crawler/README.md",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:design-web-crawler/additional-talking-points",
-          "sortOrder": 2,
+          "sortOrder": 4,
           "diagrams": []
         }
       ],
@@ -2579,7 +2637,9 @@
           "attributionNote": null,
           "contentRef": "authored:content/authored/notification-system/01-pipeline.md",
           "sortOrder": 1,
-          "diagrams": []
+          "diagrams": [
+            "channel-queues"
+          ]
         },
         {
           "slug": "reliability",
@@ -2641,7 +2701,9 @@
           "attributionNote": null,
           "contentRef": "authored:content/authored/media-and-file-storage/01-video-pipeline.md",
           "sortOrder": 1,
-          "diagrams": []
+          "diagrams": [
+            "upload-transcode"
+          ]
         },
         {
           "slug": "file-sync",

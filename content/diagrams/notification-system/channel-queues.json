@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "channel-queues",
+  "title": "One queue per channel, so one bad provider can't stop the rest",
+  "description": "The structural decision of the design. When the SMS gateway degrades, its queue backs up and push and email keep flowing at full speed.",
+  "groups": [
+    { "id": "g_providers", "label": "Third parties you don't control", "position": { "x": 830, "y": 60 }, "size": { "width": 210, "height": 480 }, "style": "filled", "labelPosition": "bottom" }
+  ],
+  "nodes": [
+    { "id": "services", "type": "server_stack", "label": "Product services", "sublabel": "trigger events", "position": { "x": 40, "y": 240 } },
+    { "id": "notif", "type": "service", "label": "Notification service", "sublabel": "opt-out · rate limit · quiet hours", "position": { "x": 290, "y": 245 }, "badge": 1 },
+    { "id": "q_push", "type": "message_queue", "label": "Push queue", "position": { "x": 570, "y": 70 } },
+    { "id": "q_sms", "type": "message_queue", "label": "SMS queue", "sublabel": "backing up", "state": "failed", "position": { "x": 570, "y": 250 } },
+    { "id": "q_mail", "type": "message_queue", "label": "Email queue", "position": { "x": 570, "y": 430 } },
+    { "id": "p_push", "type": "cdn", "label": "APNs / FCM", "position": { "x": 40, "y": 30 }, "groupId": "g_providers" },
+    { "id": "p_sms", "type": "cdn", "label": "SMS gateway", "sublabel": "degraded", "state": "failed", "position": { "x": 40, "y": 200 }, "groupId": "g_providers" },
+    { "id": "p_mail", "type": "cdn", "label": "Email provider", "position": { "x": 40, "y": 370 }, "groupId": "g_providers" },
+    { "id": "dlq", "type": "message_queue", "label": "Dead-letter queue", "position": { "x": 285, "y": 500 }, "badge": 2 }
+  ],
+  "edges": [
+    { "id": "e_trigger", "source": "services", "target": "notif", "label": "event", "step": 1, "sourceHandle": "right", "targetHandle": "left" },
+    { "id": "e_push", "source": "notif", "target": "q_push", "label": "enqueue", "step": 2, "color": "green", "sourceHandle": "right", "targetHandle": "left" },
+    { "id": "e_sms", "source": "notif", "target": "q_sms", "label": "enqueue", "step": 2, "color": "green", "sourceHandle": "right", "targetHandle": "left" },
+    { "id": "e_mail", "source": "notif", "target": "q_mail", "label": "enqueue", "step": 2, "color": "green", "sourceHandle": "right", "targetHandle": "left" },
+    { "id": "e_dpush", "source": "q_push", "target": "p_push", "label": "send", "step": 3, "color": "green", "sourceHandle": "right", "targetHandle": "left" },
+    { "id": "e_dsms", "source": "q_sms", "target": "p_sms", "label": "retrying", "step": 3, "color": "red", "lineStyle": "dashed", "sourceHandle": "right", "targetHandle": "left" },
+    { "id": "e_dmail", "source": "q_mail", "target": "p_mail", "label": "send", "step": 3, "color": "green", "sourceHandle": "right", "targetHandle": "left" },
+    { "id": "e_dlq", "source": "notif", "target": "dlq", "label": "exhausted retries", "color": "red", "lineStyle": "dashed", "sourceHandle": "bottom", "targetHandle": "top" }
+  ],
+  "flows": [
+    {
+      "id": "normal",
+      "name": "Normal fan-out",
+      "steps": [
+        { "edgeIds": ["e_trigger"], "text": "A product service triggers one notification through a single entry point. Nothing calls a provider directly, so policy cannot be bypassed." },
+        { "edgeIds": ["e_push", "e_sms", "e_mail"], "text": "Opt-out, per-user rate limits and quiet hours are applied first — a notification dropped here is a success, not a failure — then the survivors are enqueued per channel." },
+        { "edgeIds": ["e_dpush", "e_dsms", "e_dmail"], "text": "Workers per channel call their provider, respecting that provider's own rate limits." }
+      ]
+    },
+    {
+      "id": "isolation",
+      "name": "The SMS provider degrades",
+      "steps": [
+        { "edgeIds": ["e_dsms"], "text": "The SMS gateway starts timing out. Its workers retry with exponential backoff and jitter, and its queue depth climbs — the earliest signal that anything is wrong." },
+        { "edgeIds": ["e_dpush", "e_dmail"], "text": "Push and email are entirely unaffected. With a single shared queue the slowest provider would set the pace for everything, and a Twilio incident would become a total notification outage." },
+        { "edgeIds": ["e_dlq"], "text": "Messages that exhaust their retries move to the dead-letter queue rather than blocking the channel or vanishing — preserved for inspection and replay once the provider recovers." }
+      ]
+    }
+  ]
+}
