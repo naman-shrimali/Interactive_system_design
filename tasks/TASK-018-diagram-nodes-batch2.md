@@ -1,5 +1,10 @@
 # TASK-018: React Flow node components — batch 2 (dns, cdn, cache, nosql, message_queue)
 
+> ⚠️ **SHIPPED — historical record, not a specification.** The diagram engine is built. Node
+> components are grouped by shape rather than one file per kind; see
+> [docs/01-architecture.md](../docs/01-architecture.md) and [tasks/README.md](README.md).
+
+
 ## Objective
 Add five more typed diagram nodes following the batch-1 pattern, including the arrow-shaped message-queue box.
 

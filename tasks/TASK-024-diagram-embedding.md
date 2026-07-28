@@ -1,5 +1,10 @@
 # TASK-024: Embed diagrams in the topic page + file-driven preview route
 
+> ⚠️ **SHIPPED — historical record, not a specification.** The diagram engine is built. Node
+> components are grouped by shape rather than one file per kind; see
+> [docs/01-architecture.md](../docs/01-architecture.md) and [tasks/README.md](README.md).
+
+
 ## Objective
 Render a topic's interactive diagrams on its page (spec fetched from the API), and upgrade
 `/diagram-preview` to load any file from `content/diagrams/` for the authoring loop.

@@ -9,19 +9,20 @@
 | 2. API — curriculum, topics, progress, notes, diagrams | ✅ shipped |
 | 3. Reader UI — sidebar, topic page, links, progress, notes | ✅ shipped |
 | 4. Design system — tokens, dark mode, serif reading column, responsive | ✅ shipped |
-| **5. Diagram engine** | ⬜ **next** — fully specced, not yet written |
+| 5. Diagram engine — 17 node types, edges, groups, canvas, flow stepper | ✅ shipped |
 | 6. Content authoring | 🟡 in progress — 19 of 30 topics still under 800 words |
-| 7. Diagram authoring | ⬜ blocked on phase 5 |
+| **7. Diagram authoring** | ⬜ **unblocked** — 1 diagram exists, ~60 to author |
 | 8. Polish — dashboard, search, notes export | ⬜ not started |
 
 The original phases 1–3 were re-cut when the curriculum moved from a source-first to a topic-first
 model ([docs/06-topic-model.md](06-topic-model.md)). Task files for that shipped work are kept as
 history — see [tasks/README.md](../tasks/README.md).
 
-## Phase 5 — Diagram engine (next)
+## Phase 5 — Diagram engine (shipped)
 
-Task files remain accurate; the only change is that diagrams embed in **TopicPage**, not a section page,
-and diagram files live at `content/diagrams/<topicSlug>/<slug>.json`.
+Built and verified in-browser: all 17 node types, labelled edges with step badges, tier groups, the
+spec→React Flow canvas, and the flow stepper that marks a diagram viewed on completion. Diagrams embed
+in **TopicPage** and live at `content/diagrams/<topicSlug>/<slug>.json`. Task files kept as history:
 
 - **TASK-015** BaseNode + first 4 node types + registry + preview page → [tasks/TASK-015-diagram-nodes-batch1.md](../tasks/TASK-015-diagram-nodes-batch1.md)
 - **TASK-018** Node batch 2: dns, cdn, cache, nosql, message_queue → [tasks/TASK-018-diagram-nodes-batch2.md](../tasks/TASK-018-diagram-nodes-batch2.md)

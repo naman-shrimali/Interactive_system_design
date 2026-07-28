@@ -1,5 +1,10 @@
 # TASK-019: React Flow node components — batch 3 (stacks, service, text_box, table)
 
+> ⚠️ **SHIPPED — historical record, not a specification.** The diagram engine is built. Node
+> components are grouped by shape rather than one file per kind; see
+> [docs/01-architecture.md](../docs/01-architecture.md) and [tasks/README.md](README.md).
+
+
 ## Objective
 Complete the node catalog: stacked cluster variants, the filled service box, plain annotation boxes, and the data-table node.
 

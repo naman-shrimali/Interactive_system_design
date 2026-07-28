@@ -6,6 +6,7 @@ import { TopBar } from './components/layout/TopBar';
 import { HomePage } from './pages/HomePage';
 import { TopicPage } from './pages/TopicPage';
 import { NotesPage } from './pages/NotesPage';
+import { DiagramPreviewPage } from './pages/DiagramPreviewPage';
 
 export default function App() {
   const loadCurriculum = useAppStore((s) => s.loadCurriculum);
@@ -26,6 +27,7 @@ export default function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/topics/:slug" element={<TopicPage />} />
               <Route path="/notes" element={<NotesPage />} />
+              <Route path="/diagram-preview" element={<DiagramPreviewPage />} />
               {/* Legacy links from the pre-topic-model structure */}
               <Route path="/sections/:id" element={<Navigate to="/" replace />} />
               <Route path="/chapters/:id" element={<Navigate to="/" replace />} />

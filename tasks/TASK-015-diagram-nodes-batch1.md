@@ -1,5 +1,10 @@
 # TASK-015: React Flow node components — batch 1 (client, server, database, load_balancer)
 
+> ⚠️ **SHIPPED — historical record, not a specification.** The diagram engine is built. Node
+> components are grouped by shape rather than one file per kind; see
+> [docs/01-architecture.md](../docs/01-architecture.md) and [tasks/README.md](README.md).
+
+
 ## Objective
 Build the shared `BaseNode` and the first four typed diagram nodes as React Flow custom nodes, plus a dev preview page proving they render.
 

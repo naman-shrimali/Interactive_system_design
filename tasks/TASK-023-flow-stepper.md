@@ -1,5 +1,10 @@
 # TASK-023: FlowStepper + DiagramViewer (step-through walkthroughs, viewed tracking)
 
+> ⚠️ **SHIPPED — historical record, not a specification.** The diagram engine is built. Node
+> components are grouped by shape rather than one file per kind; see
+> [docs/01-architecture.md](../docs/01-architecture.md) and [tasks/README.md](README.md).
+
+
 ## Objective
 Build the walkthrough UI: pick a flow, step through it with highlighted edges and narration text, and mark the diagram viewed on completion.
 

@@ -1,5 +1,10 @@
 # TASK-020: LabeledEdge component (color / dash / step badge / emphasis)
 
+> ⚠️ **SHIPPED — historical record, not a specification.** The diagram engine is built. Node
+> components are grouped by shape rather than one file per kind; see
+> [docs/01-architecture.md](../docs/01-architecture.md) and [tasks/README.md](README.md).
+
+
 ## Objective
 Build the single custom edge type that renders every edge style in the diagram schema: semantic colors, dashed lines, the circled-step + label pill, and highlight/dim emphasis for the flow stepper.
 

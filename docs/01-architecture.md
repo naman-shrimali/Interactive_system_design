@@ -84,12 +84,20 @@ Interactive_system_design/
             ├── ui/          # Badge, Card, ProgressBar, Skeleton, EmptyState
             ├── layout/      # Sidebar, TopBar
             ├── reader/      # MarkdownView, LinksPanel, NotesPanel, ProgressControls
-            └── diagram/     # NOT YET BUILT — see tasks/TASK-015, 018–024
-                ├── DiagramCanvas.tsx
-                ├── FlowStepper.tsx
-                ├── nodes/   # one file per node type (atomic tasks!)
+            └── diagram/
+                ├── DiagramViewer.tsx    # canvas + stepper + viewed tracking
+                ├── DiagramCanvas.tsx    # React Flow wrapper
+                ├── FlowStepper.tsx      # walkthrough UI
+                ├── SectionDiagram.tsx   # fetches one spec by id
+                ├── specToFlow.ts        # spec JSON -> React Flow nodes/edges
+                ├── nodes/               # BaseNode, IconNodes, SpecialNodes, GroupNode, registry
                 └── edges/LabeledEdge.tsx
 ```
+
+> The node components are grouped by shape (`IconNodes.tsx` for the 14 icon-based kinds,
+> `SpecialNodes.tsx` for service/text_box/table) rather than one file per kind as the original task
+> files proposed — fourteen near-identical six-line files was noise. `nodes/index.ts` holds the
+> registry and a `Record<NodeKind, unknown>` check that fails compilation if a kind loses its renderer.
 
 ## Design system
 

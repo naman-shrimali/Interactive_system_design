@@ -1,5 +1,10 @@
 # TASK-022: DiagramCanvas — `InteractiveDiagram` JSON → React Flow
 
+> ⚠️ **SHIPPED — historical record, not a specification.** The diagram engine is built. Node
+> components are grouped by shape rather than one file per kind; see
+> [docs/01-architecture.md](../docs/01-architecture.md) and [tasks/README.md](README.md).
+
+
 ## Objective
 Build the read-only canvas component that renders any valid `InteractiveDiagram` spec, including highlight/dim emphasis driven from outside.
 

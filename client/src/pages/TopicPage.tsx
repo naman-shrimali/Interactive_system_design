@@ -7,6 +7,7 @@ import { MarkdownView } from '../components/reader/MarkdownView';
 import { ProgressControls } from '../components/reader/ProgressControls';
 import { LinksPanel } from '../components/reader/LinksPanel';
 import { NotesPanel } from '../components/reader/NotesPanel';
+import { SectionDiagram } from '../components/diagram/SectionDiagram';
 import { Badge, Skeleton } from '../components/ui';
 import { DIFFICULTY_LABEL, KIND_LABEL } from '../lib/cn';
 import type { TopicDetail } from '../types';
@@ -154,18 +155,9 @@ export function TopicPage() {
                 <p className="italic text-ink-faint">This section is still being written.</p>
               )}
 
-              {section.diagrams.length > 0 && (
-                <div className="mt-6 space-y-3">
-                  {section.diagrams.map((d) => (
-                    <div
-                      key={d.id}
-                      className="rounded-2xl border border-dashed border-line px-4 py-6 text-center text-sm text-ink-faint"
-                    >
-                      Interactive diagram “{d.title}” — renderer arriving in the diagram phase.
-                    </div>
-                  ))}
-                </div>
-              )}
+              {section.diagrams.map((d) => (
+                <SectionDiagram key={d.id} meta={d} />
+              ))}
 
               {section.provenance === 'primer' && section.attributionUrl && (
                 <p className="mt-5 text-[11px] text-ink-faint">
@@ -183,6 +175,17 @@ export function TopicPage() {
               )}
             </section>
           ))}
+
+          {topic.topicDiagrams.length > 0 && (
+            <section id="diagrams" className="mb-14 scroll-mt-20">
+              <h2 className="mb-4 border-b border-line pb-3 text-2xl font-bold tracking-tight">
+                Diagrams
+              </h2>
+              {topic.topicDiagrams.map((d) => (
+                <SectionDiagram key={d.id} meta={d} />
+              ))}
+            </section>
+          )}
 
           <LinksPanel links={topic.links} onChanged={refresh} />
           <NotesPanel anchor={{ topicId: topic.id }} />

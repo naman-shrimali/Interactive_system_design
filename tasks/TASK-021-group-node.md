@@ -1,5 +1,10 @@
 # TASK-021: Group (tier) rendering
 
+> ⚠️ **SHIPPED — historical record, not a specification.** The diagram engine is built. Node
+> components are grouped by shape rather than one file per kind; see
+> [docs/01-architecture.md](../docs/01-architecture.md) and [tasks/README.md](README.md).
+
+
 ## Objective
 Render diagram groups — the book's dashed "Web tier"/"Data tier" boxes, the solid "User" device box, and the filled gray datacenter regions — as background container nodes.
 
