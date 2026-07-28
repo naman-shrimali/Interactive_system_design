@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "limiter-placement",
+  "title": "Where the limiter sits, and the counter it shares",
+  "description": "The limiter lives at the gateway so it protects every service behind it — including ones that never thought about rate limiting. The counter has to be shared, which puts a network hop on every request.",
+  "groups": [
+    { "id": "g_clients", "label": "Clients", "position": { "x": 220, "y": 0 }, "size": { "width": 340, "height": 140 }, "style": "solid" },
+    { "id": "g_services", "label": "Protected services", "position": { "x": 180, "y": 560 }, "size": { "width": 430, "height": 160 }, "style": "dashed", "labelPosition": "right" }
+  ],
+  "nodes": [
+    { "id": "browser", "type": "client", "label": "Well-behaved client", "position": { "x": 20, "y": 30 }, "groupId": "g_clients" },
+    { "id": "abusive", "type": "client_mobile", "label": "Runaway client", "position": { "x": 200, "y": 30 }, "groupId": "g_clients" },
+    { "id": "gateway", "type": "service", "label": "API gateway", "sublabel": "rate limiter", "position": { "x": 330, "y": 300 }, "badge": 1 },
+    { "id": "counters", "type": "cache", "label": "Redis", "sublabel": "shared counters", "position": { "x": 760, "y": 300 }, "badge": 2 },
+    { "id": "svc1", "type": "server", "label": "Orders", "position": { "x": 50, "y": 40 }, "groupId": "g_services" },
+    { "id": "svc2", "type": "server", "label": "Search", "position": { "x": 180, "y": 40 }, "groupId": "g_services" },
+    { "id": "svc3", "type": "server", "label": "Profile", "position": { "x": 310, "y": 40 }, "groupId": "g_services" }
+  ],
+  "edges": [
+    { "id": "e_ok", "source": "browser", "target": "gateway", "label": "request", "step": 1, "sourceHandle": "bottom", "targetHandle": "top" },
+    { "id": "e_abuse", "source": "abusive", "target": "gateway", "label": "flood", "step": 1, "color": "red", "sourceHandle": "bottom", "targetHandle": "top" },
+    { "id": "e_count", "source": "gateway", "target": "counters", "label": "INCR / check", "step": 2, "color": "purple", "sourceHandle": "right", "targetHandle": "left", "direction": "both" },
+    { "id": "e_fwd1", "source": "gateway", "target": "svc1", "label": "allowed", "step": 3, "color": "green", "sourceHandle": "bottom", "targetHandle": "top" },
+    { "id": "e_fwd2", "source": "gateway", "target": "svc2", "step": 3, "color": "green", "sourceHandle": "bottom", "targetHandle": "top" },
+    { "id": "e_fwd3", "source": "gateway", "target": "svc3", "step": 3, "color": "green", "sourceHandle": "bottom", "targetHandle": "top" }
+  ],
+  "flows": [
+    {
+      "id": "allowed",
+      "name": "A request within the limit",
+      "steps": [
+        { "edgeIds": ["e_ok"], "text": "The request reaches the gateway before any service. Nothing behind the gateway needs to know rate limiting exists." },
+        { "edgeIds": ["e_count"], "text": "The gateway atomically increments the client's counter in Redis and reads the new value. One round trip, roughly 0.5–2 ms in-datacenter — and this is on the path of every single request." },
+        { "edgeIds": ["e_fwd1", "e_fwd2", "e_fwd3"], "text": "Under the limit, so the request is forwarded normally with X-RateLimit-Remaining set on the response." }
+      ]
+    },
+    {
+      "id": "throttled",
+      "name": "A request over the limit",
+      "steps": [
+        { "edgeIds": ["e_abuse"], "text": "A client in a retry loop floods the gateway." },
+        { "edgeIds": ["e_count"], "text": "The counter comes back above the limit. Note this must be one atomic operation — a separate read then write lets two gateway nodes both see 99 and both allow, over-admitting under exactly the load you were defending against." },
+        { "edgeIds": ["e_abuse"], "text": "The gateway returns 429 with a jittered Retry-After and never forwards the request. The work is rejected at the cheapest possible point, which is the entire purpose of putting the limiter here." }
+      ]
+    }
+  ]
+}

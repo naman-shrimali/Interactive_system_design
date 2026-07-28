@@ -50,13 +50,23 @@
         {
           "from": "authored",
           "file": "content/authored/interview-framework/00-overview.md",
-          "as": { "slug": "overview", "title": "Why a framework helps", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "Why a framework helps",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "how-to-approach",
-          "sections": ["overview"],
-          "as": { "slug": "the-method", "title": "The method", "kind": "concepts" },
+          "sections": [
+            "overview"
+          ],
+          "as": {
+            "slug": "the-method",
+            "title": "The method",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
@@ -68,15 +78,30 @@
             "step-3-design-core-components",
             "step-4-scale-the-design"
           ],
-          "as": { "slug": "the-four-steps", "title": "The four steps in detail", "kind": "deep-dive" },
+          "as": {
+            "slug": "the-four-steps",
+            "title": "The four steps in detail",
+            "kind": "deep-dive"
+          },
           "harvestLinks": true
         },
         {
           "from": "authored",
           "file": "content/authored/interview-framework/01-checklist.md",
-          "as": { "slug": "checklist", "title": "Interview checklist", "kind": "checklist" }
+          "as": {
+            "slug": "checklist",
+            "title": "Interview checklist",
+            "kind": "checklist"
+          }
         },
-        { "from": "primer", "chapter": "how-to-approach", "sections": ["source-s-and-further-reading"], "linksOnly": true }
+        {
+          "from": "primer",
+          "chapter": "how-to-approach",
+          "sections": [
+            "source-s-and-further-reading"
+          ],
+          "linksOnly": true
+        }
       ]
     },
     {
@@ -91,24 +116,42 @@
         {
           "from": "authored",
           "file": "content/authored/back-of-envelope/00-overview.md",
-          "as": { "slug": "overview", "title": "Why estimate at all", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "Why estimate at all",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "how-to-approach",
-          "sections": ["back-of-the-envelope-calculations"],
-          "as": { "slug": "the-numbers", "title": "The numbers to memorize", "kind": "concepts" },
+          "sections": [
+            "back-of-the-envelope-calculations"
+          ],
+          "as": {
+            "slug": "the-numbers",
+            "title": "The numbers to memorize",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "authored",
           "file": "content/authored/back-of-envelope/01-worked-examples.md",
-          "as": { "slug": "worked-examples", "title": "Worked examples", "kind": "deep-dive" }
+          "as": {
+            "slug": "worked-examples",
+            "title": "Worked examples",
+            "kind": "deep-dive"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/back-of-envelope/02-checklist.md",
-          "as": { "slug": "checklist", "title": "Estimation checklist", "kind": "checklist" }
+          "as": {
+            "slug": "checklist",
+            "title": "Estimation checklist",
+            "kind": "checklist"
+          }
         }
       ]
     },
@@ -124,29 +167,63 @@
         {
           "from": "authored",
           "file": "content/authored/performance-and-latency/00-overview.md",
-          "as": { "slug": "overview", "title": "Four words, precisely", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "Four words, precisely",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "performance-vs-scalability",
-          "sections": ["overview"],
-          "as": { "slug": "performance-vs-scalability", "title": "Performance vs scalability", "kind": "concepts" },
+          "sections": [
+            "overview"
+          ],
+          "as": {
+            "slug": "performance-vs-scalability",
+            "title": "Performance vs scalability",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "latency-vs-throughput",
-          "sections": ["overview"],
-          "as": { "slug": "latency-vs-throughput", "title": "Latency vs throughput", "kind": "concepts" },
+          "sections": [
+            "overview"
+          ],
+          "as": {
+            "slug": "latency-vs-throughput",
+            "title": "Latency vs throughput",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "authored",
           "file": "content/authored/performance-and-latency/01-tail-latency.md",
-          "as": { "slug": "tail-latency", "title": "Percentiles and tail latency", "kind": "deep-dive" }
+          "as": {
+            "slug": "tail-latency",
+            "title": "Percentiles and tail latency",
+            "kind": "deep-dive"
+          }
         },
-        { "from": "primer", "chapter": "performance-vs-scalability", "sections": ["source-s-and-further-reading"], "linksOnly": true },
-        { "from": "primer", "chapter": "latency-vs-throughput", "sections": ["source-s-and-further-reading"], "linksOnly": true }
+        {
+          "from": "primer",
+          "chapter": "performance-vs-scalability",
+          "sections": [
+            "source-s-and-further-reading"
+          ],
+          "linksOnly": true
+        },
+        {
+          "from": "primer",
+          "chapter": "latency-vs-throughput",
+          "sections": [
+            "source-s-and-further-reading"
+          ],
+          "linksOnly": true
+        }
       ]
     },
     {
@@ -161,39 +238,72 @@
         {
           "from": "authored",
           "file": "content/authored/scaling-journey/00-overview.md",
-          "as": { "slug": "overview", "title": "The scaling journey", "kind": "overview" },
-          "diagrams": ["single-server"]
+          "as": {
+            "slug": "overview",
+            "title": "The scaling journey",
+            "kind": "overview"
+          },
+          "diagrams": [
+            "single-server"
+          ]
         },
         {
           "from": "primer",
           "chapter": "design-scaling-aws",
-          "sections": ["step-1-outline-use-cases-and-constraints"],
-          "as": { "slug": "requirements", "title": "Use cases, constraints & estimates", "kind": "concepts" },
+          "sections": [
+            "step-1-outline-use-cases-and-constraints"
+          ],
+          "as": {
+            "slug": "requirements",
+            "title": "Use cases, constraints & estimates",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "authored",
           "file": "content/authored/scaling-journey/01-web-and-data-tier.md",
-          "as": { "slug": "web-and-data-tier", "title": "Splitting the web and data tiers", "kind": "deep-dive" },
-          "diagrams": ["web-data-tier"]
+          "as": {
+            "slug": "web-and-data-tier",
+            "title": "Splitting the web and data tiers",
+            "kind": "deep-dive"
+          },
+          "diagrams": [
+            "web-data-tier"
+          ]
         },
         {
           "from": "primer",
           "chapter": "design-scaling-aws",
-          "sections": ["step-3-design-core-components", "step-4-scale-the-design"],
-          "as": { "slug": "scaling-out", "title": "Scaling out, step by step", "kind": "deep-dive" },
-          "harvestLinks": true
+          "sections": [
+            "step-3-design-core-components",
+            "step-4-scale-the-design"
+          ],
+          "as": {
+            "slug": "scaling-out",
+            "title": "Scaling out, step by step",
+            "kind": "deep-dive"
+          },
+          "harvestLinks": true,
+          "diagrams": [
+            "full-stack"
+          ]
         },
         {
           "from": "primer",
           "chapter": "design-scaling-aws",
-          "sections": ["additional-talking-points"],
-          "as": { "slug": "talking-points", "title": "Additional talking points", "kind": "tradeoffs" },
+          "sections": [
+            "additional-talking-points"
+          ],
+          "as": {
+            "slug": "talking-points",
+            "title": "Additional talking points",
+            "kind": "tradeoffs"
+          },
           "harvestLinks": true
         }
       ]
     },
-
     {
       "slug": "cap-theorem",
       "track": "theory",
@@ -206,21 +316,43 @@
         {
           "from": "authored",
           "file": "content/authored/cap-theorem/00-overview.md",
-          "as": { "slug": "overview", "title": "The choice partitions force", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "The choice partitions force",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "cap-theorem",
-          "sections": ["overview", "cap-theorem"],
-          "as": { "slug": "cap", "title": "CP versus AP", "kind": "concepts" },
+          "sections": [
+            "overview",
+            "cap-theorem"
+          ],
+          "as": {
+            "slug": "cap",
+            "title": "CP versus AP",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "authored",
           "file": "content/authored/cap-theorem/01-pacelc.md",
-          "as": { "slug": "pacelc", "title": "Beyond CAP: PACELC", "kind": "deep-dive" }
+          "as": {
+            "slug": "pacelc",
+            "title": "Beyond CAP: PACELC",
+            "kind": "deep-dive"
+          }
         },
-        { "from": "primer", "chapter": "cap-theorem", "sections": ["source-s-and-further-reading"], "linksOnly": true }
+        {
+          "from": "primer",
+          "chapter": "cap-theorem",
+          "sections": [
+            "source-s-and-further-reading"
+          ],
+          "linksOnly": true
+        }
       ]
     },
     {
@@ -235,21 +367,45 @@
         {
           "from": "authored",
           "file": "content/authored/consistency-patterns/00-overview.md",
-          "as": { "slug": "overview", "title": "What consistency means here", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "What consistency means here",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "consistency-patterns",
-          "sections": ["overview", "weak-consistency", "eventual-consistency", "strong-consistency"],
-          "as": { "slug": "the-three-models", "title": "The three models", "kind": "concepts" },
+          "sections": [
+            "overview",
+            "weak-consistency",
+            "eventual-consistency",
+            "strong-consistency"
+          ],
+          "as": {
+            "slug": "the-three-models",
+            "title": "The three models",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "authored",
           "file": "content/authored/consistency-patterns/01-in-practice.md",
-          "as": { "slug": "in-practice", "title": "Choosing a model in practice", "kind": "tradeoffs" }
+          "as": {
+            "slug": "in-practice",
+            "title": "Choosing a model in practice",
+            "kind": "tradeoffs"
+          }
         },
-        { "from": "primer", "chapter": "consistency-patterns", "sections": ["source-s-and-further-reading"], "linksOnly": true }
+        {
+          "from": "primer",
+          "chapter": "consistency-patterns",
+          "sections": [
+            "source-s-and-further-reading"
+          ],
+          "linksOnly": true
+        }
       ]
     },
     {
@@ -264,26 +420,49 @@
         {
           "from": "authored",
           "file": "content/authored/availability-patterns/00-overview.md",
-          "as": { "slug": "overview", "title": "Designing for failure", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "Designing for failure",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "availability-patterns",
-          "sections": ["overview", "fail-over", "disadvantage-s-failover", "replication"],
-          "as": { "slug": "failover-and-replication", "title": "Fail-over and replication", "kind": "concepts" },
+          "sections": [
+            "overview",
+            "fail-over",
+            "disadvantage-s-failover",
+            "replication"
+          ],
+          "as": {
+            "slug": "failover-and-replication",
+            "title": "Fail-over and replication",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "availability-patterns",
-          "sections": ["availability-in-numbers"],
-          "as": { "slug": "availability-in-numbers", "title": "Availability in numbers", "kind": "deep-dive" },
+          "sections": [
+            "availability-in-numbers"
+          ],
+          "as": {
+            "slug": "availability-in-numbers",
+            "title": "Availability in numbers",
+            "kind": "deep-dive"
+          },
           "harvestLinks": true
         },
         {
           "from": "authored",
           "file": "content/authored/availability-patterns/01-resilience-patterns.md",
-          "as": { "slug": "resilience-patterns", "title": "Timeouts, retries & circuit breakers", "kind": "deep-dive" }
+          "as": {
+            "slug": "resilience-patterns",
+            "title": "Timeouts, retries & circuit breakers",
+            "kind": "deep-dive"
+          }
         }
       ]
     },
@@ -299,22 +478,38 @@
         {
           "from": "authored",
           "file": "content/authored/consistent-hashing/00-overview.md",
-          "as": { "slug": "overview", "title": "The rehashing problem", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "The rehashing problem",
+            "kind": "overview"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/consistent-hashing/01-the-ring.md",
-          "as": { "slug": "the-ring", "title": "The hash ring", "kind": "concepts" }
+          "as": {
+            "slug": "the-ring",
+            "title": "The hash ring",
+            "kind": "concepts"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/consistent-hashing/02-virtual-nodes.md",
-          "as": { "slug": "virtual-nodes", "title": "Virtual nodes and balance", "kind": "deep-dive" }
+          "as": {
+            "slug": "virtual-nodes",
+            "title": "Virtual nodes and balance",
+            "kind": "deep-dive"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/consistent-hashing/03-tradeoffs.md",
-          "as": { "slug": "tradeoffs", "title": "Trade-offs & alternatives", "kind": "tradeoffs" }
+          "as": {
+            "slug": "tradeoffs",
+            "title": "Trade-offs & alternatives",
+            "kind": "tradeoffs"
+          }
         }
       ]
     },
@@ -330,26 +525,41 @@
         {
           "from": "authored",
           "file": "content/authored/unique-id-generator/00-overview.md",
-          "as": { "slug": "overview", "title": "Why IDs are hard", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "Why IDs are hard",
+            "kind": "overview"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/unique-id-generator/01-approaches.md",
-          "as": { "slug": "approaches", "title": "Four approaches", "kind": "concepts" }
+          "as": {
+            "slug": "approaches",
+            "title": "Four approaches",
+            "kind": "concepts"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/unique-id-generator/02-snowflake.md",
-          "as": { "slug": "snowflake", "title": "Snowflake in detail", "kind": "deep-dive" }
+          "as": {
+            "slug": "snowflake",
+            "title": "Snowflake in detail",
+            "kind": "deep-dive"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/unique-id-generator/03-tradeoffs.md",
-          "as": { "slug": "tradeoffs", "title": "Trade-offs & clock skew", "kind": "tradeoffs" }
+          "as": {
+            "slug": "tradeoffs",
+            "title": "Trade-offs & clock skew",
+            "kind": "tradeoffs"
+          }
         }
       ]
     },
-
     {
       "slug": "dns",
       "track": "delivery",
@@ -362,23 +572,46 @@
         {
           "from": "authored",
           "file": "content/authored/dns/00-overview.md",
-          "as": { "slug": "overview", "title": "The first hop", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "The first hop",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "dns",
-          "sections": ["overview"],
-          "as": { "slug": "how-it-works", "title": "How resolution works", "kind": "concepts" },
+          "sections": [
+            "overview"
+          ],
+          "as": {
+            "slug": "how-it-works",
+            "title": "How resolution works",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "dns",
-          "sections": ["disadvantage-s-dns"],
-          "as": { "slug": "tradeoffs", "title": "Costs & caveats", "kind": "tradeoffs" },
+          "sections": [
+            "disadvantage-s-dns"
+          ],
+          "as": {
+            "slug": "tradeoffs",
+            "title": "Costs & caveats",
+            "kind": "tradeoffs"
+          },
           "harvestLinks": true
         },
-        { "from": "primer", "chapter": "dns", "sections": ["source-s-and-further-reading"], "linksOnly": true }
+        {
+          "from": "primer",
+          "chapter": "dns",
+          "sections": [
+            "source-s-and-further-reading"
+          ],
+          "linksOnly": true
+        }
       ]
     },
     {
@@ -393,28 +626,57 @@
         {
           "from": "authored",
           "file": "content/authored/cdn/00-overview.md",
-          "as": { "slug": "overview", "title": "Moving bytes closer to users", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "Moving bytes closer to users",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "cdn",
-          "sections": ["overview", "push-cdns", "pull-cdns"],
-          "as": { "slug": "push-vs-pull", "title": "Push vs pull CDNs", "kind": "concepts" },
+          "sections": [
+            "overview",
+            "push-cdns",
+            "pull-cdns"
+          ],
+          "as": {
+            "slug": "push-vs-pull",
+            "title": "Push vs pull CDNs",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "authored",
           "file": "content/authored/cdn/01-invalidation.md",
-          "as": { "slug": "invalidation", "title": "TTLs, versioning & invalidation", "kind": "deep-dive" }
+          "as": {
+            "slug": "invalidation",
+            "title": "TTLs, versioning & invalidation",
+            "kind": "deep-dive"
+          }
         },
         {
           "from": "primer",
           "chapter": "cdn",
-          "sections": ["disadvantage-s-cdn"],
-          "as": { "slug": "tradeoffs", "title": "Costs & caveats", "kind": "tradeoffs" },
+          "sections": [
+            "disadvantage-s-cdn"
+          ],
+          "as": {
+            "slug": "tradeoffs",
+            "title": "Costs & caveats",
+            "kind": "tradeoffs"
+          },
           "harvestLinks": true
         },
-        { "from": "primer", "chapter": "cdn", "sections": ["source-s-and-further-reading"], "linksOnly": true }
+        {
+          "from": "primer",
+          "chapter": "cdn",
+          "sections": [
+            "source-s-and-further-reading"
+          ],
+          "linksOnly": true
+        }
       ]
     },
     {
@@ -429,39 +691,91 @@
         {
           "from": "authored",
           "file": "content/authored/load-balancing/00-overview.md",
-          "as": { "slug": "overview", "title": "Spreading the load", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "Spreading the load",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "load-balancer",
-          "sections": ["overview"],
-          "as": { "slug": "what-it-does", "title": "What a load balancer does", "kind": "concepts" },
+          "sections": [
+            "overview"
+          ],
+          "as": {
+            "slug": "what-it-does",
+            "title": "What a load balancer does",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "load-balancer",
-          "sections": ["layer-4-load-balancing", "layer-7-load-balancing", "horizontal-scaling"],
-          "as": { "slug": "l4-vs-l7", "title": "Layer 4 vs Layer 7", "kind": "deep-dive" },
+          "sections": [
+            "layer-4-load-balancing",
+            "layer-7-load-balancing",
+            "horizontal-scaling"
+          ],
+          "as": {
+            "slug": "l4-vs-l7",
+            "title": "Layer 4 vs Layer 7",
+            "kind": "deep-dive"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "reverse-proxy",
-          "sections": ["overview", "load-balancer-vs-reverse-proxy"],
-          "as": { "slug": "reverse-proxy", "title": "Reverse proxies", "kind": "deep-dive" },
+          "sections": [
+            "overview",
+            "load-balancer-vs-reverse-proxy"
+          ],
+          "as": {
+            "slug": "reverse-proxy",
+            "title": "Reverse proxies",
+            "kind": "deep-dive"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "load-balancer",
-          "sections": ["disadvantage-s-load-balancer"],
-          "as": { "slug": "tradeoffs", "title": "Costs & caveats", "kind": "tradeoffs" },
+          "sections": [
+            "disadvantage-s-load-balancer"
+          ],
+          "as": {
+            "slug": "tradeoffs",
+            "title": "Costs & caveats",
+            "kind": "tradeoffs"
+          },
           "harvestLinks": true
         },
-        { "from": "primer", "chapter": "reverse-proxy", "sections": ["disadvantage-s-reverse-proxy"], "linksOnly": true },
-        { "from": "primer", "chapter": "load-balancer", "sections": ["source-s-and-further-reading"], "linksOnly": true },
-        { "from": "primer", "chapter": "reverse-proxy", "sections": ["source-s-and-further-reading"], "linksOnly": true }
+        {
+          "from": "primer",
+          "chapter": "reverse-proxy",
+          "sections": [
+            "disadvantage-s-reverse-proxy"
+          ],
+          "linksOnly": true
+        },
+        {
+          "from": "primer",
+          "chapter": "load-balancer",
+          "sections": [
+            "source-s-and-further-reading"
+          ],
+          "linksOnly": true
+        },
+        {
+          "from": "primer",
+          "chapter": "reverse-proxy",
+          "sections": [
+            "source-s-and-further-reading"
+          ],
+          "linksOnly": true
+        }
       ]
     },
     {
@@ -476,30 +790,54 @@
         {
           "from": "authored",
           "file": "content/authored/communication-protocols/00-overview.md",
-          "as": { "slug": "overview", "title": "Choosing how services talk", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "Choosing how services talk",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "communication",
-          "sections": ["overview", "hypertext-transfer-protocol-http", "transmission-control-protocol-tcp", "user-datagram-protocol-udp"],
-          "as": { "slug": "transport", "title": "HTTP, TCP & UDP", "kind": "concepts" },
+          "sections": [
+            "overview",
+            "hypertext-transfer-protocol-http",
+            "transmission-control-protocol-tcp",
+            "user-datagram-protocol-udp"
+          ],
+          "as": {
+            "slug": "transport",
+            "title": "HTTP, TCP & UDP",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "communication",
-          "sections": ["remote-procedure-call-rpc", "representational-state-transfer-rest", "rpc-and-rest-calls-comparison"],
-          "as": { "slug": "rpc-vs-rest", "title": "RPC vs REST", "kind": "deep-dive" },
+          "sections": [
+            "remote-procedure-call-rpc",
+            "representational-state-transfer-rest",
+            "rpc-and-rest-calls-comparison"
+          ],
+          "as": {
+            "slug": "rpc-vs-rest",
+            "title": "RPC vs REST",
+            "kind": "deep-dive"
+          },
           "harvestLinks": true
         },
         {
           "from": "authored",
           "file": "content/authored/communication-protocols/01-realtime.md",
-          "as": { "slug": "realtime", "title": "Polling, SSE & WebSockets", "kind": "deep-dive" }
+          "as": {
+            "slug": "realtime",
+            "title": "Polling, SSE & WebSockets",
+            "kind": "deep-dive"
+          }
         }
       ]
     },
-
     {
       "slug": "relational-databases",
       "track": "data",
@@ -512,19 +850,34 @@
         {
           "from": "authored",
           "file": "content/authored/relational-databases/00-overview.md",
-          "as": { "slug": "overview", "title": "Why relational still wins", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "Why relational still wins",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "database",
-          "sections": ["overview", "relational-database-management-system-rdbms"],
-          "as": { "slug": "rdbms", "title": "ACID and scaling techniques", "kind": "deep-dive" },
+          "sections": [
+            "overview",
+            "relational-database-management-system-rdbms"
+          ],
+          "as": {
+            "slug": "rdbms",
+            "title": "ACID and scaling techniques",
+            "kind": "deep-dive"
+          },
           "harvestLinks": true
         },
         {
           "from": "authored",
           "file": "content/authored/relational-databases/01-indexing.md",
-          "as": { "slug": "indexing", "title": "Indexes and query cost", "kind": "deep-dive" }
+          "as": {
+            "slug": "indexing",
+            "title": "Indexes and query cost",
+            "kind": "deep-dive"
+          }
         }
       ]
     },
@@ -540,20 +893,36 @@
         {
           "from": "authored",
           "file": "content/authored/nosql-databases/00-overview.md",
-          "as": { "slug": "overview", "title": "What NoSQL bought us", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "What NoSQL bought us",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "database",
-          "sections": ["nosql"],
-          "as": { "slug": "the-four-families", "title": "The four families", "kind": "deep-dive" },
+          "sections": [
+            "nosql"
+          ],
+          "as": {
+            "slug": "the-four-families",
+            "title": "The four families",
+            "kind": "deep-dive"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "database",
-          "sections": ["sql-or-nosql"],
-          "as": { "slug": "sql-or-nosql", "title": "SQL or NoSQL?", "kind": "tradeoffs" },
+          "sections": [
+            "sql-or-nosql"
+          ],
+          "as": {
+            "slug": "sql-or-nosql",
+            "title": "SQL or NoSQL?",
+            "kind": "tradeoffs"
+          },
           "harvestLinks": true
         }
       ]
@@ -570,7 +939,11 @@
         {
           "from": "authored",
           "file": "content/authored/caching/00-overview.md",
-          "as": { "slug": "overview", "title": "The cheapest big win", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "The cheapest big win",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
@@ -583,36 +956,73 @@
             "database-caching",
             "application-caching"
           ],
-          "as": { "slug": "where-to-cache", "title": "Where to cache", "kind": "concepts" },
+          "as": {
+            "slug": "where-to-cache",
+            "title": "Where to cache",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "cache",
-          "sections": ["caching-at-the-database-query-level", "caching-at-the-object-level"],
-          "as": { "slug": "what-to-cache", "title": "What to cache", "kind": "concepts" },
+          "sections": [
+            "caching-at-the-database-query-level",
+            "caching-at-the-object-level"
+          ],
+          "as": {
+            "slug": "what-to-cache",
+            "title": "What to cache",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "cache",
-          "sections": ["when-to-update-the-cache"],
-          "as": { "slug": "update-strategies", "title": "Update strategies", "kind": "deep-dive" },
-          "harvestLinks": true
+          "sections": [
+            "when-to-update-the-cache"
+          ],
+          "as": {
+            "slug": "update-strategies",
+            "title": "Update strategies",
+            "kind": "deep-dive"
+          },
+          "harvestLinks": true,
+          "diagrams": [
+            "cache-aside"
+          ]
         },
         {
           "from": "authored",
           "file": "content/authored/caching/01-eviction-and-failure.md",
-          "as": { "slug": "eviction-and-failure", "title": "Eviction & failure modes", "kind": "deep-dive" }
+          "as": {
+            "slug": "eviction-and-failure",
+            "title": "Eviction & failure modes",
+            "kind": "deep-dive"
+          }
         },
         {
           "from": "primer",
           "chapter": "cache",
-          "sections": ["disadvantage-s-cache"],
-          "as": { "slug": "tradeoffs", "title": "Costs & caveats", "kind": "tradeoffs" },
+          "sections": [
+            "disadvantage-s-cache"
+          ],
+          "as": {
+            "slug": "tradeoffs",
+            "title": "Costs & caveats",
+            "kind": "tradeoffs"
+          },
           "harvestLinks": true
         },
-        { "from": "primer", "chapter": "cache", "sections": ["source-s-and-further-reading"], "linksOnly": true }
+        {
+          "from": "primer",
+          "chapter": "cache",
+          "sections": [
+            "source-s-and-further-reading"
+          ],
+          "linksOnly": true
+        }
       ]
     },
     {
@@ -627,32 +1037,59 @@
         {
           "from": "authored",
           "file": "content/authored/key-value-store/00-overview.md",
-          "as": { "slug": "overview", "title": "What we're building", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "What we're building",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "design-query-cache",
-          "sections": ["step-1-outline-use-cases-and-constraints"],
-          "as": { "slug": "requirements", "title": "Use cases, constraints & estimates", "kind": "concepts" },
+          "sections": [
+            "step-1-outline-use-cases-and-constraints"
+          ],
+          "as": {
+            "slug": "requirements",
+            "title": "Use cases, constraints & estimates",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "authored",
           "file": "content/authored/key-value-store/01-quorum.md",
-          "as": { "slug": "quorum", "title": "Replication & quorum", "kind": "deep-dive" }
+          "as": {
+            "slug": "quorum",
+            "title": "Replication & quorum",
+            "kind": "deep-dive"
+          }
         },
         {
           "from": "primer",
           "chapter": "design-query-cache",
-          "sections": ["step-3-design-core-components", "step-4-scale-the-design"],
-          "as": { "slug": "core-components", "title": "A worked example: query cache", "kind": "deep-dive" },
+          "sections": [
+            "step-3-design-core-components",
+            "step-4-scale-the-design"
+          ],
+          "as": {
+            "slug": "core-components",
+            "title": "A worked example: query cache",
+            "kind": "deep-dive"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "design-query-cache",
-          "sections": ["additional-talking-points"],
-          "as": { "slug": "talking-points", "title": "Additional talking points", "kind": "tradeoffs" },
+          "sections": [
+            "additional-talking-points"
+          ],
+          "as": {
+            "slug": "talking-points",
+            "title": "Additional talking points",
+            "kind": "tradeoffs"
+          },
           "harvestLinks": true
         }
       ]
@@ -669,27 +1106,50 @@
         {
           "from": "authored",
           "file": "content/authored/graph-data-modeling/00-overview.md",
-          "as": { "slug": "overview", "title": "Graphs as a storage problem", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "Graphs as a storage problem",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "design-social-graph",
-          "sections": ["step-1-outline-use-cases-and-constraints"],
-          "as": { "slug": "requirements", "title": "Use cases, constraints & estimates", "kind": "concepts" },
+          "sections": [
+            "step-1-outline-use-cases-and-constraints"
+          ],
+          "as": {
+            "slug": "requirements",
+            "title": "Use cases, constraints & estimates",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "design-social-graph",
-          "sections": ["step-3-design-core-components", "step-4-scale-the-design"],
-          "as": { "slug": "core-components", "title": "Core components & scaling", "kind": "deep-dive" },
+          "sections": [
+            "step-3-design-core-components",
+            "step-4-scale-the-design"
+          ],
+          "as": {
+            "slug": "core-components",
+            "title": "Core components & scaling",
+            "kind": "deep-dive"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "design-social-graph",
-          "sections": ["additional-talking-points"],
-          "as": { "slug": "talking-points", "title": "Additional talking points", "kind": "tradeoffs" },
+          "sections": [
+            "additional-talking-points"
+          ],
+          "as": {
+            "slug": "talking-points",
+            "title": "Additional talking points",
+            "kind": "tradeoffs"
+          },
           "harvestLinks": true
         }
       ]
@@ -706,23 +1166,48 @@
         {
           "from": "authored",
           "file": "content/authored/application-layer/00-overview.md",
-          "as": { "slug": "overview", "title": "Separating concerns", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "Separating concerns",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "application-layer",
-          "sections": ["overview", "microservices", "service-discovery"],
-          "as": { "slug": "services", "title": "Microservices & discovery", "kind": "concepts" },
+          "sections": [
+            "overview",
+            "microservices",
+            "service-discovery"
+          ],
+          "as": {
+            "slug": "services",
+            "title": "Microservices & discovery",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "application-layer",
-          "sections": ["disadvantage-s-application-layer"],
-          "as": { "slug": "tradeoffs", "title": "Costs & caveats", "kind": "tradeoffs" },
+          "sections": [
+            "disadvantage-s-application-layer"
+          ],
+          "as": {
+            "slug": "tradeoffs",
+            "title": "Costs & caveats",
+            "kind": "tradeoffs"
+          },
           "harvestLinks": true
         },
-        { "from": "primer", "chapter": "application-layer", "sections": ["source-s-and-further-reading"], "linksOnly": true }
+        {
+          "from": "primer",
+          "chapter": "application-layer",
+          "sections": [
+            "source-s-and-further-reading"
+          ],
+          "linksOnly": true
+        }
       ]
     },
     {
@@ -737,28 +1222,61 @@
         {
           "from": "authored",
           "file": "content/authored/asynchronism/00-overview.md",
-          "as": { "slug": "overview", "title": "Doing work later", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "Doing work later",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "asynchronism",
-          "sections": ["overview", "message-queues", "task-queues", "back-pressure"],
-          "as": { "slug": "queues", "title": "Queues & back pressure", "kind": "concepts" },
-          "harvestLinks": true
+          "sections": [
+            "overview",
+            "message-queues",
+            "task-queues",
+            "back-pressure"
+          ],
+          "as": {
+            "slug": "queues",
+            "title": "Queues & back pressure",
+            "kind": "concepts"
+          },
+          "harvestLinks": true,
+          "diagrams": [
+            "queue-workers"
+          ]
         },
         {
           "from": "authored",
           "file": "content/authored/asynchronism/01-delivery-semantics.md",
-          "as": { "slug": "delivery-semantics", "title": "Delivery semantics & idempotency", "kind": "deep-dive" }
+          "as": {
+            "slug": "delivery-semantics",
+            "title": "Delivery semantics & idempotency",
+            "kind": "deep-dive"
+          }
         },
         {
           "from": "primer",
           "chapter": "asynchronism",
-          "sections": ["disadvantage-s-asynchronism"],
-          "as": { "slug": "tradeoffs", "title": "Costs & caveats", "kind": "tradeoffs" },
+          "sections": [
+            "disadvantage-s-asynchronism"
+          ],
+          "as": {
+            "slug": "tradeoffs",
+            "title": "Costs & caveats",
+            "kind": "tradeoffs"
+          },
           "harvestLinks": true
         },
-        { "from": "primer", "chapter": "asynchronism", "sections": ["source-s-and-further-reading"], "linksOnly": true }
+        {
+          "from": "primer",
+          "chapter": "asynchronism",
+          "sections": [
+            "source-s-and-further-reading"
+          ],
+          "linksOnly": true
+        }
       ]
     },
     {
@@ -773,30 +1291,63 @@
         {
           "from": "authored",
           "file": "content/authored/batch-analytics/00-overview.md",
-          "as": { "slug": "overview", "title": "When batch beats real time", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "When batch beats real time",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "design-mint",
-          "sections": ["step-1-outline-use-cases-and-constraints", "step-3-design-core-components", "step-4-scale-the-design"],
-          "as": { "slug": "categorization-pipeline", "title": "Worked example: transaction categorization", "kind": "deep-dive" },
+          "sections": [
+            "step-1-outline-use-cases-and-constraints",
+            "step-3-design-core-components",
+            "step-4-scale-the-design"
+          ],
+          "as": {
+            "slug": "categorization-pipeline",
+            "title": "Worked example: transaction categorization",
+            "kind": "deep-dive"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "design-sales-rank",
-          "sections": ["step-1-outline-use-cases-and-constraints", "step-3-design-core-components", "step-4-scale-the-design"],
-          "as": { "slug": "ranking-pipeline", "title": "Worked example: sales ranking with MapReduce", "kind": "deep-dive" },
+          "sections": [
+            "step-1-outline-use-cases-and-constraints",
+            "step-3-design-core-components",
+            "step-4-scale-the-design"
+          ],
+          "as": {
+            "slug": "ranking-pipeline",
+            "title": "Worked example: sales ranking with MapReduce",
+            "kind": "deep-dive"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "design-mint",
-          "sections": ["additional-talking-points"],
-          "as": { "slug": "talking-points", "title": "Additional talking points", "kind": "tradeoffs" },
+          "sections": [
+            "additional-talking-points"
+          ],
+          "as": {
+            "slug": "talking-points",
+            "title": "Additional talking points",
+            "kind": "tradeoffs"
+          },
           "harvestLinks": true
         },
-        { "from": "primer", "chapter": "design-sales-rank", "sections": ["additional-talking-points"], "linksOnly": true }
+        {
+          "from": "primer",
+          "chapter": "design-sales-rank",
+          "sections": [
+            "additional-talking-points"
+          ],
+          "linksOnly": true
+        }
       ]
     },
     {
@@ -811,19 +1362,35 @@
         {
           "from": "authored",
           "file": "content/authored/security/00-overview.md",
-          "as": { "slug": "overview", "title": "Security in a design interview", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "Security in a design interview",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "security",
-          "sections": ["overview"],
-          "as": { "slug": "principles", "title": "Core principles", "kind": "concepts" },
+          "sections": [
+            "overview"
+          ],
+          "as": {
+            "slug": "principles",
+            "title": "Core principles",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
-        { "from": "primer", "chapter": "security", "sections": ["source-s-and-further-reading"], "linksOnly": true }
+        {
+          "from": "primer",
+          "chapter": "security",
+          "sections": [
+            "source-s-and-further-reading"
+          ],
+          "linksOnly": true
+        }
       ]
     },
-
     {
       "slug": "url-shortener",
       "track": "case-studies",
@@ -836,32 +1403,62 @@
         {
           "from": "authored",
           "file": "content/authored/url-shortener/00-overview.md",
-          "as": { "slug": "overview", "title": "What we're building", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "What we're building",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "design-pastebin",
-          "sections": ["step-1-outline-use-cases-and-constraints"],
-          "as": { "slug": "requirements", "title": "Use cases, constraints & estimates", "kind": "concepts" },
+          "sections": [
+            "step-1-outline-use-cases-and-constraints"
+          ],
+          "as": {
+            "slug": "requirements",
+            "title": "Use cases, constraints & estimates",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "authored",
           "file": "content/authored/url-shortener/01-key-generation.md",
-          "as": { "slug": "key-generation", "title": "Base-62 vs hashing", "kind": "deep-dive" }
+          "as": {
+            "slug": "key-generation",
+            "title": "Base-62 vs hashing",
+            "kind": "deep-dive"
+          },
+          "diagrams": [
+            "shorten-and-redirect"
+          ]
         },
         {
           "from": "primer",
           "chapter": "design-pastebin",
-          "sections": ["step-3-design-core-components", "step-4-scale-the-design"],
-          "as": { "slug": "core-components", "title": "Core components & scaling", "kind": "deep-dive" },
+          "sections": [
+            "step-3-design-core-components",
+            "step-4-scale-the-design"
+          ],
+          "as": {
+            "slug": "core-components",
+            "title": "Core components & scaling",
+            "kind": "deep-dive"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "design-pastebin",
-          "sections": ["additional-talking-points"],
-          "as": { "slug": "talking-points", "title": "Additional talking points", "kind": "tradeoffs" },
+          "sections": [
+            "additional-talking-points"
+          ],
+          "as": {
+            "slug": "talking-points",
+            "title": "Additional talking points",
+            "kind": "tradeoffs"
+          },
           "harvestLinks": true
         }
       ]
@@ -878,32 +1475,62 @@
         {
           "from": "authored",
           "file": "content/authored/news-feed/00-overview.md",
-          "as": { "slug": "overview", "title": "What we're building", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "What we're building",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "design-twitter",
-          "sections": ["step-1-outline-use-cases-and-constraints"],
-          "as": { "slug": "requirements", "title": "Use cases, constraints & estimates", "kind": "concepts" },
+          "sections": [
+            "step-1-outline-use-cases-and-constraints"
+          ],
+          "as": {
+            "slug": "requirements",
+            "title": "Use cases, constraints & estimates",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "authored",
           "file": "content/authored/news-feed/01-fanout.md",
-          "as": { "slug": "fanout", "title": "Fan-out on write vs on read", "kind": "deep-dive" }
+          "as": {
+            "slug": "fanout",
+            "title": "Fan-out on write vs on read",
+            "kind": "deep-dive"
+          },
+          "diagrams": [
+            "fanout-on-write"
+          ]
         },
         {
           "from": "primer",
           "chapter": "design-twitter",
-          "sections": ["step-3-design-core-components", "step-4-scale-the-design"],
-          "as": { "slug": "core-components", "title": "Core components & scaling", "kind": "deep-dive" },
+          "sections": [
+            "step-3-design-core-components",
+            "step-4-scale-the-design"
+          ],
+          "as": {
+            "slug": "core-components",
+            "title": "Core components & scaling",
+            "kind": "deep-dive"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "design-twitter",
-          "sections": ["additional-talking-points"],
-          "as": { "slug": "talking-points", "title": "Additional talking points", "kind": "tradeoffs" },
+          "sections": [
+            "additional-talking-points"
+          ],
+          "as": {
+            "slug": "talking-points",
+            "title": "Additional talking points",
+            "kind": "tradeoffs"
+          },
           "harvestLinks": true
         }
       ]
@@ -920,32 +1547,59 @@
         {
           "from": "authored",
           "file": "content/authored/web-crawler/00-overview.md",
-          "as": { "slug": "overview", "title": "What we're building", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "What we're building",
+            "kind": "overview"
+          }
         },
         {
           "from": "primer",
           "chapter": "design-web-crawler",
-          "sections": ["step-1-outline-use-cases-and-constraints"],
-          "as": { "slug": "requirements", "title": "Use cases, constraints & estimates", "kind": "concepts" },
+          "sections": [
+            "step-1-outline-use-cases-and-constraints"
+          ],
+          "as": {
+            "slug": "requirements",
+            "title": "Use cases, constraints & estimates",
+            "kind": "concepts"
+          },
           "harvestLinks": true
         },
         {
           "from": "authored",
           "file": "content/authored/web-crawler/01-frontier.md",
-          "as": { "slug": "frontier", "title": "The URL frontier & politeness", "kind": "deep-dive" }
+          "as": {
+            "slug": "frontier",
+            "title": "The URL frontier & politeness",
+            "kind": "deep-dive"
+          }
         },
         {
           "from": "primer",
           "chapter": "design-web-crawler",
-          "sections": ["step-3-design-core-components", "step-4-scale-the-design"],
-          "as": { "slug": "core-components", "title": "Core components & scaling", "kind": "deep-dive" },
+          "sections": [
+            "step-3-design-core-components",
+            "step-4-scale-the-design"
+          ],
+          "as": {
+            "slug": "core-components",
+            "title": "Core components & scaling",
+            "kind": "deep-dive"
+          },
           "harvestLinks": true
         },
         {
           "from": "primer",
           "chapter": "design-web-crawler",
-          "sections": ["additional-talking-points"],
-          "as": { "slug": "talking-points", "title": "Additional talking points", "kind": "tradeoffs" },
+          "sections": [
+            "additional-talking-points"
+          ],
+          "as": {
+            "slug": "talking-points",
+            "title": "Additional talking points",
+            "kind": "tradeoffs"
+          },
           "harvestLinks": true
         }
       ]
@@ -962,22 +1616,41 @@
         {
           "from": "authored",
           "file": "content/authored/rate-limiter/00-overview.md",
-          "as": { "slug": "overview", "title": "What we're building", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "What we're building",
+            "kind": "overview"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/rate-limiter/01-algorithms.md",
-          "as": { "slug": "algorithms", "title": "The algorithms", "kind": "concepts" }
+          "as": {
+            "slug": "algorithms",
+            "title": "The algorithms",
+            "kind": "concepts"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/rate-limiter/02-distributed.md",
-          "as": { "slug": "distributed", "title": "Distributed counters & race conditions", "kind": "deep-dive" }
+          "as": {
+            "slug": "distributed",
+            "title": "Distributed counters & race conditions",
+            "kind": "deep-dive"
+          },
+          "diagrams": [
+            "limiter-placement"
+          ]
         },
         {
           "from": "authored",
           "file": "content/authored/rate-limiter/03-tradeoffs.md",
-          "as": { "slug": "tradeoffs", "title": "Trade-offs & headers", "kind": "tradeoffs" }
+          "as": {
+            "slug": "tradeoffs",
+            "title": "Trade-offs & headers",
+            "kind": "tradeoffs"
+          }
         }
       ]
     },
@@ -993,22 +1666,41 @@
         {
           "from": "authored",
           "file": "content/authored/chat-system/00-overview.md",
-          "as": { "slug": "overview", "title": "What we're building", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "What we're building",
+            "kind": "overview"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/chat-system/01-connections.md",
-          "as": { "slug": "connections", "title": "Persistent connections & presence", "kind": "concepts" }
+          "as": {
+            "slug": "connections",
+            "title": "Persistent connections & presence",
+            "kind": "concepts"
+          },
+          "diagrams": [
+            "message-delivery"
+          ]
         },
         {
           "from": "authored",
           "file": "content/authored/chat-system/02-storage-and-sync.md",
-          "as": { "slug": "storage-and-sync", "title": "Message storage, ordering & sync", "kind": "deep-dive" }
+          "as": {
+            "slug": "storage-and-sync",
+            "title": "Message storage, ordering & sync",
+            "kind": "deep-dive"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/chat-system/03-tradeoffs.md",
-          "as": { "slug": "tradeoffs", "title": "Trade-offs & scale", "kind": "tradeoffs" }
+          "as": {
+            "slug": "tradeoffs",
+            "title": "Trade-offs & scale",
+            "kind": "tradeoffs"
+          }
         }
       ]
     },
@@ -1024,22 +1716,38 @@
         {
           "from": "authored",
           "file": "content/authored/search-autocomplete/00-overview.md",
-          "as": { "slug": "overview", "title": "What we're building", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "What we're building",
+            "kind": "overview"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/search-autocomplete/01-trie.md",
-          "as": { "slug": "trie", "title": "Tries and top-k caching", "kind": "concepts" }
+          "as": {
+            "slug": "trie",
+            "title": "Tries and top-k caching",
+            "kind": "concepts"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/search-autocomplete/02-pipeline.md",
-          "as": { "slug": "pipeline", "title": "The data-gathering pipeline", "kind": "deep-dive" }
+          "as": {
+            "slug": "pipeline",
+            "title": "The data-gathering pipeline",
+            "kind": "deep-dive"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/search-autocomplete/03-tradeoffs.md",
-          "as": { "slug": "tradeoffs", "title": "Trade-offs & scale", "kind": "tradeoffs" }
+          "as": {
+            "slug": "tradeoffs",
+            "title": "Trade-offs & scale",
+            "kind": "tradeoffs"
+          }
         }
       ]
     },
@@ -1055,22 +1763,38 @@
         {
           "from": "authored",
           "file": "content/authored/notification-system/00-overview.md",
-          "as": { "slug": "overview", "title": "What we're building", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "What we're building",
+            "kind": "overview"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/notification-system/01-pipeline.md",
-          "as": { "slug": "pipeline", "title": "The delivery pipeline", "kind": "concepts" }
+          "as": {
+            "slug": "pipeline",
+            "title": "The delivery pipeline",
+            "kind": "concepts"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/notification-system/02-reliability.md",
-          "as": { "slug": "reliability", "title": "Retries, dedup & exactly-once-ish", "kind": "deep-dive" }
+          "as": {
+            "slug": "reliability",
+            "title": "Retries, dedup & exactly-once-ish",
+            "kind": "deep-dive"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/notification-system/03-tradeoffs.md",
-          "as": { "slug": "tradeoffs", "title": "Trade-offs & scale", "kind": "tradeoffs" }
+          "as": {
+            "slug": "tradeoffs",
+            "title": "Trade-offs & scale",
+            "kind": "tradeoffs"
+          }
         }
       ]
     },
@@ -1086,22 +1810,38 @@
         {
           "from": "authored",
           "file": "content/authored/media-and-file-storage/00-overview.md",
-          "as": { "slug": "overview", "title": "What we're building", "kind": "overview" }
+          "as": {
+            "slug": "overview",
+            "title": "What we're building",
+            "kind": "overview"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/media-and-file-storage/01-video-pipeline.md",
-          "as": { "slug": "video-pipeline", "title": "Upload, transcode & deliver", "kind": "deep-dive" }
+          "as": {
+            "slug": "video-pipeline",
+            "title": "Upload, transcode & deliver",
+            "kind": "deep-dive"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/media-and-file-storage/02-file-sync.md",
-          "as": { "slug": "file-sync", "title": "Chunking, dedup & sync conflicts", "kind": "deep-dive" }
+          "as": {
+            "slug": "file-sync",
+            "title": "Chunking, dedup & sync conflicts",
+            "kind": "deep-dive"
+          }
         },
         {
           "from": "authored",
           "file": "content/authored/media-and-file-storage/03-tradeoffs.md",
-          "as": { "slug": "tradeoffs", "title": "Trade-offs & scale", "kind": "tradeoffs" }
+          "as": {
+            "slug": "tradeoffs",
+            "title": "Trade-offs & scale",
+            "kind": "tradeoffs"
+          }
         }
       ]
     }

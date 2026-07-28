@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "single-server",
+  "title": "Step 1 — everything on one box",
+  "description": "Where every system starts: one machine running the web app, the database and the cache. Simple, cheap, and a single point of failure.",
+  "groups": [
+    { "id": "g_user", "label": "User", "position": { "x": 260, "y": 0 }, "size": { "width": 340, "height": 140 }, "style": "solid" }
+  ],
+  "nodes": [
+    { "id": "browser", "type": "client", "label": "Web browser", "position": { "x": 30, "y": 30 }, "groupId": "g_user" },
+    { "id": "mobile", "type": "client_mobile", "label": "Mobile app", "position": { "x": 190, "y": 30 }, "groupId": "g_user" },
+    { "id": "dns", "type": "dns", "label": "DNS", "position": { "x": 760, "y": 40 } },
+    { "id": "server", "type": "server", "label": "Web server", "sublabel": "app + database + cache", "position": { "x": 380, "y": 320 } }
+  ],
+  "edges": [
+    { "id": "e_dns", "source": "browser", "target": "dns", "label": "resolve name", "step": 1, "sourceHandle": "right", "targetHandle": "left", "direction": "both" },
+    { "id": "e_web", "source": "browser", "target": "server", "label": "HTTP", "step": 2, "sourceHandle": "bottom", "targetHandle": "top", "direction": "both" },
+    { "id": "e_app", "source": "mobile", "target": "server", "label": "HTTP", "step": 2, "sourceHandle": "bottom", "targetHandle": "top", "direction": "both" }
+  ],
+  "flows": [
+    {
+      "id": "first-request",
+      "name": "A request on day one",
+      "steps": [
+        { "edgeIds": ["e_dns"], "text": "The client asks DNS for the address behind the hostname and gets back a single IP — the one box." },
+        { "edgeIds": ["e_web", "e_app"], "text": "Every client talks straight to that one server, which runs the application, the database and the cache together." }
+      ]
+    }
+  ]
+}

@@ -278,6 +278,20 @@
       "sortOrder": 3,
       "sections": [
         {
+          "slug": "overview",
+          "title": "The scaling journey",
+          "kind": "overview",
+          "contentMarkdown": "Nobody designs the finished system on day one. What actually happens is a sequence of forced moves: something breaks, you fix it, and the fix creates the next bottleneck. Understanding that sequence is more useful than memorising the end state, because interviews ask you to *arrive* at an architecture, not recite one.\n\n### The sequence\n\nEach step below is triggered by a specific failure, and each introduces a specific new problem:\n\n1. **One box.** Web app, database and cache on a single server. Cheap, simple, and a single point of failure. It works longer than people expect.\n2. **Split the database out.** The app and the database compete for memory and CPU. Separating them lets each scale on its own axis — and introduces a network hop.\n3. **Add a load balancer and more web servers.** One server is a availability risk and a capacity ceiling. Multiple stateless servers behind a balancer fix both — *provided* the tier is stateless, which forces session data out into a shared store.\n4. **Replicate the database.** Reads dominate, so add replicas and send reads to them. This buys read capacity and introduces replication lag, which is where eventual consistency enters your product whether you wanted it or not.\n5. **Add a cache.** Most reads ask for the same small set of things. A cache in front of the database absorbs them, and brings cache invalidation with it.\n6. **Add a CDN.** Static assets don't need to come from your origin at all, and users on the other side of the planet shouldn't wait 200 ms for a stylesheet.\n7. **Queue the slow work.** Anything that doesn't need to finish before the response — transcoding, email, indexing — moves off the request path.\n8. **Multiple data centres.** Availability and latency both demand serving users from a nearby region, which brings the genuinely hard problem of cross-region data.\n9. **Shard the database.** The last resort, because it breaks joins and transactions. Everything else is cheaper.\n\n### Reading the order\n\nTwo things about that list matter more than its contents.\n\n**It's ordered by cost.** Caching is cheap and buys a lot; sharding is expensive and buys capacity you may not need. Doing them in the wrong order is the most common form of over-engineering — teams shard a database that would have been fine behind a cache.\n\n**Each step is triggered, not scheduled.** The right answer to \"how would you scale this?\" is not step 9; it's \"here's what breaks first, and here's the cheapest fix for that.\" Knowing when *not* to advance is as valuable as knowing how.\n\nThe diagrams below walk the first, middle and end states. Step through the flows to see how a single request changes shape as the system grows.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/scaling-journey/00-overview.md",
+          "sortOrder": 0,
+          "diagrams": [
+            "single-server"
+          ]
+        },
+        {
           "slug": "requirements",
           "title": "Use cases, constraints & estimates",
           "kind": "concepts",
@@ -286,8 +300,22 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/scaling_aws/README.md",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:design-scaling-aws/step-1-outline-use-cases-and-constraints",
-          "sortOrder": 0,
+          "sortOrder": 1,
           "diagrams": []
+        },
+        {
+          "slug": "web-and-data-tier",
+          "title": "Splitting the web and data tiers",
+          "kind": "deep-dive",
+          "contentMarkdown": "The first structural change is separating the thing that serves requests from the thing that stores data. Everything afterwards depends on it.\n\n### Why the split comes first\n\nOn a single box, the web app and the database fight over the same memory, CPU and disk. Worse, they want *different* hardware: the app tier wants many cores and network capacity, the database wants memory and fast storage. One machine cannot be optimal for both.\n\nSeparating them lets each scale on its own axis, and it's the precondition for everything else — you cannot put a load balancer in front of a tier that is also your database.\n\n### Stateless is the requirement, not a nicety\n\nOnce you have more than one web server, a request can land on any of them. If server 1 holds a user's session in memory and their next request lands on server 2, they're logged out.\n\nThe two ways out:\n\n- **Sticky sessions** pin a user to a server. This works and quietly reintroduces every problem you were solving: uneven load, sessions lost when a server dies, and disruptive deploys.\n- **Externalise the state** into a shared store — Redis, or a signed token held by the client. Any server can serve any request, and the tier becomes genuinely disposable.\n\nThe second is the answer. **\"Stateless web tier\" specifically means session state lives somewhere both servers can reach**, and it's what makes autoscaling and rolling deploys possible.\n\n### Replication and the lag it introduces\n\nReads usually outnumber writes heavily, so the standard next move is a primary that takes writes and replicas that serve reads. Read capacity then scales by adding replicas.\n\nThe cost is replication lag. A replica is behind the primary by milliseconds normally, and much longer under load or during a large write. So:\n\n- A user updates their profile, the write goes to the primary, their next read hits a replica, and they see the old value. This is the single most common user-visible consistency bug, and it's a design consequence rather than a defect.\n- The standard fix is **read-your-own-writes**: route a user's reads to the primary for a short window after they write, or pass a version token that ensures they read from a replica that has caught up.\n\nFailover has a matching subtlety: promoting a replica when the primary dies is straightforward; ensuring the promoted replica had all the writes, and that the old primary doesn't come back believing it's still in charge, is not. That's what fencing and leader election exist for.\n\n### What breaks next\n\nWith a load-balanced stateless tier and read replicas, the next bottleneck is usually the database being asked the same questions repeatedly — which is the cache's cue — followed by static assets travelling further than they need to, which is the CDN's.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/scaling-journey/01-web-and-data-tier.md",
+          "sortOrder": 2,
+          "diagrams": [
+            "web-data-tier"
+          ]
         },
         {
           "slug": "scaling-out",
@@ -298,8 +326,10 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/scaling_aws/README.md",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:design-scaling-aws/step-3-design-core-components+step-4-scale-the-design",
-          "sortOrder": 1,
-          "diagrams": []
+          "sortOrder": 3,
+          "diagrams": [
+            "full-stack"
+          ]
         },
         {
           "slug": "talking-points",
@@ -310,7 +340,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/scaling_aws/README.md",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:design-scaling-aws/additional-talking-points",
-          "sortOrder": 2,
+          "sortOrder": 4,
           "diagrams": []
         }
       ],
@@ -1533,7 +1563,9 @@
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:cache/when-to-update-the-cache",
           "sortOrder": 2,
-          "diagrams": []
+          "diagrams": [
+            "cache-aside"
+          ]
         },
         {
           "slug": "tradeoffs",
@@ -1861,7 +1893,9 @@
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:asynchronism/overview+message-queues+task-queues+back-pressure",
           "sortOrder": 1,
-          "diagrams": []
+          "diagrams": [
+            "queue-workers"
+          ]
         },
         {
           "slug": "delivery-semantics",
@@ -2095,6 +2129,20 @@
           "diagrams": []
         },
         {
+          "slug": "key-generation",
+          "title": "Base-62 vs hashing",
+          "kind": "deep-dive",
+          "contentMarkdown": "The entire design turns on one question: where does the short key come from? Two families of answer, with different failure modes.\n\n### Encoding a counter\n\nKeep a global counter, increment it per URL, and render the value in base 62 (`a–z`, `A–Z`, `0–9`).\n\n```\n12345678  ->  \"ZXP0\"\n```\n\n**Uniqueness is structural.** Two URLs can never receive the same key because the counter never repeats a value — no collision check, no retry loop, no probabilistic argument. That is the decisive advantage.\n\nKey length comes straight from arithmetic. At 100 million new URLs per day over five years you need ~182 billion keys:\n\n| Length | Keyspace |\n|---|---|\n| 6 | 62⁶ ≈ 56 billion — insufficient |\n| **7** | 62⁷ ≈ 3.5 trillion — comfortable |\n\nSo seven characters, with room to spare.\n\nThe problem is the counter itself: a single global sequence is a bottleneck and a single point of failure — precisely the issue the unique-ID topic exists to solve. The same answers apply. Hand out **blocks** (a service claims 10,000 values and spends them locally, cutting coordination by 10,000×), or give each generator a **distinct range**, or use a **Snowflake-style ID** and encode that.\n\nBlock allocation leaves gaps when a service restarts with unspent values. Gaps are harmless here — nobody is counting the URLs.\n\n### Hashing the URL\n\nHash the long URL (MD5, SHA-256) and take the first 7 base-62 characters.\n\nAttractive because it's stateless — any machine computes the key with no coordination at all — and because the same URL naturally yields the same key, deduplicating for free.\n\nThe catch is **collisions**. Truncating a hash to 7 characters means the birthday bound bites long before you exhaust the keyspace: at billions of URLs, two different URLs will map to the same key. So you need a collision check — look up the key, and if it exists and maps to a different URL, perturb (append a salt, rehash) and retry.\n\nThat check is a read on the write path, which reintroduces the coordination you were avoiding, and the retry loop makes worst-case latency unbounded in principle.\n\n### Choosing\n\n| | Counter + base-62 | Hash + truncate |\n|---|---|---|\n| Collisions | impossible | must check and retry |\n| Coordination | needs a sequence (batchable) | none, until the collision check |\n| Same URL twice | two keys | same key (free dedup) |\n| Keys are guessable | yes — sequential | no |\n| Custom aliases | easy to layer on | easy to layer on |\n\n**Counter with block allocation is the better default**, because \"collisions are impossible\" removes an entire class of bug and blocks remove the bottleneck.\n\nThe one genuine argument for hashing is that sequential keys are enumerable: anyone can walk `aaaa1`, `aaaa2` and discover every link ever created. If links are expected to be private-by-obscurity, that's disqualifying. The fix isn't necessarily hashing — you can encode the counter through a keyed permutation so keys are unguessable while remaining collision-free.\n\n### Custom aliases\n\nUsers want `sho.rt/my-campaign`. Treat it as a separate write path: check availability, reserve it, and keep it in the same keyspace so lookups stay uniform. Reserve a blocklist of offensive and system-conflicting words, and make sure generated keys can never collide with custom ones — usually by generating from a character set or length that custom aliases are forbidden to use.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/url-shortener/01-key-generation.md",
+          "sortOrder": 1,
+          "diagrams": [
+            "shorten-and-redirect"
+          ]
+        },
+        {
           "slug": "core-components",
           "title": "Core components & scaling",
           "kind": "deep-dive",
@@ -2103,7 +2151,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/pastebin/README.md",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:design-pastebin/step-3-design-core-components+step-4-scale-the-design",
-          "sortOrder": 1,
+          "sortOrder": 2,
           "diagrams": []
         },
         {
@@ -2115,7 +2163,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/pastebin/README.md",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:design-pastebin/additional-talking-points",
-          "sortOrder": 2,
+          "sortOrder": 3,
           "diagrams": []
         }
       ],
@@ -2161,6 +2209,20 @@
           "diagrams": []
         },
         {
+          "slug": "fanout",
+          "title": "Fan-out on write vs on read",
+          "kind": "deep-dive",
+          "contentMarkdown": "The central decision in any feed system: do you assemble a user's timeline when someone posts, or when the user reads it? Everything else follows.\n\n### Fan-out on write (push)\n\nWhen someone posts, immediately insert the post into the precomputed feed of every follower.\n\n**Reads become trivial** — a user's feed already exists, so serving it is one cache lookup with no joins and no merging. For a product where reads vastly outnumber writes, that's the right place to put the cost.\n\n**Writes become expensive.** One post becomes N writes, where N is the follower count. For a typical user with a few hundred followers that's nothing. The work is done asynchronously by workers pulling from a queue, so the author's request returns immediately.\n\n### Fan-out on read (pull)\n\nStore the post once. When a user opens their feed, fetch recent posts from everyone they follow and merge.\n\n**Writes are trivial** — one insert regardless of follower count. **Reads are expensive** — fetching from hundreds of sources and merging on every feed load, which is the operation users perform constantly.\n\nPull also wins on freshness (nothing to propagate) and storage (no duplication), and it handles a user who follows thousands of accounts without a precomputation explosion.\n\n### The celebrity problem\n\nPush breaks on one specific case: an account with ten million followers posts, and that single action becomes ten million writes. The fan-out workers saturate, the queue backs up, and *everyone else's* posts are delayed behind it. The system's worst case is triggered by its most visible users.\n\nPull has the mirror problem: a user following 5,000 accounts makes feed assembly slow for them specifically.\n\n### The hybrid, which is what real systems do\n\nPush for ordinary accounts; skip fan-out entirely for the small set of very-high-follower accounts and merge their recent posts in at read time.\n\nThe result: most users get a fully precomputed feed and pay nothing extra. A read then costs one cache lookup plus a small merge from the handful of celebrity accounts that user follows. The expensive case is handled by the mechanism that scales with it, and neither pathology occurs.\n\nThe threshold is a tuning parameter — say, accounts above 100,000 followers — and it needs to be adjustable without a deploy, because the right value changes as the product grows.\n\n| | Push | Pull | Hybrid |\n|---|---|---|---|\n| Read cost | one lookup | fetch + merge N sources | lookup + small merge |\n| Write cost | O(followers) | O(1) | O(followers) for most |\n| Freshness | propagation delay | immediate | mixed |\n| Celebrity posts | pathological | fine | fine |\n| High-follow users | fine | slow reads | fine |\n\n### Ranking, and where it goes\n\nA purely chronological feed is a merge. A ranked feed scores candidates on engagement signals, recency and affinity.\n\nThe important structural point: **ranking belongs at read time, on a bounded candidate set.** Precompute the *candidates* (the fan-out above), then score a few hundred of them when the feed is requested. Ranking at write time means re-ranking every follower's feed whenever any signal changes, which is unbounded work.\n\nThis is the same shape as the autocomplete design — precompute the expensive candidate generation, do the cheap personalised step per request.\n\n### Pagination\n\nOffset pagination breaks on a feed: new posts arrive between page loads, so `OFFSET 20` shifts and users see duplicates or gaps. Use **cursor pagination** — \"give me items after this ID\" — which is stable under insertion. The roughly-sortable IDs from the unique-ID topic are exactly what makes this work.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/news-feed/01-fanout.md",
+          "sortOrder": 1,
+          "diagrams": [
+            "fanout-on-write"
+          ]
+        },
+        {
           "slug": "core-components",
           "title": "Core components & scaling",
           "kind": "deep-dive",
@@ -2169,7 +2231,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/twitter/README.md",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:design-twitter/step-3-design-core-components+step-4-scale-the-design",
-          "sortOrder": 1,
+          "sortOrder": 2,
           "diagrams": []
         },
         {
@@ -2181,7 +2243,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/twitter/README.md",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:design-twitter/additional-talking-points",
-          "sortOrder": 2,
+          "sortOrder": 3,
           "diagrams": []
         }
       ],
@@ -2339,7 +2401,9 @@
           "attributionNote": null,
           "contentRef": "authored:content/authored/rate-limiter/02-distributed.md",
           "sortOrder": 2,
-          "diagrams": []
+          "diagrams": [
+            "limiter-placement"
+          ]
         },
         {
           "slug": "tradeoffs",
@@ -2389,7 +2453,9 @@
           "attributionNote": null,
           "contentRef": "authored:content/authored/chat-system/01-connections.md",
           "sortOrder": 1,
-          "diagrams": []
+          "diagrams": [
+            "message-delivery"
+          ]
         },
         {
           "slug": "storage-and-sync",

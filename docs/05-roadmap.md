@@ -11,7 +11,7 @@
 | 4. Design system — tokens, dark mode, serif reading column, responsive | ✅ shipped |
 | 5. Diagram engine — 17 node types, edges, groups, canvas, flow stepper | ✅ shipped |
 | 6. Content authoring | ✅ shipped — 0 topics under 800 words; 30/30 published |
-| **7. Diagram authoring** | ⬜ **unblocked** — 1 diagram exists, ~60 to author |
+| 7. Diagram authoring | 🟡 in progress — 9 diagrams across 7 topics; ~23 topics still have none |
 | 8. Polish — dashboard, search, notes export | ⬜ not started |
 
 The original phases 1–3 were re-cut when the curriculum moved from a source-first to a topic-first
