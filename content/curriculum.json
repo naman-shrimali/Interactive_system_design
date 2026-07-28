@@ -379,7 +379,9 @@
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:cap-theorem/overview+cap-theorem",
           "sortOrder": 1,
-          "diagrams": []
+          "diagrams": [
+            "partition-choice"
+          ]
         },
         {
           "slug": "pacelc",
@@ -467,7 +469,9 @@
           "attributionNote": null,
           "contentRef": "authored:content/authored/consistency-patterns/01-in-practice.md",
           "sortOrder": 2,
-          "diagrams": []
+          "diagrams": [
+            "replication-lag"
+          ]
         }
       ],
       "links": [
@@ -511,7 +515,9 @@
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:availability-patterns/overview+fail-over+disadvantage-s-failover+replication",
           "sortOrder": 1,
-          "diagrams": []
+          "diagrams": [
+            "multi-dc-failover"
+          ]
         },
         {
           "slug": "availability-in-numbers",
@@ -699,7 +705,9 @@
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:dns/overview",
           "sortOrder": 1,
-          "diagrams": []
+          "diagrams": [
+            "resolution-path"
+          ]
         },
         {
           "slug": "tradeoffs",
@@ -1031,6 +1039,18 @@
       "sortOrder": 3,
       "sections": [
         {
+          "slug": "overview",
+          "title": "Choosing how services talk",
+          "kind": "overview",
+          "contentMarkdown": "Every design has a layer where components talk to each other, and the choices there are usually made by default rather than deliberately. Being able to justify them — and knowing when the default is wrong — is what this topic is for.\n\n### The three questions\n\n**What transport?** TCP gives you ordering and reliability at the cost of head-of-line blocking and connection setup. UDP gives you neither guarantee and none of the overhead, which is exactly right for voice, video and game state where a late packet is worthless anyway. Almost everything else is TCP, usually via HTTP.\n\n**What shape of API?** REST models resources and leans on HTTP's own semantics — cacheable, uniform, easy to debug with tools everyone already has. RPC models procedures and is typically more efficient and more strongly typed, which is why internal service-to-service traffic often uses gRPC while the public API stays REST. These are not competitors so much as answers to different questions: REST for the boundary you don't control, RPC for the one you do.\n\n**Who initiates?** This is the one that reshapes architectures. HTTP assumes the client asks and the server answers. The moment the *server* needs to speak first — a message arrives, a job finishes, a price changes — you need one of the workarounds covered in the real-time section, and the one you pick determines whether your servers can stay stateless.\n\n### Where it bites in a design interview\n\n- **Chat, notifications, live dashboards** — the push requirement forces a persistent-connection tier, a registry mapping users to servers, and a scaling axis based on concurrent connections rather than request rate.\n- **Service-to-service** — every synchronous hop adds latency and multiplies your availability downward. Three dependencies at 99.9% ceiling at 99.7%. Sometimes the right protocol answer is \"don't make this call at all — publish an event.\"\n- **Mobile clients** — radios, battery, and flaky networks make chatty protocols expensive in ways that don't show up in a datacenter benchmark. Fewer, larger requests beat many small ones.\n\n### The framing worth keeping\n\nProtocol choices are latency and coupling decisions in disguise. A cross-continent round trip is ~150 ms no matter what runs on top of it, so the highest-leverage change is usually removing a round trip — batching, caching, or moving the work asynchronously — rather than picking a faster serialisation format.\n\nThe primer material that follows covers HTTP, TCP, UDP, RPC and REST in detail. The final section covers the real-time options, which the classic material predates.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/communication-protocols/00-overview.md",
+          "sortOrder": 0,
+          "diagrams": []
+        },
+        {
           "slug": "transport",
           "title": "HTTP, TCP & UDP",
           "kind": "concepts",
@@ -1039,7 +1059,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#communication",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:communication/overview+hypertext-transfer-protocol-http+transmission-control-protocol-tcp+user-datagram-protocol-udp",
-          "sortOrder": 0,
+          "sortOrder": 1,
           "diagrams": []
         },
         {
@@ -1051,8 +1071,22 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#remote-procedure-call-rpc",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:communication/remote-procedure-call-rpc+representational-state-transfer-rest+rpc-and-rest-calls-comparison",
-          "sortOrder": 1,
+          "sortOrder": 2,
           "diagrams": []
+        },
+        {
+          "slug": "realtime",
+          "title": "Polling, SSE & WebSockets",
+          "kind": "deep-dive",
+          "contentMarkdown": "The classic material predates the problem this section covers. HTTP assumes the client asks and the server answers, so anything that needs the server to speak first is a workaround — and the four common ones trade latency against compatibility and operational cost.\n\n### Polling\n\nThe client asks \"anything new?\" on a timer.\n\nTrivial to build, works everywhere, and wasteful in proportion to how rarely the answer is yes. Ten thousand clients polling every three seconds is 3,300 requests per second to mostly say \"no\", and message latency is bounded below by the interval — a three-second poll means up to three seconds of delay on every update.\n\nGenuinely fine when updates are rare and a few seconds of lag is invisible. A background sync that checks for config changes does not need anything cleverer.\n\n### Long polling\n\nThe client sends a request and the server **holds it open** until there is something to send or a timeout fires; the client then immediately reconnects.\n\nLatency drops to near zero and idle traffic nearly disappears. Its real virtue is compatibility: it is ordinary HTTP, so it traverses every proxy, firewall and corporate middlebox that has ever caused you trouble.\n\nThe costs are a fresh connection setup per message, and many simultaneously-held open requests on the server — which maps badly onto a thread-per-request model and pushes you toward an event-driven server.\n\n### Server-Sent Events\n\nA single long-lived HTTP response that the server streams into, with automatic browser reconnection and event IDs for resuming after a drop.\n\nEfficient, simple, and **one-directional**. That last point decides everything: for a notification feed, a live dashboard, or a progress indicator, traffic really is server-to-client only and SSE is the right tool with the least machinery. For chat you would pair it with ordinary POSTs for sending, which works but is two mechanisms where one would do.\n\n### WebSocket\n\nStarts as HTTP, upgrades, then both sides exchange frames over one persistent TCP connection. Full duplex, low per-message overhead, lowest latency.\n\nThis is the standard answer for chat and collaborative editing. Keep long polling as a fallback where WebSocket is blocked — some corporate proxies still interfere — and be honest in an interview that maintaining both paths is real complexity, which is what the libraries in this space exist to hide.\n\n### Comparison\n\n| | Latency | Direction | Per-message cost | Proxy-friendly |\n|---|---|---|---|---|\n| Polling | poor | both | a full request | yes |\n| Long polling | good | both | a reconnect | yes |\n| SSE | good | server → client | a frame | yes |\n| WebSocket | best | both | a frame | mostly |\n\n### The consequence people miss\n\nChoosing a persistent connection is choosing a **stateful tier**, and that reshapes the architecture:\n\n- A user's connection lives on one specific machine, so delivering a message means discovering which machine — a registry mapping user to server, plus an internal hop between servers.\n- Idle connections cost memory and file descriptors whether or not anyone is talking. A million concurrent users is a million sockets, on the order of tens of kilobytes each.\n- Connection servers scale on **concurrent users**, while your API tier scales on **request rate**. Those numbers move independently, so bundling them wastes capacity.\n- Deploys drop every connection the server holds, producing a reconnect storm. Drain before shutdown and require jittered client backoff.\n\nNone of that applies to polling or SSE-over-CDN. So the choice is not \"WebSocket is best\" — it is \"how much operational surface does this feature justify?\" If updates are infrequent and one-directional, taking the simpler option avoids an entire class of problem.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/communication-protocols/01-realtime.md",
+          "sortOrder": 3,
+          "diagrams": [
+            "realtime-options"
+          ]
         }
       ],
       "links": [
@@ -1240,6 +1274,18 @@
       "sortOrder": 0,
       "sections": [
         {
+          "slug": "overview",
+          "title": "Why relational still wins",
+          "kind": "overview",
+          "contentMarkdown": "The default answer to \"where does this data live?\" should be a relational database, and you should be able to say why rather than treating it as a lack of imagination.\n\n### What you get\n\n**ACID transactions.** Multiple statements succeed or fail together. Moving money between accounts, decrementing inventory while creating an order — anything where a half-completed operation is a correctness bug rather than an inconvenience.\n\n**A schema the database enforces.** Constraints, foreign keys and types are checked centrally, so a buggy service cannot write data that violates them. In a schemaless store those rules live in application code, which means they live in *every* application, and one of them will get it wrong.\n\n**Ad-hoc queries.** SQL answers questions you did not anticipate when you designed the schema. That matters more than it sounds: most systems outlive the query patterns they were designed for, and a store optimised for today's access pattern can make tomorrow's question impossible.\n\n**Four decades of operational knowledge.** Backup, replication, failover and query optimisation are solved and well documented. Choosing something exotic means becoming the person who understands its failure modes.\n\n### How it scales, in order of cost\n\nThe sequence matters as much as the techniques, because doing them out of order is the most common form of over-engineering:\n\n1. **Indexes and query tuning.** Free, and frequently the entire answer. A missing index is a far more common cause of a slow database than insufficient hardware.\n2. **A bigger machine.** Unfashionable and genuinely effective. Modern hardware is enormous, and plenty of systems that \"need\" distribution need a larger instance.\n3. **Read replicas.** Reads usually dominate, so send them to replicas. Buys read capacity, and introduces replication lag — which is where eventual consistency enters your product whether you planned it or not.\n4. **Caching.** Absorbs repeated reads before they reach the database at all. Cheap, high leverage, and brings invalidation with it.\n5. **Federation.** Split by feature — users on one database, orders on another. Reduces the load on each, and you can no longer join across the boundary.\n6. **Denormalisation.** Duplicate data to avoid expensive joins. Trades write complexity and consistency risk for read speed.\n7. **Sharding.** Split one table across machines. The last resort, because it breaks joins, transactions and global uniqueness — the guarantees you chose relational for in the first place.\n\n### The honest framing\n\n\"Relational databases don't scale\" is folklore. They scale a long way, and most systems never exhaust steps 1–4. What is true is that **the guarantees get expensive at the far end** — a distributed transaction across shards is genuinely costly, and that cost is what NoSQL systems trade away deliberately.\n\nSo the interesting question is never \"SQL or NoSQL\" in the abstract. It is: which of these guarantees does this data actually need, and what is the cheapest step that gets me the capacity I need while keeping them?\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/relational-databases/00-overview.md",
+          "sortOrder": 0,
+          "diagrams": []
+        },
+        {
           "slug": "rdbms",
           "title": "ACID and scaling techniques",
           "kind": "deep-dive",
@@ -1248,8 +1294,10 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#database",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:database/overview+relational-database-management-system-rdbms",
-          "sortOrder": 0,
-          "diagrams": []
+          "sortOrder": 1,
+          "diagrams": [
+            "sharding"
+          ]
         }
       ],
       "links": [
@@ -2575,7 +2623,9 @@
           "attributionNote": null,
           "contentRef": "authored:content/authored/search-autocomplete/01-trie.md",
           "sortOrder": 1,
-          "diagrams": []
+          "diagrams": [
+            "two-systems"
+          ]
         },
         {
           "slug": "pipeline",

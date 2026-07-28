@@ -334,7 +334,10 @@
             "title": "CP versus AP",
             "kind": "concepts"
           },
-          "harvestLinks": true
+          "harvestLinks": true,
+          "diagrams": [
+            "partition-choice"
+          ]
         },
         {
           "from": "authored",
@@ -396,7 +399,10 @@
             "slug": "in-practice",
             "title": "Choosing a model in practice",
             "kind": "tradeoffs"
-          }
+          },
+          "diagrams": [
+            "replication-lag"
+          ]
         },
         {
           "from": "primer",
@@ -440,7 +446,10 @@
             "title": "Fail-over and replication",
             "kind": "concepts"
           },
-          "harvestLinks": true
+          "harvestLinks": true,
+          "diagrams": [
+            "multi-dc-failover"
+          ]
         },
         {
           "from": "primer",
@@ -592,7 +601,10 @@
             "title": "How resolution works",
             "kind": "concepts"
           },
-          "harvestLinks": true
+          "harvestLinks": true,
+          "diagrams": [
+            "resolution-path"
+          ]
         },
         {
           "from": "primer",
@@ -843,7 +855,10 @@
             "slug": "realtime",
             "title": "Polling, SSE & WebSockets",
             "kind": "deep-dive"
-          }
+          },
+          "diagrams": [
+            "realtime-options"
+          ]
         }
       ]
     },
@@ -877,7 +892,10 @@
             "title": "ACID and scaling techniques",
             "kind": "deep-dive"
           },
-          "harvestLinks": true
+          "harvestLinks": true,
+          "diagrams": [
+            "sharding"
+          ]
         },
         {
           "from": "authored",
@@ -1744,7 +1762,10 @@
             "slug": "trie",
             "title": "Tries and top-k caching",
             "kind": "concepts"
-          }
+          },
+          "diagrams": [
+            "two-systems"
+          ]
         },
         {
           "from": "authored",
