@@ -45,9 +45,21 @@
       "difficulty": "foundation",
       "estimatedMinutes": 35,
       "accent": "#10b981",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 0,
       "sections": [
+        {
+          "slug": "overview",
+          "title": "Why a framework helps",
+          "kind": "overview",
+          "contentMarkdown": "A system design interview is 45 minutes, deliberately under-specified, and has no correct answer. That combination is what makes it stressful — and what makes a framework valuable. Not because there's one right process, but because having *a* process stops you freezing on an open-ended prompt, and it lets the interviewer follow your reasoning.\n\n### What is actually being assessed\n\nInterviewers are not checking whether you can recall a reference architecture. They're looking for:\n\n- **Do you scope before building?** The prompt is vague on purpose. Candidates who start drawing boxes without asking what the system must do are demonstrating exactly the failure mode the interview is designed to detect.\n- **Can you justify choices?** \"I'd use Cassandra\" is worth nothing. \"I'd use Cassandra because the access pattern is write-heavy and always scoped to one partition key, and I can give up ad-hoc queries\" is the answer.\n- **Do you know what you traded away?** Every choice costs something. Naming the cost unprompted is the strongest single signal you can send.\n- **Can you collaborate?** This is a conversation. Candidates who monologue for 40 minutes score badly even when the design is sound.\n\nThe unspoken one: **do you know when to stop?** Designing a globally distributed system for a problem that fits on one server is a failure, not thoroughness.\n\n### The shape of the conversation\n\nRoughly, with time budgets that assume 45 minutes:\n\n1. **Scope and requirements — 5–10 minutes.** Functional requirements, scale, and the explicit non-goals. Leave with a short written list you both agreed to.\n2. **Estimation — 5 minutes.** Enough arithmetic to know what kind of system this is. Skip the numbers that change nothing.\n3. **High-level design — 10–15 minutes.** Boxes, arrows, the API surface, the data model. The whole system, none of it deep.\n4. **Deep dive — 10–15 minutes.** One or two components, chosen with the interviewer. This is where the interview is won or lost.\n5. **Wrap up — 5 minutes.** Bottlenecks, what you'd monitor, what you'd do with more time.\n\nTreat the boundaries as soft. If the interviewer pulls you into a deep dive at minute 12, follow them — they're telling you what they want to assess.\n\n### The habits that matter more than the steps\n\n**Say your assumptions out loud.** Every one is an invitation to be corrected while correcting is cheap.\n\n**Drive, but check in.** After the high-level design, ask \"does this look reasonable, or would you like me to go deeper somewhere?\" It's collaborative and it surfaces what they're actually grading.\n\n**Answer the question you were asked.** If they ask how you'd handle a hot key, don't restate the architecture. Answer, then connect it back.\n\n**Don't bluff.** \"I haven't used Kafka in production, but the property I need here is a durable, replayable log — so I'd reach for it or something equivalent\" is a good answer. Inventing details about a system you don't know is the fastest way to lose credibility, because they probably do know it.\n\nThe sections that follow work through each step in detail, and the checklist at the end is what to run through under time pressure.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/interview-framework/00-overview.md",
+          "sortOrder": 0,
+          "diagrams": []
+        },
         {
           "slug": "the-method",
           "title": "The method",
@@ -57,7 +69,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#how-to-approach-a-system-design-interview-question",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:how-to-approach/overview",
-          "sortOrder": 0,
+          "sortOrder": 1,
           "diagrams": []
         },
         {
@@ -69,7 +81,19 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#step-1-outline-use-cases-constraints-and-assumptions",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:how-to-approach/step-1-outline-use-cases-constraints-and-assumptions+step-2-create-a-high-level-design+step-3-design-core-components+step-4-scale-the-design",
-          "sortOrder": 1,
+          "sortOrder": 2,
+          "diagrams": []
+        },
+        {
+          "slug": "checklist",
+          "title": "Interview checklist",
+          "kind": "checklist",
+          "contentMarkdown": "### Questions to ask in the first five minutes\n\n**Functional scope**\n- Who uses this, and what are the two or three core actions?\n- What's explicitly out of scope? (Say your own list — \"I'll assume no auth flows and no moderation unless you'd like those.\")\n- Is there a mobile client, or web only? It changes the API surface and the push story.\n\n**Scale**\n- How many users total, and how many daily active?\n- Read-heavy or write-heavy, and roughly what ratio?\n- Is traffic global or regional? Global means multi-region, which changes everything about consistency.\n\n**Constraints**\n- What's the latency expectation for the main action?\n- How fresh must data be? (This one buys the most architectural freedom when the answer is \"not very\".)\n- What's the availability target, and what happens if we're down for a minute?\n\n**Data**\n- How long is data retained?\n- Is anything sensitive — regulated, encrypted, subject to deletion requests?\n\nYou will not ask all of these. Pick the four that most change the design.\n\n### The wrap-up, which candidates skip\n\nWith five minutes left, volunteer:\n\n- **The bottleneck.** \"The first thing to break under 10× is the fan-out worker pool, because…\" Knowing where your own design fails is the mark of someone who has operated systems.\n- **What you'd monitor.** Two or three metrics that would tell you it's unhealthy — queue depth, p99 latency, replication lag.\n- **What you'd do differently with more time or more information.**\n- **The biggest risk.** Often a dependency you don't control.\n\n### Common failure modes\n\n| Mistake | What to do instead |\n|---|---|\n| Drawing boxes before scoping | Spend the first five minutes on requirements, always |\n| Estimating things that change no decision | Compute QPS, storage, and the read:write ratio; skip the rest |\n| Naming a technology without a reason | Pair every choice with the property you need from it |\n| Over-engineering | If the numbers say one database, say one database |\n| Monologuing | Check in after the high-level design |\n| Going silent while thinking | Narrate: \"I'm weighing whether to precompute this…\" |\n| Defending a design when challenged | Interviewers push to see if you can reason, not to trap you. Engage with the objection |\n| Ignoring the data model | The schema often *is* the design; sketch it |\n| Forgetting failure | Say what happens when each major component dies |\n\n### A compact rubric for your own answer\n\nBefore you finish, check that you have said something about each:\n\n- [ ] Agreed functional requirements and explicit non-goals\n- [ ] Scale figures, and the read:write ratio\n- [ ] An API surface — the two or three main endpoints\n- [ ] A data model, including the partition key for anything sharded\n- [ ] The high-level component diagram with data flow\n- [ ] Where state lives, and which store, with justification\n- [ ] Caching: what, where, and how it's invalidated\n- [ ] One deep dive with a genuine trade-off named\n- [ ] Failure behaviour for the main components\n- [ ] Bottleneck and monitoring in the wrap-up\n\n### If you get stuck\n\nFall back to the request path. Trace one request end to end — client, DNS, load balancer, service, cache, database, response — and the gaps become obvious. It restarts a stalled conversation and rarely leads you astray.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/interview-framework/01-checklist.md",
+          "sortOrder": 3,
           "diagrams": []
         }
       ],
@@ -172,9 +196,21 @@
       "difficulty": "foundation",
       "estimatedMinutes": 25,
       "accent": "#10b981",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 2,
       "sections": [
+        {
+          "slug": "overview",
+          "title": "Four words, precisely",
+          "kind": "overview",
+          "contentMarkdown": "Four words that interviewers use precisely and candidates use interchangeably. Getting them right is cheap and signals care.\n\n### The definitions\n\n**Latency** — how long one operation takes. Measured in time: milliseconds for a request, microseconds for a memory read.\n\n**Throughput** — how many operations complete per unit time. Measured in rate: requests per second, megabytes per second.\n\n**Performance** — how fast the system is *for a given workload*. Improving performance means the same work finishes sooner.\n\n**Scalability** — whether performance holds as the workload grows. A system is scalable if adding resources buys proportional capacity.\n\nThe distinction that matters most: **performance and scalability are different problems with different fixes.** If your system is slow with ten users, that's a performance problem — profile it, fix the algorithm, add an index. If it's fast with ten users and slow with ten thousand, that's a scalability problem, and no amount of local optimisation fixes it. Saying \"this is a scalability problem, not a performance one\" out loud shows you know which lever to reach for.\n\n### Latency and throughput are not inverses\n\nThe intuitive but wrong model is that halving latency doubles throughput. Concurrency breaks the relationship: a system can have high latency *and* high throughput if it processes many operations in parallel.\n\nA useful frame is Little's Law:\n\n```\nconcurrency = throughput × latency\n```\n\nA service handling 1,000 requests/second where each takes 200 ms has 200 requests in flight at any moment. That number determines thread pool sizes, connection pool sizes, and memory footprint — and it's why a latency regression can quietly exhaust a connection pool without throughput changing at all.\n\nThe two also trade against each other deliberately. **Batching** raises throughput and raises latency: waiting to accumulate 100 rows before writing amortises overhead across them, and the first row in the batch waits. Nagle's algorithm, group commit, and micro-batching in stream processors are all this same trade.\n\nSo \"make it faster\" is ambiguous. Ask which one matters. A video pipeline wants throughput and tolerates seconds of latency; an autocomplete endpoint wants latency and has modest throughput.\n\n### Vertical and horizontal scaling\n\n**Vertical** — a bigger machine. Simple, requires no code changes, and works remarkably far: modern hardware is enormous, and plenty of systems that \"need\" distribution actually need a larger instance. Its limits are a hard ceiling, superlinear cost at the top end, and no redundancy — one machine is one failure away from total outage.\n\n**Horizontal** — more machines. Effectively unbounded and gives redundancy for free, but demands statelessness, introduces coordination, and brings every distributed-systems problem with it.\n\nThe honest position in an interview: **start vertical, scale horizontally when you must**, and know which constraint forces the move. Reaching for horizontal scaling on a workload that fits on one box is over-engineering.\n\nThe prerequisite for horizontal scaling is that the tier is **stateless** — any request can go to any machine. That's why session state moves out of web servers and into a shared store. Once state is external, the tier scales by changing a number.\n\n### Where time actually goes\n\nBefore optimising, know the budget. A request that takes 200 ms typically spends it on network round trips, database queries, and serialisation — rarely on your application logic. Which is why the highest-leverage fixes are usually *removing round trips* (caching, batching, denormalising) rather than making code faster.\n\nAnd geography dominates: a cross-continent round trip is ~150 ms, so a request making three sequential calls across regions cannot be fast no matter how good the code is. That's what CDNs and regional deployments exist to fix.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/performance-and-latency/00-overview.md",
+          "sortOrder": 0,
+          "diagrams": []
+        },
         {
           "slug": "performance-vs-scalability",
           "title": "Performance vs scalability",
@@ -184,7 +220,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#performance-vs-scalability",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:performance-vs-scalability/overview",
-          "sortOrder": 0,
+          "sortOrder": 1,
           "diagrams": []
         },
         {
@@ -196,7 +232,19 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#latency-vs-throughput",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:latency-vs-throughput/overview",
-          "sortOrder": 1,
+          "sortOrder": 2,
+          "diagrams": []
+        },
+        {
+          "slug": "tail-latency",
+          "title": "Percentiles and tail latency",
+          "kind": "deep-dive",
+          "contentMarkdown": "Averages hide the experience of the users you most need to keep. Percentiles are how you see them, and tail latency is the thing that actually breaks distributed systems.\n\n### Read percentiles, not means\n\np50 (median) is the typical experience. p99 is the slowest 1%. p99.9 is the slowest 1 in 1,000.\n\nAn average conceals both the shape and the outliers: a service with p50 = 20 ms and p99 = 3,000 ms might average 50 ms and look healthy on a dashboard while 1% of requests time out. Worse, averages are dragged by outliers in a way that makes them neither typical nor extreme — they describe nobody.\n\n**Why the tail matters more than it seems.** If a page makes 20 backend calls and each has a p99 of 1 second, the chance that *at least one* is slow is `1 − 0.99²⁰ ≈ 18%`. A one-in-a-hundred backend event has become a one-in-six page event. Fan-out converts rare slowness into common slowness — this is the single most important thing to understand about tail latency, and the reason large systems obsess over p99 rather than p50.\n\nIt's also the users you care about: the p99 user is often the one with the most data, the most followers, the largest cart. Your slowest requests correlate with your most engaged customers.\n\n### Where tails come from\n\nSlow requests are usually not slow code. Common causes:\n\n- **Queueing.** As utilisation rises, queue time rises non-linearly. Past roughly 70–80% utilisation, small load increases produce large latency increases. This is why running servers \"efficiently\" at 95% CPU produces terrible tails.\n- **Garbage collection** or other stop-the-world pauses.\n- **Cache misses** falling through to a slow path.\n- **Head-of-line blocking** behind one expensive request.\n- **Noisy neighbours** on shared infrastructure.\n- **Retries and timeouts** interacting badly.\n\n### Mitigations\n\n**Hedged requests.** Send the request; if no answer by p95, send a duplicate to another replica and take whichever returns first. Costs a few percent extra load and dramatically cuts the tail, because it converts one unlucky server into two independent chances. Only safe for idempotent reads.\n\n**Timeouts everywhere, set from percentiles.** A timeout at 10× p99 doesn't protect anything. Set it near p99.9 and fail fast — a request that has already blown its budget is consuming capacity for a user who has probably left.\n\n**Load shedding.** Under overload, reject some requests immediately rather than degrading everyone. Fast failure beats universal slowness, and it keeps the queue from growing without bound.\n\n**Keep utilisation off the cliff.** Provision so normal operation sits well below the knee of the queueing curve.\n\n**Circuit breakers.** When a dependency is failing, stop calling it rather than tying up every worker on a timeout.\n\n### Setting targets\n\nState latency requirements as a percentile and a number: \"p99 under 200 ms\" is a requirement; \"fast\" is not. In an interview, saying \"I'd target p99 rather than average, because with this fan-out the tail dominates the user experience\" is a strong, specific signal.\n\nTwo things follow from a target:\n\n- **Budget it across the request path.** If p99 must be 200 ms and you make three sequential backend calls, each has roughly 60 ms — which immediately tells you whether a cross-region call is affordable. It usually isn't.\n- **Prefer parallel over sequential calls.** Three sequential 50 ms calls cost 150 ms; three parallel ones cost ~50 ms plus fan-out risk. That risk is exactly the tail-amplification maths above, which is why parallel fan-out is paired with hedging.\n\n**Key numbers:** p99 of 1 s across 20 calls ≈ 18% of pages affected · queueing degrades sharply past ~70–80% utilisation · cross-continent round trip ~150 ms · hedging at p95 costs ~5% extra load.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/performance-and-latency/01-tail-latency.md",
+          "sortOrder": 3,
           "diagrams": []
         }
       ],
@@ -408,9 +456,21 @@
       "difficulty": "intermediate",
       "estimatedMinutes": 35,
       "accent": "#8b5cf6",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 2,
       "sections": [
+        {
+          "slug": "overview",
+          "title": "Designing for failure",
+          "kind": "overview",
+          "contentMarkdown": "Availability is designed, not hoped for. The assumption underneath every technique in this topic is that components *will* fail — disks, machines, racks, networks, whole regions — and the system's job is to keep serving anyway.\n\n### The two levers\n\nAlmost everything reduces to one of two ideas:\n\n**Redundancy** — have more than one of the thing, so losing one isn't fatal. Replicas, multiple availability zones, several providers.\n\n**Isolation** — arrange things so a failure can't spread. Bulkheads between tenants, circuit breakers between services, separate queues per channel, blast-radius limits on deploys.\n\nRedundancy without isolation gives you correlated failure: three replicas in one rack are one power event away from zero replicas. Isolation without redundancy gives you a contained outage that's still an outage. You need both, and naming which one a given technique provides is a good way to reason clearly.\n\n### Availability composes badly\n\nThis is the arithmetic worth internalising:\n\n**In series** (you need all of them), availabilities multiply. Three dependencies at 99.9% each give `0.999³ ≈ 99.7%` — worse than any component. Every synchronous dependency you add lowers your ceiling.\n\n**In parallel** (any one suffices), unavailabilities multiply. Two redundant components at 99% give `1 − 0.01² = 99.99%`.\n\nTwo design consequences follow immediately:\n\n1. **Long synchronous dependency chains are an availability tax.** Six services in a request path, each at 99.9%, ceiling at 99.4% — roughly two days of downtime a year from composition alone. The fix is fewer synchronous hops: make calls asynchronous, cache aggressively, or degrade gracefully when a dependency is unavailable.\n2. **Redundancy is the only thing that buys nines back**, and only when failures are genuinely independent. Two replicas sharing a rack, a power supply, or a deployment pipeline are not independent, and the arithmetic doesn't apply.\n\nThat second caveat is where real outages live. Correlated failure — the same bad config pushed everywhere, the same expired certificate, the same dependency underneath both \"independent\" paths — is what turns a redundant system into a single point of failure that nobody noticed.\n\n### What the target actually means\n\n| Target | Downtime/year | What it demands |\n|---|---|---|\n| 99% | 3.65 days | one machine, manual recovery |\n| 99.9% | 8.8 hours | redundancy, alerting, someone on call |\n| 99.99% | 53 minutes | multi-AZ, automated failover, tested runbooks |\n| 99.999% | 5.3 minutes | multi-region, automated everything, no manual step in the recovery path |\n\nEach nine costs roughly an order of magnitude more than the last. The right move in an interview is to **ask what the target is** rather than assuming five nines — and to note that at 99.99% and above, a human being paged is already too slow, so recovery must be automatic.\n\nAlso worth saying: availability targets should be **per operation**. Reading a product page and completing a checkout do not need the same guarantee, and pretending they do makes the whole system expensive.\n\n### Failing well\n\nNot all downtime is equal, and the best systems degrade rather than stop:\n\n- **Graceful degradation.** Recommendations service down? Show a generic list. The page still works.\n- **Read-only mode.** If writes can't be made safely, serving stale reads is far better than an error page.\n- **Static fallback.** A cached or default response beats a 500.\n\nDesigning what your system does *while broken* is as much a part of availability as preventing the break — and volunteering it in an interview is a strong signal, because it's the part most candidates never mention.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/availability-patterns/00-overview.md",
+          "sortOrder": 0,
+          "diagrams": []
+        },
         {
           "slug": "failover-and-replication",
           "title": "Fail-over and replication",
@@ -420,7 +480,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#availability-patterns",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:availability-patterns/overview+fail-over+disadvantage-s-failover+replication",
-          "sortOrder": 0,
+          "sortOrder": 1,
           "diagrams": []
         },
         {
@@ -432,7 +492,19 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#availability-in-numbers",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:availability-patterns/availability-in-numbers",
-          "sortOrder": 1,
+          "sortOrder": 2,
+          "diagrams": []
+        },
+        {
+          "slug": "resilience-patterns",
+          "title": "Timeouts, retries & circuit breakers",
+          "kind": "deep-dive",
+          "contentMarkdown": "Fail-over and replication keep data available. These patterns keep the *request path* available when a dependency misbehaves — and they're what candidates most often leave out.\n\n### Timeouts\n\n**Every network call needs a timeout.** A call without one waits forever, holding a thread, a connection, and memory. Under a dependency outage, an unbounded call turns into resource exhaustion, and a service that was merely dependent on a broken thing becomes broken itself.\n\nSet the value from observed latency — near p99.9 of the call, not an arbitrary 30 seconds. A timeout longer than the caller's own budget is decoration: if your endpoint must answer in 200 ms, a 5-second timeout on a backend call will never fire before the user has already given up.\n\n### Retries, and how they cause outages\n\nRetries fix transient failures and amplify sustained ones. Three rules:\n\n**Exponential backoff with jitter.** Without jitter, every client that failed during an outage retries in the same instant when the service returns, and knocks it over again. Jitter is not a refinement; it's the difference between recovery and a second outage.\n\n**Only retry what's retryable.** Timeouts and 503s, yes. A 400 will fail identically forever.\n\n**Budget retries.** Cap the fraction of traffic that is retries — say 10%. Without a budget, a service at 50% error rate sees its load *increase* precisely when it's least able to cope. This is the mechanism behind a large share of cascading failures: the retry storm, not the original fault, is what takes the system down.\n\nRetries also demand **idempotency**. Retrying a read is free; retrying a payment is not. Either make the operation idempotent with a key, or don't retry it.\n\n### Circuit breakers\n\nWhen a dependency is comprehensively down, retrying is worse than useless — each attempt occupies a worker for a full timeout, and the pool fills with calls destined to fail. Work for *healthy* dependencies then starves.\n\nA circuit breaker tracks the failure rate and trips past a threshold, failing fast without attempting the call. After a cooling period it lets a probe through; success closes it again. Three states: closed (normal), open (failing fast), half-open (probing).\n\nThe value is converting \"every worker blocked for 30 seconds\" into \"immediate, cheap failure\" — which preserves capacity for everything else and gives the dependency room to recover instead of being hammered while it restarts.\n\n### Bulkheads\n\nPartition resources so one workload can't consume everything. Separate connection pools or thread pools per dependency mean a slow dependency exhausts only its own pool. Separate queues per channel — as in the notification system — mean one failing provider doesn't stall the rest.\n\nNamed after ship compartments, and the metaphor is exact: the point is that flooding one section doesn't sink the vessel.\n\n### Health checks and fail-over\n\nFail-over is only as good as its detection. Two distinctions worth making:\n\n- **Liveness vs readiness.** Liveness asks \"is the process alive?\"; readiness asks \"can it serve traffic?\" A process that is alive but has lost its database connection should fail readiness and be removed from rotation without being restarted.\n- **Deep vs shallow checks.** A check returning 200 unconditionally tells you nothing. One that verifies critical dependencies is meaningful — but be careful: if a health check fails because a shared dependency is down, *every* instance fails simultaneously and you remove your entire fleet from service. Health checks should reflect the instance's own health, not the whole system's.\n\n**Failing over is the easy half.** Failing *back* — reconciling writes that happened on the promoted replica, catching up the recovered primary, avoiding split brain where two nodes both believe they're primary — is where the difficulty lives. Fencing tokens or a consensus-based leader election exist for exactly this.\n\nAnd the rule that matters most: **an untested fail-over does not work.** The first real execution of an untested runbook happens during an incident, at 3 a.m., under pressure. Systems that fail over reliably are the ones that practise it.\n\n### Checklist\n\n- [ ] Timeout on every network call, derived from measured latency\n- [ ] Exponential backoff with jitter, and a retry budget\n- [ ] Idempotency wherever retries can touch a mutation\n- [ ] Circuit breakers around external dependencies\n- [ ] Bulkheads isolating pools per dependency\n- [ ] Readiness distinct from liveness; checks that don't fail the whole fleet at once\n- [ ] Graceful degradation defined for each major dependency\n- [ ] Fail-over exercised on purpose, not discovered in an incident\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/availability-patterns/01-resilience-patterns.md",
+          "sortOrder": 3,
           "diagrams": []
         }
       ],
@@ -570,9 +642,21 @@
       "difficulty": "foundation",
       "estimatedMinutes": 25,
       "accent": "#0ea5e9",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 0,
       "sections": [
+        {
+          "slug": "overview",
+          "title": "The first hop",
+          "kind": "overview",
+          "contentMarkdown": "DNS turns a name into an address. It's the first thing that happens in every request, it's invisible when healthy, and it's one of the more powerful traffic-steering tools you have — which is why it deserves more than a footnote.\n\n### The resolution path\n\nA cold lookup for `api.example.com` walks a hierarchy:\n\n1. **Caches first** — the browser, then the OS, then the configured resolver. Most lookups stop here, which is why DNS appears free most of the time.\n2. **Root servers** — \"who handles `.com`?\"\n3. **TLD servers** — \"who handles `example.com`?\"\n4. **Authoritative nameserver** — the one that actually knows, and returns the record.\n\nA cold resolution costs several round trips and can run to 100+ ms; a warm one is microseconds. That gap is why DNS lookup time shows up in page-load waterfalls for first-time visitors and vanishes for everyone else.\n\n### Records worth knowing\n\n| Type | Purpose |\n|---|---|\n| `A` / `AAAA` | name → IPv4 / IPv6 address |\n| `CNAME` | name → another name (cannot coexist with other records at the same name, so not valid at a zone apex) |\n| `NS` | delegates a zone to nameservers |\n| `MX` | mail routing |\n| `TXT` | arbitrary text — domain verification, SPF/DKIM |\n\nThe `CNAME`-at-apex restriction is a real operational constraint: `example.com` cannot be a `CNAME` to a load balancer's hostname, which is why providers offer non-standard `ALIAS`/`ANAME` records that resolve server-side.\n\n### TTL is the dial that matters\n\nEvery record carries a **time to live** — how long resolvers may cache it. It's the central trade-off in DNS operations:\n\n- **Long TTL** (hours): fewer lookups, faster for users, less load on your nameservers — and changes take hours to propagate.\n- **Short TTL** (seconds to a minute): fast failover and quick changes — at the cost of far more query volume and a DNS lookup on the critical path more often.\n\nThe practical pattern: keep TTLs moderate normally, and **lower them well in advance** of a planned migration. Lowering a TTL only takes effect after the *old* TTL expires, so dropping it an hour before a cutover accomplishes nothing. Lower it a day ahead, migrate, then raise it again.\n\nAnd the caveat worth stating in an interview: **TTLs are advisory.** Some resolvers and clients ignore them or apply their own minimums, and applications may cache a resolved address for the process lifetime. Never rely on DNS alone for fast failover — treat it as eventually consistent, and put a load balancer or health-checked proxy in front for anything that needs to move in seconds.\n\n### DNS as a routing tool\n\nBecause you control the answer, DNS is a load-balancing and steering layer:\n\n- **Round-robin** — return multiple A records and let clients pick. Crude and unaware of health or load, but free.\n- **Geo/latency-based** — return the address of the nearest or fastest region. This is how a global service directs users to a local datacenter, and how CDNs point you at a nearby edge.\n- **Weighted** — split traffic by percentage. The mechanism behind gradual migrations and canary regions.\n- **Failover** — health-check endpoints and stop returning unhealthy ones.\n\nThis is genuinely global load balancing — it happens before any packet reaches your infrastructure, so it's the only layer that can steer traffic *away* from a region that's entirely down.\n\n### What to say about it\n\nIn most designs DNS is one box on the diagram, and that's appropriate. Mention it when:\n\n- **Multi-region routing** is in scope — geo-based DNS is how users reach the nearest region.\n- **Failover** is discussed — and then immediately note the TTL caveat, because that's the part people get wrong.\n- **CDN integration** — the CDN's hostname is where your DNS points.\n- **Availability composition** — your DNS provider is a dependency, and a single-provider outage takes you offline no matter how redundant your servers are. Serious deployments use two providers.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/dns/00-overview.md",
+          "sortOrder": 0,
+          "diagrams": []
+        },
         {
           "slug": "how-it-works",
           "title": "How resolution works",
@@ -582,7 +666,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#domain-name-system",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:dns/overview",
-          "sortOrder": 0,
+          "sortOrder": 1,
           "diagrams": []
         },
         {
@@ -594,7 +678,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#disadvantages-dns",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:dns/disadvantage-s-dns",
-          "sortOrder": 1,
+          "sortOrder": 2,
           "diagrams": []
         }
       ],
@@ -669,9 +753,21 @@
       "difficulty": "foundation",
       "estimatedMinutes": 30,
       "accent": "#0ea5e9",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 1,
       "sections": [
+        {
+          "slug": "overview",
+          "title": "Moving bytes closer to users",
+          "kind": "overview",
+          "contentMarkdown": "A CDN is a network of servers positioned close to users that caches your content and serves it from there. The motivation is not clever engineering — it's the speed of light.\n\n### Why proximity is the whole story\n\nA round trip from Sydney to Virginia is on the order of 200 ms, and no optimisation removes it. A page that makes even a handful of sequential requests to a distant origin feels slow regardless of how fast your servers are.\n\nServing from an edge 20 ms away collapses that. And because latency compounds — TCP handshake, TLS negotiation, then the request itself — cutting the round trip cuts every phase at once. Terminating TLS at the edge is a substantial part of the win, often more than the cached bytes themselves.\n\nThe secondary benefits are real too: origin load drops dramatically at a good hit rate, bandwidth costs fall since CDN egress is cheaper than origin egress, and the CDN absorbs traffic spikes and volumetric attacks before they reach you.\n\n### What belongs on a CDN\n\n**Ideal:** static assets (JS, CSS, images, fonts), video segments, downloads — anything immutable, requested far more often than it changes, and identical for every user.\n\n**Workable with care:** API responses that are cacheable for seconds, personalised pages assembled at the edge, HTML with a short TTL.\n\n**Not suitable:** anything unique per user on every request, or where staleness is unacceptable.\n\nThe useful test is **the request-to-change ratio.** Content requested a million times between changes is perfect. Content that changes on every request gains nothing and adds a hop.\n\n### Push and pull\n\n**Pull** (the default): the first request for an object misses at the edge, the CDN fetches from your origin, caches it, and serves subsequent requests locally. Zero operational effort — you change nothing about how you serve files. The cost is that the first user in each region pays the full origin round trip, and cold content is repeatedly re-fetched after eviction.\n\n**Push:** you upload content to the CDN ahead of demand. Right for large files with predictable traffic and for scheduled launches, where you don't want a million simultaneous cold misses. The cost is that you now manage what's on the CDN and when it expires.\n\nMost services use pull, with push reserved for known events. This is essentially the same **pre-warming** idea as the video topic: for a scheduled release, populate the edges before the audience arrives, because a thundering herd of cold misses hits your origin with exactly the load the CDN was supposed to absorb.\n\n### The hit rate is the number that matters\n\nCDN value is roughly proportional to hit rate, and the things that quietly destroy it are worth knowing:\n\n- **Cache-busting query strings.** If URLs carry unique parameters, every request is a distinct object and nothing is ever a hit. Configure which query parameters are part of the cache key.\n- **Vary headers.** Varying on a header with many values fragments the cache into many copies of the same object.\n- **Cookies.** Many CDNs won't cache responses with `Set-Cookie`, so an unnecessary cookie on a static asset silently disables caching.\n- **Short TTLs everywhere.** A one-minute TTL on content that changes weekly throws away most of the benefit.\n\nHit rate is worth monitoring directly. A regression usually means someone changed a header, not that traffic patterns shifted.\n\n### Where it sits\n\nDNS points at the CDN hostname, so the CDN is the first thing a client reaches. It serves what it can from cache and forwards the rest to your origin. That ordering matters for the design: the CDN sees all traffic, which is why it's also the natural place for TLS termination, basic request filtering, and DDoS absorption.\n\nThe next section covers the harder half — TTLs, versioning, and invalidation — which is where most of the real operational difficulty lives.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/cdn/00-overview.md",
+          "sortOrder": 0,
+          "diagrams": []
+        },
         {
           "slug": "push-vs-pull",
           "title": "Push vs pull CDNs",
@@ -681,7 +777,19 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#content-delivery-network",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:cdn/overview+push-cdns+pull-cdns",
-          "sortOrder": 0,
+          "sortOrder": 1,
+          "diagrams": []
+        },
+        {
+          "slug": "invalidation",
+          "title": "TTLs, versioning & invalidation",
+          "kind": "deep-dive",
+          "contentMarkdown": "Caching is easy. Deciding when a cached copy stops being valid is the hard part, and the CDN version has a specific twist: the stale copies are on machines you don't control, spread across the world.\n\n### The headers that control it\n\n`Cache-Control` is the mechanism; the directives worth knowing:\n\n| Directive | Effect |\n|---|---|\n| `max-age=N` | cacheable by anyone for N seconds |\n| `s-maxage=N` | overrides `max-age` for shared caches (the CDN) only |\n| `no-cache` | may store, must revalidate before serving |\n| `no-store` | never store — for genuinely sensitive responses |\n| `private` | browser may cache, CDN must not |\n| `immutable` | never revalidate within the TTL |\n| `stale-while-revalidate=N` | serve stale for N seconds while refreshing in the background |\n\n`s-maxage` enables a useful split: a short browser TTL so users pick up changes quickly, and a long CDN TTL so your origin is protected. The two audiences have different needs and the header lets you serve both.\n\n`stale-while-revalidate` is underused and valuable. It removes the latency cliff at expiry — instead of one unlucky user waiting for an origin fetch, everyone gets an instant (slightly stale) response while the refresh happens behind them.\n\n### Versioned URLs beat invalidation\n\nThe single most effective technique: **make content immutable and put the version in the URL.**\n\n```\n/static/app.a3f9c2.js      Cache-Control: max-age=31536000, immutable\n```\n\nThe filename contains a hash of the contents. Deploy new code and the filename changes, so clients request a URL that was never cached and get the new file instantly. The old file remains cached harmlessly and ages out.\n\nThis eliminates invalidation entirely for versioned assets. Nothing needs purging because nothing is ever modified in place — you only ever create new objects. Build tools generate these hashes automatically, and the HTML that references them carries a short TTL so the pointer updates quickly while the assets it points to are cached for a year.\n\n**The general principle worth stating:** prefer making content immutable over inventing ways to expire it. Cache invalidation is hard; not needing it is easy.\n\n### When you must actually purge\n\nSome content can't be versioned — an HTML page at a stable URL, an API response, a user-uploaded image that was replaced. Options:\n\n- **Purge by URL.** Precise; requires knowing every affected URL. Propagation across a global edge network takes seconds to minutes, not instantly.\n- **Purge by tag/surrogate key.** Tag responses when serving (`product-1234`), then purge everything with that tag. The right tool when one change affects many URLs — a product update invalidating listing pages, search results, and the detail page at once.\n- **Purge everything.** The emergency lever. It works and it dumps your entire traffic load onto the origin simultaneously, so it can cause the outage it was meant to fix. Treat it as a last resort.\n\nNote the asymmetry: purging is fast to *request* and slow to *complete* globally, so never design a flow that depends on a purge having finished.\n\n### Serving stale on purpose\n\nTwo directives turn the CDN into an availability layer, not just a performance one:\n\n- **`stale-while-revalidate`** — hide refresh latency.\n- **`stale-if-error`** — if the origin returns an error or is unreachable, keep serving the cached copy.\n\n`stale-if-error` is genuinely powerful: your origin can be completely down and users still see a working site for cached content. Combined with a long `s-maxage`, the CDN becomes a static fallback that costs nothing to operate. This is the concrete version of the \"graceful degradation\" idea from the availability topic.\n\n### Costs and caveats\n\n- **Cost.** CDN egress is cheaper than origin egress but not free, and low-traffic assets may cost more to distribute than they save. Caching everything indiscriminately isn't automatically economical.\n- **Cold regions.** An edge with little traffic for your content evicts it, so users there repeatedly pay origin latency. Hit rate is not uniform globally.\n- **Privacy.** A response that varies by user must never be cached publicly. A `private` or `no-store` header missing from an authenticated response can serve one user's data to another — this is a real and recurring incident class, so authenticated responses deserve explicit cache headers rather than defaults.\n- **Debugging.** \"It works for me\" often means your edge has a different copy than theirs. `Age` and cache-status response headers are what you inspect first.\n\n**Key numbers:** cross-continent round trip ~150–200 ms vs ~20 ms to a nearby edge · versioned assets `max-age=31536000` (1 year) · HTML/manifests seconds to minutes · purge propagation seconds to minutes, not instant.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/cdn/01-invalidation.md",
+          "sortOrder": 2,
           "diagrams": []
         },
         {
@@ -693,7 +801,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#disadvantages-cdn",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:cdn/disadvantage-s-cdn",
-          "sortOrder": 1,
+          "sortOrder": 3,
           "diagrams": []
         }
       ],
@@ -733,9 +841,21 @@
       "difficulty": "foundation",
       "estimatedMinutes": 45,
       "accent": "#0ea5e9",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 2,
       "sections": [
+        {
+          "slug": "overview",
+          "title": "Spreading the load",
+          "kind": "overview",
+          "contentMarkdown": "A load balancer sits between clients and servers and decides which server handles each request. That one sentence undersells it: the load balancer is what makes a fleet of machines behave like a single service, and it's the enabler for horizontal scaling, zero-downtime deploys, and failure tolerance.\n\n### What it actually buys you\n\n- **Horizontal scaling.** Adding capacity becomes adding a machine to a pool, with no client changes. Without a load balancer, clients would need to know about every server.\n- **Failure tolerance.** Health checks remove dead servers from rotation. A machine dying becomes a capacity event rather than an outage — for the users who would have hit it, nothing happens.\n- **Zero-downtime deploys.** Drain a server, deploy, health-check, return it to rotation, repeat. Rolling deploys are a load-balancer feature.\n- **A place to put cross-cutting work.** TLS termination, compression, request logging, and rate limiting all naturally live at the entry point rather than being duplicated in every service.\n\nThat last one matters more than it looks. Terminating TLS centrally means certificates are managed in one place and backends speak plain HTTP internally — simpler and measurably cheaper in CPU.\n\n### Distribution algorithms\n\n| Algorithm | Behaviour | Good for |\n|---|---|---|\n| Round robin | each server in turn | uniform requests, uniform servers |\n| Weighted round robin | proportional to capacity | mixed hardware generations |\n| Least connections | fewest active connections | long-lived or variable-duration requests |\n| Least response time | fastest observed | heterogeneous or degrading backends |\n| IP hash | same client → same server | crude session affinity |\n| Consistent hash | key → server, stable under membership change | cache locality (see the consistent-hashing topic) |\n\nRound robin is the sensible default. **Least connections** is the upgrade that matters when request durations vary a lot — round robin will happily send a new request to a server already handling ten slow ones, because it's only counting turns.\n\nConsistent hashing is worth naming when routing should preserve cache locality: sending the same key to the same backend means that backend's local cache stays warm.\n\n### The sticky-session trap\n\nSession affinity pins a client to one server, usually via a cookie or IP hash. It's tempting because it makes in-memory session state work.\n\nIt's also a design smell, and the reasons are worth having ready:\n\n- **Uneven load.** Some sessions are heavier and longer than others, so pinning defeats balancing.\n- **Failure loses state.** The server dies, the session goes with it, and the user is logged out.\n- **Deploys become disruptive.** Draining a server means abandoning its sessions or waiting for them all to end.\n- **Autoscaling doesn't help.** New servers get no traffic from existing sticky clients.\n\nThe fix is to make the tier **stateless** — put session data in a shared store (Redis, or a signed token held by the client) so any server can handle any request. Then affinity is unnecessary and every problem above disappears. In an interview, if you find yourself needing sticky sessions, that's usually the signal to externalise state instead.\n\nThe legitimate exception is genuinely stateful connections — a WebSocket lives on one server by nature, which is why the chat topic needs a connection registry rather than affinity.\n\n### Health checks decide everything\n\nA load balancer is only as good as its notion of \"healthy\". Two distinctions:\n\n**Passive** checks observe real traffic for failures — free, but only detects problems after users hit them. **Active** checks probe an endpoint on a schedule — catches problems before users do, at the cost of some traffic. Use both.\n\nThe endpoint should reflect *this instance's* ability to serve, which is subtler than it sounds. A check that verifies a shared database will fail on every instance simultaneously when that database blips, removing the entire fleet from rotation and converting a degraded dependency into a total outage. Check what this instance controls; degrade gracefully on shared dependencies rather than declaring yourself dead.\n\n### Avoiding the single point of failure\n\nA single load balancer is a single point of failure, and putting one in front of a redundant fleet just relocates the problem. Standard answers: an active-passive pair sharing a floating IP, multiple load balancers behind DNS round-robin, or a managed cloud load balancer that is redundant internally. Mention this — it's the obvious follow-up to \"add a load balancer\", and having the answer ready is cheap.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/load-balancing/00-overview.md",
+          "sortOrder": 0,
+          "diagrams": []
+        },
         {
           "slug": "what-it-does",
           "title": "What a load balancer does",
@@ -745,7 +865,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#load-balancer",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:load-balancer/overview",
-          "sortOrder": 0,
+          "sortOrder": 1,
           "diagrams": []
         },
         {
@@ -757,7 +877,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#layer-4-load-balancing",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:load-balancer/layer-4-load-balancing+layer-7-load-balancing+horizontal-scaling",
-          "sortOrder": 1,
+          "sortOrder": 2,
           "diagrams": []
         },
         {
@@ -769,7 +889,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#reverse-proxy-web-server",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:reverse-proxy/overview+load-balancer-vs-reverse-proxy",
-          "sortOrder": 2,
+          "sortOrder": 3,
           "diagrams": []
         },
         {
@@ -781,7 +901,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#disadvantages-load-balancer",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:load-balancer/disadvantage-s-load-balancer",
-          "sortOrder": 3,
+          "sortOrder": 4,
           "diagrams": []
         }
       ],
@@ -1610,9 +1730,21 @@
       "difficulty": "intermediate",
       "estimatedMinutes": 35,
       "accent": "#f59e0b",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 5,
       "sections": [
+        {
+          "slug": "overview",
+          "title": "Separating concerns",
+          "kind": "overview",
+          "contentMarkdown": "Separating the web tier from the application tier means the thing serving HTTP is not the thing doing the work. It's a small structural change with disproportionate consequences.\n\n### Why split at all\n\n- **Independent scaling.** Serving requests and doing work consume different resources. If image processing is CPU-bound and request handling is I/O-bound, one tier scales on CPU and the other on connections. Bundled together, you over-provision both.\n- **Independent deployment.** Business logic changes far more often than the HTTP layer.\n- **Failure isolation.** A crash in a worker shouldn't take down request handling.\n- **Reuse.** The same application service serves your web app, mobile API, and internal batch jobs.\n\nThe tell that you need the split: one part of the system needs to scale for reasons that have nothing to do with the other.\n\n### Services and their boundaries\n\nSplitting the application tier further gives you services. The hard part is never the mechanics — it's deciding where the seams go.\n\nThe useful heuristics:\n\n- **Follow the data.** A service should own its data exclusively. If two services read and write the same tables, they aren't separate services; they're one service with a distributed monolith's failure modes and none of the benefits.\n- **Follow the team.** A service maintained by two teams will have contention on every change. One team, one service.\n- **Follow the change rate.** Things that change together belong together.\n- **Follow the scale profile.** A component needing ten times the capacity of its neighbours is a candidate for separation.\n\nThe anti-pattern is splitting by technical layer — a \"database service\", a \"validation service\" — which produces services that can never change independently because every feature touches all of them.\n\n### What decomposition costs\n\nThis is the part worth volunteering, because enthusiasm for microservices without acknowledging their price reads as inexperience:\n\n**Availability multiplies downward.** Six services at 99.9% in a synchronous chain ceiling at 99.4%. Every hop you add lowers the achievable number.\n\n**Latency accumulates.** Each hop adds a round trip plus serialisation. A request touching five services has five times the opportunity for a slow tail — and as the tail-latency material shows, fan-out converts rare slowness into common slowness.\n\n**Transactions stop being free.** Within one database, a transaction is `BEGIN`/`COMMIT`. Across services it becomes sagas with compensating actions, or eventual consistency with reconciliation. This is usually the largest hidden cost and the one that surprises teams.\n\n**Operational overhead is per service.** Deployment, monitoring, alerting, on-call, and dependency upgrades multiply.\n\n**Debugging gets harder.** A stack trace becomes a distributed trace, and you need the tracing infrastructure to make it legible.\n\nThe honest position: **start with a modular monolith** and extract services when a specific pressure justifies it — a differing scale profile, a team boundary, an isolation requirement. \"We'd split this out when X becomes true\" is a much stronger interview answer than a diagram with twelve services in it.\n\n### Service discovery, briefly\n\nOnce services call each other, they need to find each other, and hardcoded addresses don't survive autoscaling. Two patterns:\n\n- **Client-side discovery** — the caller queries a registry (Consul, etcd) and picks an instance. Fewer hops, more logic in every client.\n- **Server-side discovery** — the caller hits a stable address and a load balancer or mesh routes it. Simpler clients; an extra hop.\n\nIn practice, platforms provide this: Kubernetes gives you a stable DNS name per service that resolves to healthy pods, which is server-side discovery with nothing to build. Say that rather than designing a registry from scratch — knowing when the platform already solved it is part of the answer.\n\nWhatever the mechanism, the parts that matter are **health checking** (only route to instances that can serve) and **deregistration** (remove instances that die, promptly), which are the same concerns as the load balancer and the chat connection registry.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/application-layer/00-overview.md",
+          "sortOrder": 0,
+          "diagrams": []
+        },
         {
           "slug": "services",
           "title": "Microservices & discovery",
@@ -1622,7 +1754,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#application-layer",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:application-layer/overview+microservices+service-discovery",
-          "sortOrder": 0,
+          "sortOrder": 1,
           "diagrams": []
         },
         {
@@ -1634,7 +1766,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#disadvantages-application-layer",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:application-layer/disadvantage-s-application-layer",
-          "sortOrder": 1,
+          "sortOrder": 2,
           "diagrams": []
         }
       ],
@@ -1704,9 +1836,21 @@
       "difficulty": "intermediate",
       "estimatedMinutes": 40,
       "accent": "#f59e0b",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 6,
       "sections": [
+        {
+          "slug": "overview",
+          "title": "Doing work later",
+          "kind": "overview",
+          "contentMarkdown": "Doing work later is one of the highest-leverage moves in system design. It converts a slow, fragile synchronous request into a fast acknowledgement plus a durable job — and it decouples the availability of the caller from the availability of the worker.\n\n### When to go asynchronous\n\nMove work off the request path when any of these hold:\n\n- **It's slow.** Video transcoding, report generation, bulk email. No user should hold a connection for it.\n- **It can fail and be retried.** A third-party call that times out should be retried by a worker, not by a user refreshing.\n- **It's spiky.** A queue absorbs a burst that would otherwise overwhelm the downstream system.\n- **The user doesn't need the result now.** Sending a confirmation email doesn't need to complete before the page renders.\n- **The downstream is unavailable.** A queue lets you accept work while a dependency is down and drain it when recovery happens — which turns a hard dependency into a soft one.\n\nThe counter-test matters too: **if the user needs the answer to continue, it's synchronous.** Making a checkout asynchronous just moves the wait somewhere the user can't see it and adds a polling problem.\n\n### What it costs\n\nThe trade is honesty about completion. Synchronously, success means done. Asynchronously, success means *accepted* — and the actual work may fail minutes later, when there's no request context to report it.\n\nThat creates real obligations:\n\n- **The client needs a way to learn the outcome** — polling a status endpoint, a webhook, a push notification, or a UI that updates when it lands.\n- **Failures need somewhere to go.** Nobody is watching, so a failed job that isn't recorded and alerted on has silently vanished.\n- **Debugging spans systems.** \"Where did my job go?\" needs a correlation ID that survives from the request into the queue and the worker.\n- **Eventual consistency arrives.** The user's action is accepted but not yet reflected, which is visible and needs handling in the UI.\n\n### Queues, logs, and the difference\n\nTwo families that get conflated:\n\n**Message queues** (RabbitMQ, SQS) distribute work. A message goes to one consumer, is acknowledged, and disappears. The mental model is a to-do list shared by a worker pool, and it's what you want for task distribution.\n\n**Event logs** (Kafka) are append-only and retain messages after reading. Many independent consumer groups read the same stream at their own positions, and a consumer can rewind and replay. The mental model is a durable ledger.\n\nThe distinction is consequential. If two teams need the same events, or if you'll want to reprocess history after fixing a bug, you want a log. If you're handing out jobs to workers, a queue is simpler. Asking \"will anything else ever need these events?\" is the question that decides it, and getting it wrong is expensive to reverse.\n\n### Back pressure\n\nA queue is a buffer, and buffers hide problems until they can't. If producers outpace consumers indefinitely, the queue grows without bound: memory or disk fills, latency through the queue climbs from milliseconds to hours, and by the time anyone notices, the backlog takes hours to drain.\n\nBack pressure is deliberately pushing that constraint back to the producer — bounded queue sizes that reject or block when full, producer-side rate limiting, or shedding low-priority work. The alternative to back pressure isn't \"no back pressure\"; it's an unbounded queue and a much worse failure later.\n\n**Queue depth is the single most important metric here.** A steadily growing queue means consumers are underprovisioned or failing, and it's a leading indicator — it tells you before users are affected. Alert on the trend, not just an absolute threshold.\n\n### The shape it gives your system\n\nAsynchronism changes the diagram: a request writes durably, enqueues, and returns. Workers pull, process, and record results. Producers and consumers scale independently, deploy independently, and fail independently.\n\nThat independence is the real payoff — more than the latency improvement. The web tier stays up when the transcoder is down; work accumulates instead of being lost.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/asynchronism/00-overview.md",
+          "sortOrder": 0,
+          "diagrams": []
+        },
         {
           "slug": "queues",
           "title": "Queues & back pressure",
@@ -1716,7 +1860,19 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#asynchronism",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:asynchronism/overview+message-queues+task-queues+back-pressure",
-          "sortOrder": 0,
+          "sortOrder": 1,
+          "diagrams": []
+        },
+        {
+          "slug": "delivery-semantics",
+          "title": "Delivery semantics & idempotency",
+          "kind": "deep-dive",
+          "contentMarkdown": "Every queue makes a promise about how many times a message is delivered. Understanding which promise you have — and which you can actually get — is what separates a working async system from one that quietly double-charges customers.\n\n### The three guarantees\n\n**At-most-once.** The message is delivered zero or one times. Fast, no acknowledgement bookkeeping, and messages are lost when a consumer crashes mid-processing. Acceptable only for data where loss is tolerable — metrics samples, some telemetry.\n\n**At-least-once.** The message is delivered one or more times. The consumer acknowledges after processing; if it crashes before acknowledging, the message is redelivered. Nothing is lost, and **duplicates happen**. This is what almost every production system uses.\n\n**Exactly-once.** Delivered precisely once. What everyone wants and what, across a network boundary, cannot be provided in general.\n\n### Why exactly-once isn't real\n\nThe failure that makes it impossible: a consumer processes a message and crashes before acknowledging. The broker cannot distinguish \"processed but didn't ack\" from \"never processed\". It must choose — redeliver (at-least-once, risking duplicates) or not (at-most-once, risking loss). There is no third option, because the information needed to decide was lost with the consumer.\n\nSystems advertising exactly-once are being precise about a narrower claim: **exactly-once *processing* within a closed system**, achieved by making the consumer's write and its offset commit atomic — Kafka's transactional producer does this across Kafka topics. The moment your side effect leaves that system — an HTTP call, a payment, an email — the guarantee ends.\n\nThe correct answer in an interview is: *at-least-once delivery plus idempotent processing gives exactly-once semantics in effect.* That sentence demonstrates you understand the boundary rather than repeating a marketing claim.\n\n### Idempotency in practice\n\nIdempotent means processing the same message twice has the same effect as once. Ways to get there:\n\n**Natural idempotency.** `SET status = 'shipped'` is idempotent; `balance = balance - 10` is not. Where you can express the operation as a set rather than an increment, do.\n\n**Deduplication by key.** Every message carries a unique ID; the consumer records processed IDs and skips repeats. The check must be atomic with the work — a conditional insert, not read-then-write, or two concurrent consumers both pass the check. The store needs a retention window (long enough to cover the redelivery horizon) and it becomes a dependency of every consumer.\n\n**Conditional writes.** Include an expected version and reject if it doesn't match. The second delivery fails harmlessly.\n\n**Upserts.** `INSERT … ON CONFLICT DO UPDATE` collapses repeats naturally.\n\n### Ordering\n\nMost queues guarantee ordering only within a partition or a single consumer. Parallelism and global ordering are fundamentally in tension: if two consumers process concurrently, you cannot know which finishes first.\n\nThe standard resolution is **partition by a key** — all events for one user, order, or conversation go to the same partition and are therefore ordered relative to each other, while different keys process in parallel. That's per-key ordering with parallelism across keys, which is almost always the actual requirement.\n\nWatch for the hot-partition consequence: one very active key concentrates on one consumer and becomes the bottleneck. The same trade-off as sharding, for the same reason.\n\nWhere you can, design so ordering doesn't matter — commutative operations and messages carrying absolute state rather than deltas both remove the requirement.\n\n### Failure handling\n\n**Retry with exponential backoff and jitter**, exactly as in the notification system — immediate retries hammer a struggling dependency, and unjittered retries synchronise across consumers.\n\n**Dead-letter queues** for messages that exhaust retries. Without one, a poison message either blocks its partition forever or is silently dropped. A DLQ preserves it for inspection and replay after a fix, and a growing DLQ is a high-quality alert.\n\n**Visibility timeouts.** While a consumer holds a message, it's hidden from others. Too short and a slow job is redelivered while still being processed — a duplicate you caused yourself. Too long and a crashed consumer's message is stuck. Set it above your p99 processing time and extend it explicitly for long jobs.\n\n### What to monitor\n\n- **Queue depth and its trend** — the leading indicator of everything.\n- **Consumer lag** — how far behind the head consumers are.\n- **Message age at processing** — reveals a backlog that depth alone can hide.\n- **DLQ size** — anything above zero deserves attention.\n- **Redelivery rate** — a spike means consumers are crashing or timing out.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/asynchronism/01-delivery-semantics.md",
+          "sortOrder": 2,
           "diagrams": []
         },
         {
@@ -1728,7 +1884,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#disadvantages-asynchronism",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:asynchronism/disadvantage-s-asynchronism",
-          "sortOrder": 1,
+          "sortOrder": 3,
           "diagrams": []
         }
       ],
@@ -1854,9 +2010,21 @@
       "difficulty": "foundation",
       "estimatedMinutes": 25,
       "accent": "#f59e0b",
-      "status": "stub",
+      "status": "published",
       "sortOrder": 8,
       "sections": [
+        {
+          "slug": "overview",
+          "title": "Security in a design interview",
+          "kind": "overview",
+          "contentMarkdown": "Security rarely gets its own system design question, but it appears as a follow-up in almost every one — and a candidate who has to be prompted for it looks careless. What's expected isn't depth; it's evidence that you think about it by default.\n\n### Authentication and authorization\n\nTwo different questions, routinely conflated. **Authentication** is who you are; **authorization** is what you may do. A system can authenticate perfectly and still let any logged-in user read anyone's data.\n\nThe pattern to describe: authenticate once at the edge, issue a token, and let services verify it without a round trip to an auth service on every call. A signed token (JWT or similar) carries identity and claims and is verified with a public key locally.\n\nThe trade-off to volunteer, because it's the standard follow-up: **stateless tokens cannot be revoked.** A token valid for an hour stays valid for an hour after you ban the user or they log out. The mitigations are short expiry plus refresh tokens, or a revocation list checked on sensitive operations — which reintroduces the state you were avoiding, for a subset of requests. Pick and justify.\n\nFor authorization, say where the check happens. Checking only in the UI is not a check. Every service must enforce on its own data, because \"the caller is internal\" is not an authorization decision.\n\n### Encryption\n\n**In transit:** TLS everywhere, including between internal services. The flat internal network where anything can talk to anything unencrypted is a common finding, and \"we're inside the VPC\" isn't a security model.\n\n**At rest:** disk and database encryption, which mostly protects against physical media loss. Note what it does *not* protect against — an application with valid credentials reads plaintext regardless.\n\n**Application-level encryption** for genuinely sensitive fields, so the data is unreadable even to someone with database access. Costs you the ability to query those fields, which is why it's applied selectively rather than universally.\n\nNever store passwords, even encrypted. **Hash** them with a slow, salted algorithm — bcrypt, scrypt, or Argon2. The slowness is the feature: it makes offline brute-force expensive. A fast hash like SHA-256 is the wrong tool here, and saying so shows you know why.\n\n### Least privilege\n\nEvery component gets the minimum access it needs. A read-only service gets read-only credentials. Concretely, this is what limits blast radius: a compromised component can only do what it was permitted to do, so the difference between an incident and a catastrophe is often a scoped credential.\n\nThe same applies to network reachability — a database should accept connections only from services that need it, not from anything in the VPC.\n\n### Input handling\n\nMost application vulnerabilities reduce to trusting input:\n\n- **SQL injection** — use parameterised queries. Never build SQL by string concatenation. This is entirely solved and still happens.\n- **XSS** — escape on output, contextually. Prefer frameworks that escape by default.\n- **SSRF** — a user-supplied URL fetched server-side can reach internal services and cloud metadata endpoints. Allowlist destinations.\n- **Deserialisation** of untrusted data into objects can execute code. Prefer plain data formats.\n\nThe principle: **validate on the server**, always. Client-side validation is a UX feature.\n\n### Rate limiting is a security control\n\nWorth stating explicitly, because it's usually filed under performance. Rate limiting is the cheapest defence against credential stuffing, brute force, and scraping. It doesn't prevent a determined attacker; it changes the economics from hours to years.\n\nApply it hardest to authentication endpoints, and key it on both IP and attempted username — see the rate-limiter topic for why neither alone suffices.\n\n### What to say when asked\n\nA compact answer that covers the ground:\n\n> \"TLS everywhere including service-to-service. Authenticate at the edge with short-lived signed tokens; each service authorizes against its own data. Passwords hashed with Argon2. Secrets in a secret manager with rotation, never in config or environment variables in the repo. Least-privilege credentials per service so a compromise is contained. Parameterised queries and server-side validation. Rate limiting on auth endpoints. PII encrypted at the application layer where it's sensitive enough to justify losing queryability, with a retention and deletion policy for regulatory requests.\"\n\nThen add the one that most designs forget: **audit logging.** Recording who did what, to what, and when is how you answer questions after an incident — and if it isn't designed in, it can't be reconstructed later.\n",
+          "provenance": "authored",
+          "attributionUrl": null,
+          "attributionNote": null,
+          "contentRef": "authored:content/authored/security/00-overview.md",
+          "sortOrder": 0,
+          "diagrams": []
+        },
         {
           "slug": "principles",
           "title": "Core principles",
@@ -1866,7 +2034,7 @@
           "attributionUrl": "https://github.com/donnemartin/system-design-primer#security",
           "attributionNote": "The System Design Primer — MIT © Donne Martin",
           "contentRef": "primer:security/overview",
-          "sortOrder": 0,
+          "sortOrder": 1,
           "diagrams": []
         }
       ],
