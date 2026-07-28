@@ -559,7 +559,10 @@
             "slug": "snowflake",
             "title": "Snowflake in detail",
             "kind": "deep-dive"
-          }
+          },
+          "diagrams": [
+            "snowflake-layout"
+          ]
         },
         {
           "from": "authored",
@@ -1167,7 +1170,10 @@
             "title": "Core components & scaling",
             "kind": "deep-dive"
           },
-          "harvestLinks": true
+          "harvestLinks": true,
+          "diagrams": [
+            "graph-sharding"
+          ]
         },
         {
           "from": "primer",
@@ -1215,7 +1221,10 @@
             "title": "Microservices & discovery",
             "kind": "concepts"
           },
-          "harvestLinks": true
+          "harvestLinks": true,
+          "diagrams": [
+            "service-boundaries"
+          ]
         },
         {
           "from": "primer",
@@ -1355,7 +1364,10 @@
             "title": "Worked example: sales ranking with MapReduce",
             "kind": "deep-dive"
           },
-          "harvestLinks": true
+          "harvestLinks": true,
+          "diagrams": [
+            "mapreduce-pipeline"
+          ]
         },
         {
           "from": "primer",

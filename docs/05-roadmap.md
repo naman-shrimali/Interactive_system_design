@@ -11,7 +11,7 @@
 | 4. Design system — tokens, dark mode, serif reading column, responsive | ✅ shipped |
 | 5. Diagram engine — 17 node types, edges, groups, canvas, flow stepper | ✅ shipped |
 | 6. Content authoring | ✅ shipped — 0 topics under 800 words; 30/30 published |
-| 7. Diagram authoring | 🟡 in progress — 23 diagrams across 21 of 30 topics |
+| 7. Diagram authoring | ✅ shipped — 27 diagrams across 25 of 30 topics; 5 left deliberately prose-only |
 | 8. Polish — dashboard, search, notes export | ⬜ not started |
 
 The original phases 1–3 were re-cut when the curriculum moved from a source-first to a topic-first
@@ -54,10 +54,17 @@ Delivered in batches of ~5 topics. Each batch is markdown under `content/authore
 
 **Status: done.** Zero topics under 800 words; 54,909 words across 101 sections, median topic 1,761 words. 19 authored files remain unwritten, but every topic they belong to already clears the bar on primer content — they are enhancements, not gaps, and `npm run ingest` lists them.
 
-## Phase 7 — Diagram authoring
+## Phase 7 — Diagram authoring (shipped)
 
-~3 diagrams per topic for the top ~20 topics (~60 total), including evolution diagrams (one system drawn
-at three scales) and numbered request flows. Validate each batch with `npm run validate:diagrams`.
+27 diagrams across 25 of 30 topics, 68 walkthroughs, all 17 node types exercised, every diagram
+anchored to a section. Includes the scaling-journey evolution sequence (one system at three scales).
+
+Five topics are **deliberately** prose-only: `back-of-envelope` and `performance-and-latency` are
+carried by tables and worked arithmetic, `security` is a checklist, `nosql-databases` is a four-way
+comparison a table serves better, and `interview-framework` is a process rather than a system. A
+forced diagram there would be filler.
+
+Authoring loop: write JSON → `npm run validate:diagrams` → view at `/diagram-preview` → `npm run seed`.
 
 ## Phase 8 — Polish
 

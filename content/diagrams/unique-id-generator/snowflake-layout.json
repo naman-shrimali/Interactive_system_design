@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "snowflake-layout",
+  "title": "64 bits, and where they go",
+  "description": "Pack meaning into the integer instead of drawing it at random. Time in the high bits makes IDs sortable; a machine ID makes collisions impossible; a sequence covers bursts within a millisecond.",
+  "nodes": [
+    {
+      "id": "bits",
+      "type": "table",
+      "label": "The layout",
+      "position": { "x": 40, "y": 60 },
+      "tableData": {
+        "columns": ["bits", "field", "what it buys"],
+        "rows": [
+          ["1", "unused sign bit", "stays a positive int64 in every language"],
+          ["41", "timestamp (ms)", "~69 years from a custom epoch"],
+          ["10", "machine ID", "1,024 generators"],
+          ["12", "sequence", "4,096 per ms ≈ 4.1M/sec per machine"]
+        ]
+      }
+    },
+    { "id": "assigner", "type": "service", "label": "Machine ID assignment", "sublabel": "ZooKeeper lease or pod ordinal", "position": { "x": 430, "y": 405 }, "badge": 1 },
+    { "id": "g1", "type": "server", "label": "Generator", "sublabel": "machine 7", "position": { "x": 830, "y": 60 } },
+    { "id": "g2", "type": "server", "label": "Generator", "sublabel": "machine 42", "position": { "x": 830, "y": 250 } },
+    { "id": "g3", "type": "server", "label": "Generator", "sublabel": "machine 91", "position": { "x": 830, "y": 440 } },
+    { "id": "clock", "type": "text_box", "label": "The one real failure", "sublabel": "If the clock steps backwards —\nNTP correction, VM resume — a\ntimestamp is replayed and IDs\nrepeat. Advance monotonically\nfrom the last issued value.", "position": { "x": 380, "y": 570 } }
+  ],
+  "edges": [
+    { "id": "e_a1", "source": "assigner", "target": "g1", "label": "claims 7", "step": 1, "color": "purple", "sourceHandle": "right", "targetHandle": "left" },
+    { "id": "e_a2", "source": "assigner", "target": "g2", "label": "claims 42", "step": 1, "color": "purple", "sourceHandle": "right", "targetHandle": "left" },
+    { "id": "e_a3", "source": "assigner", "target": "g3", "label": "claims 91", "step": 1, "color": "purple", "sourceHandle": "right", "targetHandle": "left" },
+    { "id": "e_layout", "source": "bits", "target": "assigner", "label": "same layout everywhere", "color": "gray", "lineStyle": "dashed", "direction": "none", "sourceHandle": "bottom", "targetHandle": "top" }
+  ],
+  "flows": [
+    {
+      "id": "generate",
+      "name": "Generating an ID",
+      "steps": [
+        { "edgeIds": ["e_layout"], "text": "Every generator uses the identical bit layout. Because the timestamp occupies the high bits, comparing two IDs as integers compares them by time — sortability falls out of the layout rather than needing an index." },
+        { "edgeIds": ["e_a1", "e_a2", "e_a3"], "text": "Each generator holds a distinct machine ID, so two machines cannot produce the same integer even in the same millisecond. That is the whole collision argument — structural, not probabilistic." },
+        { "edgeIds": ["e_layout"], "text": "Generation itself is three shifts and two ORs. No network call, no shared counter, no lock beyond making the function thread-safe locally. That is why this design scales where a ticket server does not." }
+      ]
+    },
+    {
+      "id": "assignment",
+      "name": "Where the coordination actually is",
+      "steps": [
+        { "edgeIds": ["e_a1", "e_a2", "e_a3"], "text": "The one piece of genuine coordination: handing out machine IDs. Two generators sharing an ID produce identical IDs whenever their clocks and sequences align — the exact failure the design exists to prevent." },
+        { "edgeIds": ["e_a2"], "text": "A ZooKeeper or etcd ephemeral lease is the robust answer: claim the lowest free ID at startup, and the claim disappears if the process dies. A StatefulSet ordinal is free if you already run one. Static config is fine at small scale and quietly dangerous at large, because someone will copy a config file." },
+        { "edgeIds": ["e_a3"], "text": "The property that matters is that an ID is never reused while its original holder is still running. Autoscaling churn can exhaust 1,024 IDs faster than expected, so make them reclaimable." }
+      ]
+    },
+    {
+      "id": "clock",
+      "name": "When the clock moves backwards",
+      "steps": [
+        { "edgeIds": ["e_layout"], "text": "NTP corrections step clocks backwards. VMs resume with a corrected clock. Someone fixes a 'wrong' clock by hand. If the timestamp rewinds and the sequence has reset, you regenerate IDs you already issued." },
+        { "edgeIds": ["e_a1"], "text": "The practical answer: never trust the wall clock directly. Keep the last issued timestamp and advance monotonically — now = max(system_clock, last_timestamp) — so a rewind is absorbed by the sequence while real time catches up." },
+        { "edgeIds": ["e_layout"], "text": "Alarm if the gap is large, and configure NTP to slew rather than step. Prevention beats detection, and duplicate primary keys are not a failure you want to discover downstream." }
+      ]
+    }
+  ]
+}
