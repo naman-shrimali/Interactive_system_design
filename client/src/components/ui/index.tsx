@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 
 export function Badge({
@@ -73,10 +73,12 @@ export function Card({
   children,
   className,
   interactive,
+  style,
 }: {
   children: ReactNode;
   className?: string;
   interactive?: boolean;
+  style?: CSSProperties;
 }) {
   return (
     <div
@@ -85,6 +87,7 @@ export function Card({
         interactive && 'transition-shadow hover:shadow-lift',
         className,
       )}
+      style={style}
     >
       {children}
     </div>

@@ -79,10 +79,11 @@ Interactive_system_design/
         ├── api/client.ts    # typed fetch wrappers
         ├── lib/cn.ts        # class helper + shared label maps
         ├── store/           # useAppStore (curriculum), useThemeStore (light/dark)
-        ├── pages/           # HomePage, TopicPage, NotesPage, DiagramPreviewPage
+        ├── pages/           # HomePage, TopicPage, NotesPage, DashboardPage, DiagramPreviewPage
         └── components/
             ├── ui/          # Badge, Card, ProgressBar, Skeleton, EmptyState
             ├── layout/      # Sidebar, TopBar
+            ├── search/      # CommandPalette (Cmd/Ctrl+K, client-side topic search)
             ├── reader/      # MarkdownView, LinksPanel, NotesPanel, ProgressControls
             └── diagram/
                 ├── DiagramViewer.tsx    # canvas + stepper + viewed tracking

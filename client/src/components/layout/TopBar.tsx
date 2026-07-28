@@ -1,11 +1,12 @@
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, Moon, Sun, StickyNote, Boxes } from 'lucide-react';
+import { Menu, Moon, Sun, StickyNote, Boxes, Search, LayoutDashboard } from 'lucide-react';
 import { useThemeStore } from '../../store/useThemeStore';
 import { cn } from '../../lib/cn';
 
-export function TopBar({ onMenu }: { onMenu: () => void }) {
+export function TopBar({ onMenu, onSearch }: { onMenu: () => void; onSearch: () => void }) {
   const theme = useThemeStore((s) => s.theme);
   const toggle = useThemeStore((s) => s.toggle);
+  const isMac = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform);
 
   return (
     <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-3 border-b border-line bg-canvas/85 px-4 backdrop-blur">
@@ -23,7 +24,37 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
         <span className="sm:hidden">ISD</span>
       </Link>
 
+      <button
+        onClick={onSearch}
+        className="ml-2 hidden items-center gap-2 rounded-lg border border-line px-2.5 py-1.5 text-[13px] text-ink-faint hover:bg-surface hover:text-ink-muted md:flex"
+      >
+        <Search size={13} />
+        <span>Search topics</span>
+        <kbd className="ml-2 rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-[10px]">
+          {isMac ? '⌘K' : 'Ctrl K'}
+        </kbd>
+      </button>
+
       <nav className="ml-auto flex items-center gap-1 text-sm">
+        <button
+          onClick={onSearch}
+          aria-label="Search topics"
+          className="rounded-lg p-2 text-ink-muted hover:bg-surface md:hidden"
+        >
+          <Search size={16} />
+        </button>
+        <NavLink
+          to="/dashboard"
+          className={({ isActive }) =>
+            cn(
+              'flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
+              isActive ? 'bg-surface text-ink' : 'text-ink-muted hover:bg-surface',
+            )
+          }
+        >
+          <LayoutDashboard size={15} />
+          <span className="hidden sm:inline">Progress</span>
+        </NavLink>
         <NavLink
           to="/notes"
           className={({ isActive }) =>
