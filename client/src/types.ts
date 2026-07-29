@@ -56,6 +56,29 @@ export interface DiagramMeta {
   title: string;
   viewed: boolean;
 }
+export interface CodeWalkthroughMeta {
+  id: number;
+  slug: string;
+  title: string;
+}
+export type CodeStepKind = 'code' | 'infra';
+export interface CodeStep {
+  title: string;
+  kind: CodeStepKind;
+  code?: string;
+  language?: string;
+  explain: string;
+  saysOutLoud?: string;
+}
+export interface CodeWalkthrough {
+  schemaVersion: 1;
+  id: string;
+  title: string;
+  intro?: string;
+  language?: string;
+  closing?: string;
+  steps: CodeStep[];
+}
 export interface TopicNeighbor {
   slug: string;
   title: string;
@@ -75,6 +98,8 @@ export interface TopicDetail {
   links: ExternalLink[];
   /** Diagrams not anchored to a specific section. */
   topicDiagrams: DiagramMeta[];
+  /** Step-by-step code dry runs for this topic. */
+  codeWalkthroughs: CodeWalkthroughMeta[];
   prev: TopicNeighbor | null;
   next: TopicNeighbor | null;
 }

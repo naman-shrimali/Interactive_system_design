@@ -93,6 +93,18 @@ CREATE TABLE IF NOT EXISTS diagrams (
 );
 CREATE INDEX IF NOT EXISTS idx_diagrams_topic ON diagrams(topic_id);
 
+-- Step-by-step code dry runs, one or more per topic. Added in v3 (additive).
+CREATE TABLE IF NOT EXISTS code_walkthroughs (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  topic_id   INTEGER NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+  slug       TEXT NOT NULL,
+  title      TEXT NOT NULL,
+  spec_json  TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  UNIQUE (topic_id, slug)
+);
+CREATE INDEX IF NOT EXISTS idx_code_topic ON code_walkthroughs(topic_id);
+
 CREATE TABLE IF NOT EXISTS section_progress (
   user_id    INTEGER NOT NULL REFERENCES users(id)    ON DELETE CASCADE,
   section_id INTEGER NOT NULL REFERENCES sections(id) ON DELETE CASCADE,

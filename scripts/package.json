@@ -7,7 +7,9 @@
     "ingest": "tsx ingest/parse-primer.ts && tsx ingest/build-curriculum.ts",
     "ingest:parse": "tsx ingest/parse-primer.ts",
     "ingest:build": "tsx ingest/build-curriculum.ts",
-    "validate:diagrams": "tsx validate-diagrams.ts"
+    "validate:diagrams": "tsx validate-diagrams.ts",
+    "validate:code": "tsx validate-code.ts",
+    "validate": "npm run validate:diagrams && npm run validate:code"
   },
   "dependencies": {
     "ajv": "^8.17.1"

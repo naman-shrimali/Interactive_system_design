@@ -56,6 +56,11 @@ export interface DiagramMeta {
   title: string;
   viewed: boolean;
 }
+export interface CodeWalkthroughMeta {
+  id: number;
+  slug: string;
+  title: string;
+}
 export interface TopicNeighbor {
   slug: string;
   title: string;
@@ -75,6 +80,8 @@ export interface TopicDetail {
   links: ExternalLink[];
   /** Diagrams not anchored to a specific section. */
   topicDiagrams: DiagramMeta[];
+  /** Step-by-step code dry runs for this topic. */
+  codeWalkthroughs: CodeWalkthroughMeta[];
   prev: TopicNeighbor | null;
   next: TopicNeighbor | null;
 }

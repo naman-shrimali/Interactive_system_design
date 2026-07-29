@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Clock, ExternalLink as LinkIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock, Code2, ExternalLink as LinkIcon } from 'lucide-react';
 import { fetchTopic } from '../api/client';
 import { useAppStore } from '../store/useAppStore';
 import { MarkdownView } from '../components/reader/MarkdownView';
@@ -8,6 +8,7 @@ import { ProgressControls } from '../components/reader/ProgressControls';
 import { LinksPanel } from '../components/reader/LinksPanel';
 import { NotesPanel } from '../components/reader/NotesPanel';
 import { SectionDiagram } from '../components/diagram/SectionDiagram';
+import { CodeSidebar } from '../components/code/CodeSidebar';
 import { Badge, Skeleton } from '../components/ui';
 import { DIFFICULTY_LABEL, KIND_LABEL } from '../lib/cn';
 import type { TopicDetail } from '../types';
@@ -21,12 +22,14 @@ export function TopicPage() {
   const { slug } = useParams<{ slug: string }>();
   const [state, setState] = useState<Phase>({ phase: 'loading' });
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [codeOpen, setCodeOpen] = useState(false);
   const refresh = useAppStore((s) => s.refreshCurriculum);
   const scrollRoot = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!slug) return;
     setState({ phase: 'loading' });
+    setCodeOpen(false);
     let alive = true;
     fetchTopic(slug)
       .then((topic) => alive && setState({ phase: 'ready', topic }))
@@ -118,6 +121,16 @@ export function TopicPage() {
               {topic.sections.length} {topic.sections.length === 1 ? 'section' : 'sections'}
             </Badge>
             {topic.status === 'stub' && <Badge tone="warn">Being expanded</Badge>}
+            {topic.codeWalkthroughs.length > 0 && (
+              <button
+                onClick={() => setCodeOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-medium text-white transition-opacity hover:opacity-90"
+                style={{ background: topic.accent }}
+              >
+                <Code2 size={12} />
+                Dry-run in code
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -256,6 +269,14 @@ export function TopicPage() {
           </div>
         </aside>
       </div>
+
+      {topic.codeWalkthroughs.length > 0 && (
+        <CodeSidebar
+          meta={topic.codeWalkthroughs[0]}
+          open={codeOpen}
+          onClose={() => setCodeOpen(false)}
+        />
+      )}
     </div>
   );
 }

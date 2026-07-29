@@ -4,7 +4,15 @@ import path from 'path';
 
 const DB_PATH = path.join(__dirname, '..', '..', 'data', 'app.db');
 const SCHEMA_PATH = path.join(__dirname, 'schema.sql');
-export const SCHEMA_VERSION = '2';
+export const SCHEMA_VERSION = '3';
+
+/**
+ * Versions that can be upgraded in place by simply applying schema.sql, because
+ * every change since was additive (new tables/indexes only, all IF NOT EXISTS).
+ * v2 -> v3 added `code_walkthroughs`. A non-additive change must NOT be listed
+ * here — it needs a rebuild so stale rows can't survive under a new meaning.
+ */
+const ADDITIVE_UPGRADE_FROM = new Set(['2']);
 
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
@@ -39,6 +47,12 @@ function assertSchemaVersion(): void {
     | { value: string }
     | undefined;
   if (row && row.value !== SCHEMA_VERSION) {
+    if (ADDITIVE_UPGRADE_FROM.has(row.value)) {
+      // Applying schema.sql below adds the new tables; existing rows keep their
+      // meaning, so progress and notes survive.
+      console.log(`Upgrading database schema v${row.value} → v${SCHEMA_VERSION} (additive).`);
+      return;
+    }
     throw new Error(
       `Database schema is v${row.value} but this build expects v${SCHEMA_VERSION}. ` +
         `Delete server/data/app.db and re-seed.`,

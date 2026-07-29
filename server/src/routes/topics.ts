@@ -5,6 +5,7 @@ import type {
   TopicSection,
   ExternalLink,
   DiagramMeta,
+  CodeWalkthroughMeta,
   ProgressStatus,
   SectionKind,
   Difficulty,
@@ -95,6 +96,13 @@ topicsRouter.get('/topics/:idOrSlug', (req, res) => {
     )
     .all(USER_ID, topic.id) as DiagramRow[];
 
+  const codeRows = db
+    .prepare(
+      `SELECT id, slug, title FROM code_walkthroughs
+       WHERE topic_id = ? ORDER BY sort_order`,
+    )
+    .all(topic.id) as CodeWalkthroughMeta[];
+
   const toMeta = (d: DiagramRow): DiagramMeta => ({
     id: d.id,
     slug: d.slug,
@@ -147,6 +155,7 @@ topicsRouter.get('/topics/:idOrSlug', (req, res) => {
       (l): ExternalLink => ({ id: l.id, url: l.url, title: l.title, completed: l.completed === 1 }),
     ),
     topicDiagrams,
+    codeWalkthroughs: codeRows,
     prev: idx > 0 ? order[idx - 1] : null,
     next: idx >= 0 && idx < order.length - 1 ? order[idx + 1] : null,
   };

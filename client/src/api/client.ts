@@ -6,6 +6,7 @@ import type {
   ProgressSummaryTrack,
   Note,
   NoteWithAnchor,
+  CodeWalkthrough,
 } from '../types';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -76,6 +77,12 @@ export function updateNote(id: number, contentMarkdown: string): Promise<Note> {
 }
 export function deleteNote(id: number): Promise<void> {
   return request<void>(`/api/notes/${id}`, { method: 'DELETE' });
+}
+
+export function fetchCodeWalkthrough(
+  id: number,
+): Promise<{ id: number; slug: string; title: string; spec: CodeWalkthrough }> {
+  return request(`/api/code/${id}`);
 }
 
 // Dev-only: raw diagram files for the authoring preview (TASK-024)

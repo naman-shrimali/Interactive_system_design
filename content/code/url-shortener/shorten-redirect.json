@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "shorten-redirect",
+  "title": "Dry-run: shorten and redirect",
+  "intro": "About 5 minutes. Two endpoints, two very different load profiles — write the arithmetic first, because it decides the key length for you.",
+  "language": "javascript",
+  "steps": [
+    {
+      "title": "Derive the key length from the numbers",
+      "kind": "code",
+      "explain": "Do this before writing any code. It turns 'how long should the key be' from a guess into arithmetic, and it is the clearest demonstration that estimation drives design rather than decorating it.",
+      "saysOutLoud": "182 billion URLs over five years, so 62 to the 7 — seven characters.",
+      "code": "// 100M new URLs/day × 365 × 5 ≈ 182 billion keys needed\n//\n//   62^6 ≈ 56 billion      → not enough\n//   62^7 ≈ 3.5 trillion    → comfortable\n//\n// → 7 characters of [a-zA-Z0-9]\n\nconst ALPHABET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';\n"
+    },
+    {
+      "title": "Encode a counter, don't hash the URL",
+      "kind": "code",
+      "explain": "Base-62 encoding a counter makes collisions structurally impossible — no lookup, no retry loop. Hashing is stateless but needs a collision check on the write path, which reintroduces the coordination you were avoiding.",
+      "code": "function encode(n) {\n  let out = '';\n  do {\n    out = ALPHABET[n % 62] + out;\n    n = Math.floor(n / 62);\n  } while (n > 0);\n  return out.padStart(7, 'a');\n}\n\n// encode(1)        → 'aaaaaab'\n// encode(12345678) → 'aaapqPu'\n"
+    },
+    {
+      "title": "Remove the counter bottleneck with block allocation",
+      "kind": "code",
+      "explain": "A single global sequence is a bottleneck and a single point of failure. Leasing a block of 10,000 cuts coordination by 10,000× and each service spends its block locally. Gaps appear when a service restarts with unspent IDs — harmless here, because nobody is counting the URLs.",
+      "saysOutLoud": "I lease blocks of ten thousand so the counter isn't on the hot path.",
+      "code": "let cursor = 0, blockEnd = 0;\n\nasync function nextKey(db) {\n  if (cursor >= blockEnd) {\n    // atomic: reserve the next block for this instance only\n    const { start } = await db.reserveBlock(10_000);\n    cursor = start;\n    blockEnd = start + 10_000;\n  }\n  return encode(cursor++);\n}\n"
+    },
+    {
+      "title": "The write path",
+      "kind": "code",
+      "explain": "Short and boring by design — this runs at roughly a tenth of the read rate, so a little latency here is affordable. Note the mapping is immutable once created, which is what makes the read path so easy to cache.",
+      "code": "app.post('/shorten', async (req, res) => {\n  const { longUrl } = req.body;\n  if (!isSafe(longUrl)) return res.status(400).json({ error: 'rejected' });\n\n  const key = await nextKey(db);\n  await db.put(key, longUrl);        // sharded by key → writes spread evenly\n\n  res.json({ shortUrl: `https://sho.rt/${key}` });\n});\n"
+    },
+    {
+      "title": "The read path is where the traffic is",
+      "kind": "code",
+      "explain": "Ten times the write rate, and the entries never change — so cache entries never need invalidating. That immutability makes this one of the easiest caches anyone will ever operate, and it is worth pointing out.",
+      "code": "app.get('/:key', async (req, res) => {\n  const { key } = req.params;\n\n  let url = await cache.get(key);\n  if (!url) {\n    url = await db.get(key);\n    if (!url) return res.status(404).end();\n    await cache.set(key, url);       // immutable → no invalidation, ever\n  }\n\n  res.redirect(302, url);\n});\n"
+    },
+    {
+      "title": "301 versus 302 is a product decision",
+      "kind": "code",
+      "explain": "The follow-up they are waiting for. A permanent redirect lets browsers cache it and skips your servers entirely next time — cheaper, but you lose click analytics. Temporary keeps every click coming to you. Frame it as analytics versus load, not as an HTTP trivia question.",
+      "saysOutLoud": "301 if I want the traffic off my servers, 302 if I need the click data.",
+      "code": "// 301 Moved Permanently → browser caches it, later clicks never reach us\n//                          cheapest, but analytics go dark\n//\n// 302 Found             → every click hits us, so we can count it\n//                          costs the traffic we were trying to shed\n"
+    },
+    {
+      "title": "Cache and store are separate concerns",
+      "kind": "infra",
+      "explain": "Redis in front of a store sharded by key. Because links follow a steep popularity curve, a small cache absorbs the large majority of reads — and since the shard key is the same key you look up by, every read touches exactly one shard rather than scatter-gathering."
+    }
+  ],
+  "closing": "If they ask about abuse: short links hide their destination, so a shortener is a phishing tool by default. Rate limit creation and check destinations against a safe-browsing list before storing."
+}

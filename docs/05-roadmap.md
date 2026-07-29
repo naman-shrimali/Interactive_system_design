@@ -13,6 +13,7 @@
 | 6. Content authoring | ✅ shipped — 0 topics under 800 words; 30/30 published |
 | 7. Diagram authoring | ✅ shipped — 27 diagrams across 25 of 30 topics; 5 left deliberately prose-only |
 | 8. Polish — dashboard, search, notes export | ✅ shipped |
+| 9. Code dry-runs — per-topic step-through sidebar | 🟡 in progress — 5 of 30 topics |
 
 The original phases 1–3 were re-cut when the curriculum moved from a source-first to a topic-first
 model ([docs/06-topic-model.md](06-topic-model.md)). Task files for that shipped work are kept as
@@ -84,3 +85,21 @@ Authoring loop: write JSON → `npm run validate:diagrams` → view at `/diagram
 
 Verified in-browser in both themes: dashboard stat cards and progress bars, palette search/filter/
 keyboard-select/navigate, and export producing well-formed markdown from a real note.
+
+## Phase 9 — Code dry-runs
+
+A per-topic sidebar that walks the topic's implementation in JavaScript, one step at a time, for
+practising the "dry run this for me" moment in an interview.
+
+Content lives at `content/code/<topicSlug>/<slug>.json`, validated by `npm run validate:code` against
+`scripts/code-walkthrough.schema.json`. Authoring is a data change — no TypeScript.
+
+Each step is either `kind: "code"` (a snippet plus the reasoning you would say while writing it) or
+`kind: "infra"` (a component with nothing to write — Redis, a queue, a CDN — rendered as a one-line
+note so the flow stays continuous). Steps may carry `saysOutLoud` for a line to deliver verbatim.
+
+The validator enforces what makes a step usable at a whiteboard: infra steps need a real explanation
+rather than a stub, snippets stay under 100 columns and 40 lines, and every step's `explain` has to
+say something beyond restating the code.
+
+Written so far: rate-limiter, consistent-hashing, unique-id-generator, url-shortener, caching.

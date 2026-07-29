@@ -11,6 +11,7 @@ import { db } from './index';
 const REPO_ROOT = path.join(__dirname, '..', '..', '..');
 const CURRICULUM = path.join(REPO_ROOT, 'content', 'curriculum.json');
 const DIAGRAMS_DIR = path.join(REPO_ROOT, 'content', 'diagrams');
+const CODE_DIR = path.join(REPO_ROOT, 'content', 'code');
 
 interface InSection {
   slug: string;
@@ -81,6 +82,13 @@ const upsertLink = db.prepare(`
     title = excluded.title, sort_order = excluded.sort_order
 `);
 
+const upsertCode = db.prepare(`
+  INSERT INTO code_walkthroughs (topic_id, slug, title, spec_json, sort_order)
+  VALUES (@topicId, @slug, @title, @specJson, @sortOrder)
+  ON CONFLICT(topic_id, slug) DO UPDATE SET
+    title = excluded.title, spec_json = excluded.spec_json, sort_order = excluded.sort_order
+`);
+
 const upsertDiagram = db.prepare(`
   INSERT INTO diagrams (topic_id, section_id, slug, title, spec_json, sort_order)
   VALUES (@topicId, @sectionId, @slug, @title, @specJson, @sortOrder)
@@ -98,6 +106,7 @@ function main(): void {
   const data: InCurriculum = JSON.parse(fs.readFileSync(CURRICULUM, 'utf-8'));
 
   let diagramCount = 0;
+  let codeCount = 0;
 
   db.transaction(() => {
     for (const track of data.tracks) upsertTrack.run(track);
@@ -124,27 +133,52 @@ function main(): void {
 
       // Diagram files live at content/diagrams/<topicSlug>/<slug>.json
       const dir = path.join(DIAGRAMS_DIR, topic.slug);
-      if (!fs.existsSync(dir)) continue;
-      let order = 0;
-      for (const file of fs.readdirSync(dir).sort()) {
-        if (!file.endsWith('.json')) continue;
-        const raw = fs.readFileSync(path.join(dir, file), 'utf-8');
-        let parsed: { title?: string };
-        try {
-          parsed = JSON.parse(raw);
-        } catch (e) {
-          throw new Error(`Invalid JSON in diagrams/${topic.slug}/${file}: ${(e as Error).message}`);
+      if (fs.existsSync(dir)) {
+        let order = 0;
+        for (const file of fs.readdirSync(dir).sort()) {
+          if (!file.endsWith('.json')) continue;
+          const raw = fs.readFileSync(path.join(dir, file), 'utf-8');
+          let parsed: { title?: string };
+          try {
+            parsed = JSON.parse(raw);
+          } catch (e) {
+            throw new Error(`Invalid JSON in diagrams/${topic.slug}/${file}: ${(e as Error).message}`);
+          }
+          const slug = file.replace(/\.json$/, '');
+          upsertDiagram.run({
+            topicId,
+            sectionId: diagramOwner.get(slug) ?? null,
+            slug,
+            title: parsed.title ?? slug,
+            specJson: raw,
+            sortOrder: order++,
+          });
+          diagramCount++;
         }
-        const slug = file.replace(/\.json$/, '');
-        upsertDiagram.run({
-          topicId,
-          sectionId: diagramOwner.get(slug) ?? null,
-          slug,
-          title: parsed.title ?? slug,
-          specJson: raw,
-          sortOrder: order++,
-        });
-        diagramCount++;
+      }
+
+      // Code walkthroughs live at content/code/<topicSlug>/<slug>.json
+      const codeDir = path.join(CODE_DIR, topic.slug);
+      if (fs.existsSync(codeDir)) {
+        let codeOrder = 0;
+        for (const file of fs.readdirSync(codeDir).sort()) {
+          if (!file.endsWith('.json')) continue;
+          const raw = fs.readFileSync(path.join(codeDir, file), 'utf-8');
+          let parsed: { title?: string };
+          try {
+            parsed = JSON.parse(raw);
+          } catch (e) {
+            throw new Error(`Invalid JSON in code/${topic.slug}/${file}: ${(e as Error).message}`);
+          }
+          upsertCode.run({
+            topicId,
+            slug: file.replace(/\.json$/, ''),
+            title: parsed.title ?? file,
+            specJson: raw,
+            sortOrder: codeOrder++,
+          });
+          codeCount++;
+        }
       }
     }
   })();
@@ -155,7 +189,8 @@ function main(): void {
       `${n('SELECT COUNT(*) n FROM topics')} topics, ` +
       `${n('SELECT COUNT(*) n FROM sections')} sections, ` +
       `${n('SELECT COUNT(*) n FROM external_links')} links, ` +
-      `${diagramCount} diagrams.`,
+      `${diagramCount} diagrams, ` +
+      `${codeCount} code walkthroughs.`,
   );
 
   const orphanDirs = fs.existsSync(DIAGRAMS_DIR)

@@ -6,6 +6,7 @@ import { topicsRouter } from './routes/topics';
 import { progressRouter } from './routes/progress';
 import { notesRouter } from './routes/notes';
 import { diagramsRouter } from './routes/diagrams';
+import { codeRouter } from './routes/code';
 import { devRouter } from './routes/dev';
 
 const app = express();
@@ -18,6 +19,7 @@ app.use('/api', topicsRouter);
 app.use('/api', progressRouter);
 app.use('/api', notesRouter);
 app.use('/api', diagramsRouter);
+app.use('/api', codeRouter);
 app.use('/api', devRouter);
 
 const PORT = 4000;
