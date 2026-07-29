@@ -4,57 +4,284 @@
   "title": "Two systems that barely touch",
   "description": "The hard latency requirement applies only to a simple read service. The messy requirement — aggregating billions of events — has no latency pressure at all. Getting to that split quickly is most of what this question tests.",
   "groups": [
-    { "id": "g_serve", "label": "Serving — under 100 ms, read-only", "position": { "x": 60, "y": 20 }, "size": { "width": 900, "height": 220 }, "style": "dashed", "labelPosition": "top-left" },
-    { "id": "g_build", "label": "Data gathering — batch, no latency budget", "position": { "x": 60, "y": 380 }, "size": { "width": 900, "height": 220 }, "style": "filled", "labelPosition": "bottom" }
+    {
+      "id": "g_serve",
+      "label": "Serving — under 100 ms, read-only",
+      "position": {
+        "x": 60,
+        "y": 20
+      },
+      "size": {
+        "width": 900,
+        "height": 220
+      },
+      "style": "dashed",
+      "labelPosition": "top-left"
+    },
+    {
+      "id": "g_build",
+      "label": "Data gathering — batch, no latency budget",
+      "position": {
+        "x": 60,
+        "y": 380
+      },
+      "size": {
+        "width": 900,
+        "height": 220
+      },
+      "style": "filled",
+      "labelPosition": "bottom"
+    }
   ],
   "nodes": [
-    { "id": "typer", "type": "client", "label": "User typing", "sublabel": "one request per keystroke", "position": { "x": 40, "y": 60 }, "groupId": "g_serve" },
-    { "id": "edge_cache", "type": "cache", "label": "Prefix cache", "sublabel": "hot prefixes", "position": { "x": 280, "y": 60 }, "groupId": "g_serve" },
-    { "id": "trie", "type": "server_stack", "label": "Trie replicas", "sublabel": "top-k precomputed per node", "position": { "x": 520, "y": 60 }, "groupId": "g_serve" },
-    { "id": "filter", "type": "text_box", "label": "Safety filter", "sublabel": "applied at serving time,\nso a blocklist update takes\neffect in seconds", "position": { "x": 720, "y": 50 }, "groupId": "g_serve" },
-    { "id": "logs", "type": "message_queue", "label": "Query log", "sublabel": "every submitted search", "position": { "x": 40, "y": 60 }, "groupId": "g_build" },
-    { "id": "agg", "type": "worker_stack", "label": "Aggregation", "sublabel": "counts per window", "position": { "x": 280, "y": 55 }, "groupId": "g_build" },
-    { "id": "rank", "type": "worker_stack", "label": "Ranking", "sublabel": "time-decayed score", "position": { "x": 480, "y": 55 }, "groupId": "g_build" },
-    { "id": "builder", "type": "server", "label": "Trie builder", "sublabel": "bottom-up top-k", "position": { "x": 700, "y": 55 }, "groupId": "g_build" }
+    {
+      "id": "typer",
+      "type": "client",
+      "label": "User typing",
+      "sublabel": "one request per keystroke",
+      "position": {
+        "x": 40,
+        "y": 60
+      },
+      "groupId": "g_serve"
+    },
+    {
+      "id": "edge_cache",
+      "type": "cache",
+      "label": "Prefix cache",
+      "sublabel": "hot prefixes",
+      "position": {
+        "x": 280,
+        "y": 60
+      },
+      "groupId": "g_serve"
+    },
+    {
+      "id": "trie",
+      "type": "server_stack",
+      "label": "Trie replicas",
+      "sublabel": "top-k precomputed per node",
+      "position": {
+        "x": 520,
+        "y": 60
+      },
+      "groupId": "g_serve"
+    },
+    {
+      "id": "filter",
+      "type": "text_box",
+      "label": "Safety filter",
+      "sublabel": "applied at serving time,\nso a blocklist update takes\neffect in seconds",
+      "position": {
+        "x": 720,
+        "y": 50
+      },
+      "groupId": "g_serve"
+    },
+    {
+      "id": "logs",
+      "type": "message_queue",
+      "label": "Query log",
+      "sublabel": "every submitted search",
+      "position": {
+        "x": 40,
+        "y": 60
+      },
+      "groupId": "g_build"
+    },
+    {
+      "id": "agg",
+      "type": "worker_stack",
+      "label": "Aggregation",
+      "sublabel": "counts per window",
+      "position": {
+        "x": 280,
+        "y": 55
+      },
+      "groupId": "g_build"
+    },
+    {
+      "id": "rank",
+      "type": "worker_stack",
+      "label": "Ranking",
+      "sublabel": "time-decayed score",
+      "position": {
+        "x": 480,
+        "y": 55
+      },
+      "groupId": "g_build"
+    },
+    {
+      "id": "builder",
+      "type": "server",
+      "label": "Trie builder",
+      "sublabel": "bottom-up top-k",
+      "position": {
+        "x": 700,
+        "y": 55
+      },
+      "groupId": "g_build"
+    }
   ],
   "edges": [
-    { "id": "e_type", "source": "typer", "target": "edge_cache", "label": "prefix", "step": 1, "sourceHandle": "right", "targetHandle": "left", "direction": "both" },
-    { "id": "e_trie", "source": "edge_cache", "target": "trie", "label": "on miss", "step": 2, "color": "purple", "sourceHandle": "right", "targetHandle": "left", "direction": "both" },
-    { "id": "e_filter", "source": "trie", "target": "filter", "label": "top k + margin", "step": 3, "color": "green", "sourceHandle": "right", "targetHandle": "left" },
-    { "id": "e_capture", "source": "typer", "target": "logs", "label": "submitted searches", "color": "gray", "lineStyle": "dashed", "sourceHandle": "bottom", "targetHandle": "top" },
-    { "id": "e_agg", "source": "logs", "target": "agg", "label": "batch", "color": "purple", "sourceHandle": "right", "targetHandle": "left" },
-    { "id": "e_rank", "source": "agg", "target": "rank", "label": "counts", "color": "purple", "sourceHandle": "right", "targetHandle": "left" },
-    { "id": "e_build", "source": "rank", "target": "builder", "label": "top terms", "color": "purple", "sourceHandle": "right", "targetHandle": "left" },
-    { "id": "e_swap", "source": "builder", "target": "trie", "label": "atomic swap", "color": "red", "lineStyle": "dashed", "sourceHandle": "right", "targetHandle": "top" }
+    {
+      "id": "e_type",
+      "source": "typer",
+      "target": "edge_cache",
+      "label": "prefix",
+      "step": 1,
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "direction": "both"
+    },
+    {
+      "id": "e_trie",
+      "source": "edge_cache",
+      "target": "trie",
+      "label": "on miss",
+      "step": 2,
+      "color": "purple",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "direction": "both"
+    },
+    {
+      "id": "e_filter",
+      "source": "trie",
+      "target": "filter",
+      "label": "top k + margin",
+      "step": 3,
+      "color": "green",
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "e_capture",
+      "source": "typer",
+      "target": "logs",
+      "label": "submitted searches",
+      "color": "gray",
+      "lineStyle": "dashed",
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
+    },
+    {
+      "id": "e_agg",
+      "source": "logs",
+      "target": "agg",
+      "label": "batch",
+      "color": "purple",
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "e_rank",
+      "source": "agg",
+      "target": "rank",
+      "label": "counts",
+      "color": "purple",
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "e_build",
+      "source": "rank",
+      "target": "builder",
+      "label": "top terms",
+      "color": "purple",
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "e_swap",
+      "source": "builder",
+      "target": "trie",
+      "label": "atomic swap",
+      "color": "red",
+      "lineStyle": "dashed",
+      "sourceHandle": "right",
+      "targetHandle": "top"
+    }
   ],
   "flows": [
     {
       "id": "serving",
       "name": "Answering a keystroke",
       "steps": [
-        { "edgeIds": ["e_type"], "text": "The user types another character. Debouncing means this fires perhaps every other keystroke rather than every one — the cheapest request is the one never sent." },
-        { "edgeIds": ["e_trie"], "text": "Prefix popularity follows a steep power law, so a small cache absorbs most requests. Short prefixes are both the hottest and, in a naive trie, the most expensive — so they benefit most." },
-        { "edgeIds": ["e_filter"], "text": "On a miss, the trie walks p characters and reads a precomputed top-k list. Because the answer is stored at the node, a one-letter prefix costs exactly what a ten-letter one does." },
-        { "edgeIds": ["e_filter"], "text": "Blocked terms are dropped at serving time, which is why k + margin is fetched. Filtering here rather than at build time means a newly-discovered problem term disappears in seconds instead of at the next rebuild." }
+        {
+          "edgeIds": [
+            "e_type"
+          ],
+          "text": "The user types another character. Debouncing means this fires perhaps every other keystroke rather than every one — the cheapest request is the one never sent."
+        },
+        {
+          "edgeIds": [
+            "e_trie"
+          ],
+          "text": "Prefix popularity follows a steep power law, so a small cache absorbs most requests. Short prefixes are both the hottest and, in a naive trie, the most expensive — so they benefit most."
+        },
+        {
+          "edgeIds": [
+            "e_filter"
+          ],
+          "text": "On a miss the trie walks p characters and reads a precomputed top-k list, so a one-letter prefix costs exactly what a ten-letter one does. It fetches k + margin because blocked terms are dropped here, at serving time — which is why a newly-discovered problem term disappears in seconds rather than at the next rebuild."
+        }
       ]
     },
     {
       "id": "building",
       "name": "Learning what people search for",
       "steps": [
-        { "edgeIds": ["e_capture"], "text": "Submitted searches — not keystrokes — are appended to a log. Keystrokes are prefixes of the thing you actually want to count." },
-        { "edgeIds": ["e_agg"], "text": "Batch jobs roll raw events into counts per term per window, cutting data volume by orders of magnitude before anything downstream sees it." },
-        { "edgeIds": ["e_rank"], "text": "Counts become scores with time decay, so trends surface and dead terms fade. A frequency floor drops noise and typos — and doubles as a privacy mechanism, since a string typed once never reaches it." },
-        { "edgeIds": ["e_build", "e_swap"], "text": "A fresh trie is built offline and swapped in atomically. The serving tier never mutates a live structure, which removes concurrency from the one component that has a hard latency budget." }
+        {
+          "edgeIds": [
+            "e_capture"
+          ],
+          "text": "Submitted searches — not keystrokes — are appended to a log. Keystrokes are prefixes of the thing you actually want to count."
+        },
+        {
+          "edgeIds": [
+            "e_agg"
+          ],
+          "text": "Batch jobs roll raw events into counts per term per window, cutting data volume by orders of magnitude before anything downstream sees it."
+        },
+        {
+          "edgeIds": [
+            "e_rank"
+          ],
+          "text": "Counts become scores with time decay, so trends surface and dead terms fade. A frequency floor drops noise and typos — and doubles as a privacy mechanism, since a string typed once never reaches it."
+        },
+        {
+          "edgeIds": [
+            "e_build",
+            "e_swap"
+          ],
+          "text": "A fresh trie is built offline and swapped in atomically. The serving tier never mutates a live structure, which removes concurrency from the one component that has a hard latency budget."
+        }
       ]
     },
     {
       "id": "decoupled",
       "name": "Why the split matters",
       "steps": [
-        { "edgeIds": ["e_swap"], "text": "The pipeline can fail, retry, and run late, and users notice nothing — the serving tier is still answering from the last good trie." },
-        { "edgeIds": ["e_type", "e_trie"], "text": "The only coupling is one artefact handed over at the end. That is what lets a sub-100 ms requirement coexist with aggregating billions of events, and it is bought entirely by admitting suggestions may be minutes stale." },
-        { "edgeIds": ["e_swap"], "text": "The failure mode to monitor is a silently stale trie: builds failing repeatedly while serving looks perfectly healthy. Alert on trie age, not just build success." }
+        {
+          "edgeIds": [
+            "e_swap"
+          ],
+          "text": "The pipeline can fail, retry, and run late, and users notice nothing — the serving tier is still answering from the last good trie."
+        },
+        {
+          "edgeIds": [
+            "e_type",
+            "e_trie"
+          ],
+          "text": "The only coupling is one artefact handed over at the end. That is what lets a sub-100 ms requirement coexist with aggregating billions of events, and it is bought entirely by admitting suggestions may be minutes stale."
+        },
+        {
+          "edgeIds": [
+            "e_swap"
+          ],
+          "text": "The failure mode to monitor is a silently stale trie: builds failing repeatedly while serving looks perfectly healthy. Alert on trie age, not just build success."
+        }
       ]
     }
   ]

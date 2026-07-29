@@ -4,44 +4,178 @@
   "title": "A cold lookup, and why you almost never pay for one",
   "description": "Resolution walks a hierarchy — root, TLD, authoritative — but caching at every layer means most lookups never leave the machine.",
   "nodes": [
-    { "id": "client", "type": "client", "label": "Client", "sublabel": "browser + OS cache", "position": { "x": 40, "y": 240 } },
-    { "id": "resolver", "type": "service", "label": "Recursive resolver", "sublabel": "ISP or public, caches heavily", "position": { "x": 300, "y": 245 }, "badge": 1 },
-    { "id": "root", "type": "dns", "label": "Root", "sublabel": "who handles .com?", "position": { "x": 700, "y": 40 } },
-    { "id": "tld", "type": "dns", "label": "TLD (.com)", "sublabel": "who handles example.com?", "position": { "x": 700, "y": 240 } },
-    { "id": "auth", "type": "dns", "label": "Authoritative", "sublabel": "the answer, with a TTL", "position": { "x": 700, "y": 440 } },
-    { "id": "note", "type": "text_box", "label": "TTL is the dial", "sublabel": "Long: fewer lookups, slow changes.\nShort: fast failover, more queries.\nLower it a DAY before a migration —\nthe change only takes effect after\nthe OLD TTL expires.", "position": { "x": 250, "y": 470 } }
+    {
+      "id": "client",
+      "type": "client",
+      "label": "Client",
+      "sublabel": "browser + OS cache",
+      "position": {
+        "x": 40,
+        "y": 240
+      }
+    },
+    {
+      "id": "resolver",
+      "type": "service",
+      "label": "Recursive resolver",
+      "sublabel": "ISP or public, caches heavily",
+      "position": {
+        "x": 300,
+        "y": 245
+      },
+      "badge": 1
+    },
+    {
+      "id": "root",
+      "type": "dns",
+      "label": "Root",
+      "sublabel": "who handles .com?",
+      "position": {
+        "x": 700,
+        "y": 40
+      }
+    },
+    {
+      "id": "tld",
+      "type": "dns",
+      "label": "TLD (.com)",
+      "sublabel": "who handles example.com?",
+      "position": {
+        "x": 700,
+        "y": 240
+      }
+    },
+    {
+      "id": "auth",
+      "type": "dns",
+      "label": "Authoritative",
+      "sublabel": "the answer, with a TTL",
+      "position": {
+        "x": 700,
+        "y": 440
+      }
+    },
+    {
+      "id": "note",
+      "type": "text_box",
+      "label": "TTL is the dial",
+      "sublabel": "Long: fewer lookups, slow changes.\nShort: fast failover, more queries.\nLower it a DAY before a migration —\nthe change only takes effect after\nthe OLD TTL expires.",
+      "position": {
+        "x": 250,
+        "y": 470
+      }
+    }
   ],
   "edges": [
-    { "id": "e_ask", "source": "client", "target": "resolver", "label": "api.example.com?", "step": 1, "sourceHandle": "right", "targetHandle": "left", "direction": "both" },
-    { "id": "e_root", "source": "resolver", "target": "root", "label": "referral", "step": 2, "color": "gray", "sourceHandle": "right", "targetHandle": "left", "direction": "both" },
-    { "id": "e_tld", "source": "resolver", "target": "tld", "label": "referral", "step": 3, "color": "gray", "sourceHandle": "right", "targetHandle": "left", "direction": "both" },
-    { "id": "e_auth", "source": "resolver", "target": "auth", "label": "the record", "step": 4, "color": "green", "sourceHandle": "right", "targetHandle": "left", "direction": "both" }
+    {
+      "id": "e_ask",
+      "source": "client",
+      "target": "resolver",
+      "label": "api.example.com?",
+      "step": 1,
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "direction": "both"
+    },
+    {
+      "id": "e_root",
+      "source": "resolver",
+      "target": "root",
+      "label": "referral",
+      "step": 2,
+      "color": "gray",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "direction": "both"
+    },
+    {
+      "id": "e_tld",
+      "source": "resolver",
+      "target": "tld",
+      "label": "referral",
+      "step": 3,
+      "color": "gray",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "direction": "both"
+    },
+    {
+      "id": "e_auth",
+      "source": "resolver",
+      "target": "auth",
+      "label": "the record",
+      "step": 4,
+      "color": "green",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "direction": "both"
+    }
   ],
   "flows": [
     {
       "id": "cold",
       "name": "Cold lookup",
       "steps": [
-        { "edgeIds": ["e_ask"], "text": "Nothing is cached anywhere, so the query reaches the recursive resolver, whose job is to do the walking on the client's behalf." },
-        { "edgeIds": ["e_root"], "text": "The root servers do not know the answer — they know who is responsible for .com." },
-        { "edgeIds": ["e_tld"], "text": "The .com servers likewise do not know the address; they know which nameservers are authoritative for example.com." },
-        { "edgeIds": ["e_auth"], "text": "The authoritative server returns the record with a TTL. Several round trips have elapsed — a cold resolution can run past 100 ms, which is why DNS shows up in first-visit page-load waterfalls and vanishes afterwards." }
+        {
+          "edgeIds": [
+            "e_ask"
+          ],
+          "text": "Nothing is cached anywhere, so the query reaches the recursive resolver, whose job is to do the walking on the client's behalf."
+        },
+        {
+          "edgeIds": [
+            "e_root"
+          ],
+          "text": "The root servers do not know the answer — they know who is responsible for .com."
+        },
+        {
+          "edgeIds": [
+            "e_tld"
+          ],
+          "text": "The .com servers likewise do not know the address; they know which nameservers are authoritative for example.com."
+        },
+        {
+          "edgeIds": [
+            "e_auth"
+          ],
+          "text": "The authoritative server returns the record with a TTL. Several round trips have elapsed — a cold resolution can run past 100 ms, which is why DNS shows up in first-visit page-load waterfalls and vanishes afterwards."
+        }
       ]
     },
     {
       "id": "warm",
       "name": "Warm lookup — the common case",
       "steps": [
-        { "edgeIds": ["e_ask"], "text": "The browser, the OS, or the resolver already holds the record within its TTL, and answers immediately. The hierarchy above is never touched." },
-        { "edgeIds": ["e_ask"], "text": "This is why DNS feels free. It also means a change you make is invisible to anyone holding a cached record — which is the caveat that matters." }
+        {
+          "edgeIds": [
+            "e_ask"
+          ],
+          "text": "The browser, the OS, or the resolver already holds the record within its TTL and answers immediately. The hierarchy above is never touched — which is why DNS feels free."
+        },
+        {
+          "edgeIds": [
+            "e_auth"
+          ],
+          "text": "That cache lifetime was set once, here, by the authoritative server. It is the only lever you have over how long a stale answer can survive — and it means a change you make is invisible to anyone still holding a cached record."
+        }
       ]
     },
     {
       "id": "steering",
       "name": "DNS as a routing tool",
       "steps": [
-        { "edgeIds": ["e_auth"], "text": "Because you control the answer, you control the routing: return the nearest region's address, weight traffic by percentage for a gradual migration, or stop returning an address that fails its health check." },
-        { "edgeIds": ["e_ask"], "text": "But TTLs are advisory. Some resolvers apply their own minimums and some applications cache a resolved address for the process lifetime. Treat DNS as eventually consistent and put a health-checked load balancer in front of anything that must move in seconds." }
+        {
+          "edgeIds": [
+            "e_auth"
+          ],
+          "text": "Because you control the answer, you control the routing: return the nearest region's address, weight traffic by percentage for a gradual migration, or stop returning an address that fails its health check."
+        },
+        {
+          "edgeIds": [
+            "e_ask"
+          ],
+          "text": "But TTLs are advisory. Some resolvers apply their own minimums and some applications cache a resolved address for the process lifetime. Treat DNS as eventually consistent and put a health-checked load balancer in front of anything that must move in seconds."
+        }
       ]
     }
   ]

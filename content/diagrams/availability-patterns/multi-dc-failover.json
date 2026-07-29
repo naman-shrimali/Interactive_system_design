@@ -4,43 +4,217 @@
   "title": "Losing a region without losing the service",
   "description": "Redundancy only buys nines when failures are independent. Two regions with separate power, network and deploy pipelines are independent; two racks sharing a switch are not.",
   "groups": [
-    { "id": "g_dc1", "label": "Region 1 — healthy", "position": { "x": 120, "y": 360 }, "size": { "width": 330, "height": 200 }, "style": "filled", "labelPosition": "bottom" },
-    { "id": "g_dc2", "label": "Region 2 — offline", "position": { "x": 620, "y": 360 }, "size": { "width": 330, "height": 200 }, "style": "filled", "labelPosition": "bottom" }
+    {
+      "id": "g_dc1",
+      "label": "Region 1 — healthy",
+      "position": {
+        "x": 120,
+        "y": 360
+      },
+      "size": {
+        "width": 330,
+        "height": 200
+      },
+      "style": "filled",
+      "labelPosition": "bottom"
+    },
+    {
+      "id": "g_dc2",
+      "label": "Region 2 — offline",
+      "position": {
+        "x": 620,
+        "y": 360
+      },
+      "size": {
+        "width": 330,
+        "height": 200
+      },
+      "style": "filled",
+      "labelPosition": "bottom"
+    }
   ],
   "nodes": [
-    { "id": "users", "type": "client", "label": "Users", "position": { "x": 470, "y": 20 } },
-    { "id": "dns", "type": "dns", "label": "GeoDNS", "sublabel": "health-checked", "position": { "x": 470, "y": 190 }, "badge": 1 },
-    { "id": "web1", "type": "server_stack", "label": "Web tier", "position": { "x": 40, "y": 45 }, "groupId": "g_dc1" },
-    { "id": "db1", "type": "database_stack", "label": "Databases", "position": { "x": 190, "y": 45 }, "groupId": "g_dc1" },
-    { "id": "web2", "type": "server_stack", "label": "Web tier", "state": "failed", "position": { "x": 40, "y": 45 }, "groupId": "g_dc2" },
-    { "id": "db2", "type": "database_stack", "label": "Databases", "state": "failed", "position": { "x": 190, "y": 45 }, "groupId": "g_dc2" },
-    { "id": "note", "type": "text_box", "label": "Independence is the assumption", "sublabel": "Two replicas sharing a rack,\na power supply, or a deploy\npipeline are not independent —\nand the arithmetic that buys\nnines no longer applies.", "position": { "x": 30, "y": 130 } }
+    {
+      "id": "users",
+      "type": "client",
+      "label": "Users",
+      "position": {
+        "x": 470,
+        "y": 20
+      }
+    },
+    {
+      "id": "dns",
+      "type": "dns",
+      "label": "GeoDNS",
+      "sublabel": "health-checked",
+      "position": {
+        "x": 470,
+        "y": 190
+      },
+      "badge": 1
+    },
+    {
+      "id": "web1",
+      "type": "server_stack",
+      "label": "Web tier",
+      "position": {
+        "x": 40,
+        "y": 45
+      },
+      "groupId": "g_dc1"
+    },
+    {
+      "id": "db1",
+      "type": "database_stack",
+      "label": "Databases",
+      "position": {
+        "x": 190,
+        "y": 45
+      },
+      "groupId": "g_dc1"
+    },
+    {
+      "id": "web2",
+      "type": "server_stack",
+      "label": "Web tier",
+      "state": "failed",
+      "position": {
+        "x": 40,
+        "y": 45
+      },
+      "groupId": "g_dc2"
+    },
+    {
+      "id": "db2",
+      "type": "database_stack",
+      "label": "Databases",
+      "state": "failed",
+      "position": {
+        "x": 190,
+        "y": 45
+      },
+      "groupId": "g_dc2"
+    },
+    {
+      "id": "note",
+      "type": "text_box",
+      "label": "Independence is the assumption",
+      "sublabel": "Two replicas sharing a rack,\na power supply, or a deploy\npipeline are not independent —\nand the arithmetic that buys\nnines no longer applies.",
+      "position": {
+        "x": 30,
+        "y": 130
+      }
+    }
   ],
   "edges": [
-    { "id": "e_dns", "source": "users", "target": "dns", "label": "resolve", "step": 1, "sourceHandle": "bottom", "targetHandle": "top", "direction": "both" },
-    { "id": "e_r1", "source": "dns", "target": "web1", "label": "100% of traffic", "step": 2, "color": "green", "sourceHandle": "bottom", "targetHandle": "top" },
-    { "id": "e_r2", "source": "dns", "target": "web2", "label": "withdrawn", "step": 2, "color": "red", "lineStyle": "dashed", "direction": "none", "sourceHandle": "bottom", "targetHandle": "top" },
-    { "id": "e_d1", "source": "web1", "target": "db1", "label": "local reads", "color": "green", "sourceHandle": "right", "targetHandle": "left" },
-    { "id": "e_repl", "source": "db1", "target": "db2", "label": "cross-region replication", "color": "gray", "lineStyle": "dashed", "sourceHandle": "right", "targetHandle": "left" }
+    {
+      "id": "e_dns",
+      "source": "users",
+      "target": "dns",
+      "label": "resolve",
+      "step": 1,
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "direction": "both"
+    },
+    {
+      "id": "e_r1",
+      "source": "dns",
+      "target": "web1",
+      "label": "100% of traffic",
+      "step": 2,
+      "color": "green",
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
+    },
+    {
+      "id": "e_r2",
+      "source": "dns",
+      "target": "web2",
+      "label": "withdrawn",
+      "step": 2,
+      "color": "red",
+      "lineStyle": "dashed",
+      "direction": "none",
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
+    },
+    {
+      "id": "e_d1",
+      "source": "web1",
+      "target": "db1",
+      "label": "local reads",
+      "color": "green",
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "e_repl",
+      "source": "db1",
+      "target": "db2",
+      "label": "cross-region replication",
+      "color": "gray",
+      "lineStyle": "dashed",
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    }
   ],
   "flows": [
     {
       "id": "normal",
       "name": "Both regions healthy",
       "steps": [
-        { "edgeIds": ["e_dns"], "text": "GeoDNS returns the address of the region nearest the user. This is genuinely global load balancing — it happens before any packet reaches your infrastructure, which is why it is the only layer that can steer traffic away from a region that is entirely down." },
-        { "edgeIds": ["e_r1", "e_r2"], "text": "Traffic splits between regions by proximity. Each serves reads from its local database, so the cross-continent round trip never appears on the request path." },
-        { "edgeIds": ["e_repl"], "text": "Data replicates between regions asynchronously. This is where multi-region gets genuinely hard: synchronous cross-region writes cost 100+ ms every time, and asynchronous ones mean the regions disagree." }
+        {
+          "edgeIds": [
+            "e_dns"
+          ],
+          "text": "GeoDNS returns the address of the region nearest the user. This is genuinely global load balancing — it happens before any packet reaches your infrastructure, which is why it is the only layer that can steer traffic away from a region that is entirely down."
+        },
+        {
+          "edgeIds": [
+            "e_r1",
+            "e_r2",
+            "e_d1"
+          ],
+          "text": "Traffic splits between regions by proximity, and each region serves reads from its own local database. That locality is the point: the cross-continent round trip never lands on the request path."
+        },
+        {
+          "edgeIds": [
+            "e_repl"
+          ],
+          "text": "Data replicates between regions asynchronously. This is where multi-region gets genuinely hard: synchronous cross-region writes cost 100+ ms every time, and asynchronous ones mean the regions disagree."
+        }
       ]
     },
     {
       "id": "failover",
       "name": "Region 2 goes dark",
       "steps": [
-        { "edgeIds": ["e_r2"], "text": "Health checks stop passing for Region 2 and DNS withdraws its records. The dashed line is a route no longer offered, not a failing request." },
-        { "edgeIds": ["e_r1"], "text": "All traffic lands on Region 1 — which must have been provisioned to carry it. Two regions each running at 80% capacity cannot absorb each other; that is the hidden cost of active-active and the reason failover capacity is a budget line." },
-        { "edgeIds": ["e_dns"], "text": "Users near Region 2 are now served from further away, so latency rises. Degraded and available beats fast and down." },
-        { "edgeIds": ["e_repl"], "text": "The caveat worth stating: DNS TTLs are advisory. Resolvers and client libraries cache addresses beyond them, so some clients keep trying the dead region. DNS is not a fast-failover mechanism — pair it with health-checked load balancers for anything that must move in seconds." }
+        {
+          "edgeIds": [
+            "e_r2"
+          ],
+          "text": "Health checks stop passing for Region 2 and DNS withdraws its records. The dashed line is a route no longer offered, not a failing request."
+        },
+        {
+          "edgeIds": [
+            "e_r1"
+          ],
+          "text": "All traffic lands on Region 1 — which must have been provisioned to carry it. Two regions each running at 80% capacity cannot absorb each other; that is the hidden cost of active-active and the reason failover capacity is a budget line."
+        },
+        {
+          "edgeIds": [
+            "e_dns"
+          ],
+          "text": "Users near Region 2 are now served from further away, so latency rises. Degraded and available beats fast and down."
+        },
+        {
+          "edgeIds": [
+            "e_repl"
+          ],
+          "text": "The caveat worth stating: DNS TTLs are advisory. Resolvers and client libraries cache addresses beyond them, so some clients keep trying the dead region. DNS is not a fast-failover mechanism — pair it with health-checked load balancers for anything that must move in seconds."
+        }
       ]
     }
   ]

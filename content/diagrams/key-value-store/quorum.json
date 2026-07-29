@@ -36,8 +36,9 @@
       "name": "A quorum read (R = 2)",
       "steps": [
         { "edgeIds": ["e_req"], "text": "The client sends a get. The coordinator must decide how many replicas to consult." },
-        { "edgeIds": ["e_a", "e_b"], "text": "It reads from R = 2. Because 2 + 2 > 3, at least one of them must have participated in the last successful write — so the newest value is guaranteed to be among the responses." },
-        { "edgeIds": ["e_c"], "text": "If a replica returns an older version, the coordinator returns the newest and repairs the stale one in the background. That is read repair, and it is part of how 'eventually' becomes true." }
+        { "edgeIds": ["e_a", "e_b"], "text": "It reads from R = 2 — replicas A and B. Because 2 + 2 > 3, the read set and the last write set must share at least one replica, so the newest acknowledged value is among these responses." },
+        { "edgeIds": ["e_b"], "text": "Suppose B returns an older version than A. The coordinator compares versions, returns A's value to the client, and writes the newer value back to B in the background. That is read repair — and note it applies to a replica that was actually read, not to the one left out." },
+        { "edgeIds": ["e_c"], "text": "Replica C was never consulted, so this read did nothing to fix it. Keys that are rarely read are repaired instead by anti-entropy: replicas periodically exchange Merkle trees and reconcile only the ranges whose hashes differ." }
       ]
     },
     {

@@ -1,0 +1,294 @@
+{
+  "version": 1,
+  "updated": "2026-07-28",
+  "purpose": "Approved browser sources for fact-checking and improving Interactive System Design lessons.",
+  "source_priority": [
+    "normative",
+    "authoritative",
+    "interview"
+  ],
+  "rules": {
+    "normative_for": [
+      "protocol semantics",
+      "standards terminology",
+      "security requirements"
+    ],
+    "authoritative_for": [
+      "database behavior",
+      "operational practice",
+      "cloud architecture",
+      "observability",
+      "research-backed distributed systems"
+    ],
+    "interview_for": [
+      "interview structure",
+      "common design prompts",
+      "breadth and vocabulary",
+      "candidate-facing diagrams"
+    ],
+    "do_not_use_as_authority": [
+      "search-result snippets",
+      "anonymous blogs",
+      "SEO listicles",
+      "unverified forum answers",
+      "AI-generated summaries",
+      "a vendor page to prove a vendor-neutral claim"
+    ],
+    "citation_format": "Use the registry id plus the direct page URL. Include the accessed date and the page update/publication date when available.",
+    "copyright": "Paraphrase. Do not reproduce proprietary books, paid courses, or long passages. Keep Primer attribution for content already present in this repository."
+  },
+  "resources": [
+    {
+      "id": "system-design-primer",
+      "tier": "interview",
+      "title": "The System Design Primer",
+      "publisher": "Donne Martin / GitHub",
+      "url": "https://github.com/donnemartin/system-design-primer",
+      "allowed_domains": ["github.com"],
+      "use_for": ["interview framework", "common system-design topics", "sample solutions", "estimation breadth"],
+      "not_for": ["current product behavior", "strong technical authority when a standard or official document exists"],
+      "license_note": "MIT attribution is required for the repository's imported material."
+    },
+    {
+      "id": "bytebytego-interview",
+      "tier": "interview",
+      "title": "ByteByteGo System Design Interview Course",
+      "publisher": "ByteByteGo",
+      "url": "https://bytebytego.com/courses/system-design-interview/foreword",
+      "allowed_domains": ["bytebytego.com"],
+      "use_for": ["interview communication", "visual explanations", "case-study breadth", "candidate checklists"],
+      "not_for": ["sole authority for implementation-specific facts", "copying proprietary lesson text or diagrams"]
+    },
+    {
+      "id": "ddia-2e",
+      "tier": "authoritative",
+      "title": "Designing Data-Intensive Applications, 2nd Edition",
+      "publisher": "Martin Kleppmann and Chris Riccomini / O'Reilly",
+      "url": "https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/",
+      "allowed_domains": ["oreilly.com"],
+      "use_for": ["data-system trade-offs", "replication", "partitioning", "transactions", "consistency", "streaming", "cloud data architecture"],
+      "not_for": ["current vendor API syntax unless corroborated by official vendor docs"],
+      "access_note": "Use the public book page and accessible excerpts/metadata; do not bypass paywalls."
+    },
+    {
+      "id": "google-sre",
+      "tier": "authoritative",
+      "title": "Google Site Reliability Engineering Books",
+      "publisher": "Google",
+      "url": "https://sre.google/books/",
+      "allowed_domains": ["sre.google"],
+      "use_for": ["SLOs", "SLIs", "error budgets", "capacity", "monitoring", "incident response", "reliability practice"],
+      "not_for": ["protocol specifications", "vendor-specific service guarantees"]
+    },
+    {
+      "id": "aws-well-architected",
+      "tier": "authoritative",
+      "title": "AWS Well-Architected Framework",
+      "publisher": "Amazon Web Services",
+      "url": "https://docs.aws.amazon.com/wellarchitected/2025-02-25/framework/welcome.html",
+      "allowed_domains": ["docs.aws.amazon.com"],
+      "use_for": ["operational excellence", "security", "reliability", "performance", "cost", "sustainability", "failure isolation"],
+      "not_for": ["vendor-neutral claims without an explicit AWS label"]
+    },
+    {
+      "id": "gcp-well-architected",
+      "tier": "authoritative",
+      "title": "Google Cloud Well-Architected Framework",
+      "publisher": "Google Cloud",
+      "url": "https://docs.cloud.google.com/architecture/framework?hl=en",
+      "allowed_domains": ["docs.cloud.google.com"],
+      "use_for": ["cloud architecture", "reliability", "security", "performance", "cost", "sustainability", "multi-cloud perspective"],
+      "not_for": ["general claims that ignore provider-specific assumptions"]
+    },
+    {
+      "id": "postgresql-docs",
+      "tier": "authoritative",
+      "title": "PostgreSQL Documentation",
+      "publisher": "PostgreSQL Global Development Group",
+      "url": "https://www.postgresql.org/docs/current/",
+      "allowed_domains": ["postgresql.org"],
+      "use_for": ["transaction isolation", "MVCC behavior", "indexes", "locking", "partitioning", "query planning"],
+      "not_for": ["universal behavior of all relational databases"]
+    },
+    {
+      "id": "kafka-docs",
+      "tier": "authoritative",
+      "title": "Apache Kafka Documentation",
+      "publisher": "Apache Software Foundation",
+      "url": "https://kafka.apache.org/documentation/",
+      "allowed_domains": ["kafka.apache.org"],
+      "use_for": ["event logs", "partitions", "consumer groups", "delivery semantics", "transactions", "replay", "operations"],
+      "not_for": ["all message queues", "claims that Kafka semantics automatically extend to external side effects"]
+    },
+    {
+      "id": "redis-docs",
+      "tier": "authoritative",
+      "title": "Redis Documentation",
+      "publisher": "Redis",
+      "url": "https://redis.io/docs/latest/",
+      "allowed_domains": ["redis.io"],
+      "use_for": ["caching", "atomic operations", "Lua scripts", "rate limiting", "expiration", "distributed locking caveats"],
+      "not_for": ["treating Redis as a universal database recommendation"]
+    },
+    {
+      "id": "opentelemetry-docs",
+      "tier": "authoritative",
+      "title": "OpenTelemetry Documentation",
+      "publisher": "Cloud Native Computing Foundation project",
+      "url": "https://opentelemetry.io/docs/",
+      "allowed_domains": ["opentelemetry.io"],
+      "use_for": ["metrics", "logs", "traces", "context propagation", "observability vocabulary"],
+      "not_for": ["claiming that instrumentation alone makes a system observable"]
+    },
+    {
+      "id": "ietf-http",
+      "tier": "normative",
+      "title": "HTTP Semantics, RFC 9110",
+      "publisher": "Internet Engineering Task Force / RFC Editor",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "allowed_domains": ["rfc-editor.org"],
+      "use_for": ["HTTP methods", "status codes", "caching semantics", "redirects", "safe and idempotent methods"],
+      "not_for": ["framework-specific behavior"]
+    },
+    {
+      "id": "ietf-websocket",
+      "tier": "normative",
+      "title": "The WebSocket Protocol, RFC 6455",
+      "publisher": "Internet Engineering Task Force / RFC Editor",
+      "url": "https://www.rfc-editor.org/rfc/rfc6455.html",
+      "allowed_domains": ["rfc-editor.org"],
+      "use_for": ["WebSocket handshake", "framing", "connection behavior", "protocol boundaries"],
+      "not_for": ["presence, fan-out, or message durability architecture"]
+    },
+    {
+      "id": "ietf-tls",
+      "tier": "normative",
+      "title": "TLS 1.3, RFC 8446",
+      "publisher": "Internet Engineering Task Force / RFC Editor",
+      "url": "https://www.rfc-editor.org/rfc/rfc8446.html",
+      "allowed_domains": ["rfc-editor.org"],
+      "use_for": ["TLS terminology", "handshake properties", "encryption in transit", "protocol security"],
+      "not_for": ["complete application security guidance"]
+    },
+    {
+      "id": "ietf-dns",
+      "tier": "normative",
+      "title": "Domain Name System specifications",
+      "publisher": "Internet Engineering Task Force / RFC Editor",
+      "url": "https://www.rfc-editor.org/rfc/rfc1034.html",
+      "allowed_domains": ["rfc-editor.org"],
+      "use_for": ["DNS delegation", "nameserver behavior", "caching", "record semantics", "DNS vocabulary"],
+      "not_for": ["provider-specific routing policy claims"]
+    },
+    {
+      "id": "ietf-uuid",
+      "tier": "normative",
+      "title": "Universally Unique Identifier, RFC 9562",
+      "publisher": "Internet Engineering Task Force / RFC Editor",
+      "url": "https://www.rfc-editor.org/rfc/rfc9562.html",
+      "allowed_domains": ["rfc-editor.org"],
+      "use_for": ["UUID versions", "UUIDv7 terminology", "identifier format claims"],
+      "not_for": ["choosing a globally unique ID architecture without workload context"]
+    },
+    {
+      "id": "owasp-asvs",
+      "tier": "normative",
+      "title": "OWASP Application Security Verification Standard",
+      "publisher": "OWASP Foundation",
+      "url": "https://owasp.org/www-project-application-security-verification-standard/",
+      "allowed_domains": ["owasp.org"],
+      "use_for": ["application security controls", "authentication", "authorization", "input validation", "secure design review"],
+      "not_for": ["cloud reliability or performance claims"]
+    },
+    {
+      "id": "dynamo-paper",
+      "tier": "authoritative",
+      "title": "Dynamo: Amazon's Highly Available Key-value Store",
+      "publisher": "Amazon Science / ACM SOSP paper",
+      "url": "https://www.amazon.science/publications/dynamo-amazons-highly-available-key-value-store",
+      "allowed_domains": ["amazon.science"],
+      "use_for": ["consistent hashing", "quorums", "sloppy quorums", "vector clocks", "anti-entropy", "high-availability key-value design"],
+      "not_for": ["assuming every modern DynamoDB behavior is identical to the original Dynamo paper"]
+    },
+    {
+      "id": "raft-paper",
+      "tier": "authoritative",
+      "title": "In Search of an Understandable Consensus Algorithm",
+      "publisher": "Diego Ongaro and John Ousterhout / Stanford",
+      "url": "https://web.stanford.edu/~ouster/cgi-bin/papers/raft-extended.pdf",
+      "allowed_domains": ["stanford.edu"],
+      "use_for": ["leader election", "replicated logs", "consensus", "split-brain prevention", "failure semantics"],
+      "not_for": ["claiming consensus is needed for every replicated data system"]
+    },
+    {
+      "id": "grpc-docs",
+      "tier": "authoritative",
+      "title": "gRPC Core Concepts",
+      "publisher": "gRPC project",
+      "url": "https://grpc.io/docs/what-is-grpc/core-concepts/",
+      "allowed_domains": ["grpc.io"],
+      "use_for": ["RPC concepts", "streaming", "deadlines", "status codes", "service contracts"],
+      "not_for": ["claiming gRPC is always better than HTTP/JSON"]
+    },
+    {
+      "id": "kubernetes-docs",
+      "tier": "authoritative",
+      "title": "Kubernetes Documentation",
+      "publisher": "Kubernetes project",
+      "url": "https://kubernetes.io/docs/",
+      "allowed_domains": ["kubernetes.io"],
+      "use_for": ["service discovery", "readiness and liveness", "deployment behavior", "autoscaling", "orchestration vocabulary"],
+      "not_for": ["assuming Kubernetes removes distributed-systems trade-offs"]
+    },
+    {
+      "id": "s3-docs",
+      "tier": "authoritative",
+      "title": "Amazon S3 User Guide",
+      "publisher": "Amazon Web Services",
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/",
+      "allowed_domains": ["docs.aws.amazon.com"],
+      "use_for": ["object storage", "multipart upload", "presigned URLs", "versioning", "lifecycle", "durability claims"],
+      "not_for": ["assuming all object stores have identical consistency and pricing"]
+    },
+    {
+      "id": "cloudflare-cache",
+      "tier": "authoritative",
+      "title": "Cloudflare Cache Documentation",
+      "publisher": "Cloudflare",
+      "url": "https://developers.cloudflare.com/cache/",
+      "allowed_domains": ["developers.cloudflare.com"],
+      "use_for": ["HTTP caching", "cache keys", "TTL", "purging", "stale content", "edge behavior"],
+      "not_for": ["universal CDN behavior", "assuming a CDN is complete DDoS protection"]
+    },
+    {
+      "id": "hls-docs",
+      "tier": "authoritative",
+      "title": "HTTP Live Streaming Resources",
+      "publisher": "Apple Developer",
+      "url": "https://developer.apple.com/streaming/",
+      "allowed_domains": ["developer.apple.com"],
+      "use_for": ["HLS manifests", "segments", "adaptive bitrate streaming", "video delivery terminology"],
+      "not_for": ["general video-transcoding cost estimates"]
+    },
+    {
+      "id": "robots-rfc",
+      "tier": "normative",
+      "title": "Robots Exclusion Protocol, RFC 9309",
+      "publisher": "Internet Engineering Task Force / RFC Editor",
+      "url": "https://www.rfc-editor.org/rfc/rfc9309.html",
+      "allowed_domains": ["rfc-editor.org"],
+      "use_for": ["robots.txt syntax", "crawler policy terminology", "crawler compliance boundaries"],
+      "not_for": ["assuming robots.txt is an access-control mechanism"]
+    },
+    {
+      "id": "firebase-fcm",
+      "tier": "authoritative",
+      "title": "Firebase Cloud Messaging Documentation",
+      "publisher": "Google Firebase",
+      "url": "https://firebase.google.com/docs/cloud-messaging",
+      "allowed_domains": ["firebase.google.com"],
+      "use_for": ["push notification delivery", "device tokens", "provider feedback", "message handling"],
+      "not_for": ["general guarantees about every push provider"]
+    }
+  ]
+}
