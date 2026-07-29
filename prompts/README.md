@@ -42,6 +42,19 @@ The browser model must:
 - `02-gap-review.md` — find missing concepts, follow-ups, and failure modes.
 - `03-rewrite-lesson.md` — produce a corrected, original lesson draft with citations.
 - `04-interview-readiness.md` — assess whether a learner can use the lesson in a timed interview.
+- `05-diagram-review.md` — verify one interactive diagram: edge direction, step order, step/edge
+  agreement, coverage, and label arithmetic.
+
+## Diagrams
+
+Diagrams make claims the same way prose does, so they need their own pass. Every diagram is listed
+under its topic in `lesson-review-map.json` as `diagrams[]`, with its owning section and flow ids.
+
+The defect that matters most is not a wrong fact — it is a **step whose narration explains one thing
+while highlighting another**, which teaches the reader the wrong association. Two related defects are
+an edge that is drawn but never walked (an unsupported claim left on the canvas), and a step that
+repeats its predecessor's highlight (prose wearing a step's clothing). `05-diagram-review.md` checks
+all three explicitly.
 
 ## Recommended execution
 

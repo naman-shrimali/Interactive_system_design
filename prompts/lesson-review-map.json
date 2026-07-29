@@ -1,7 +1,7 @@
 {
   "version": 1,
   "curriculum_path": "../content/curriculum.json",
-  "purpose": "Review every published lesson against an explicit set of technical questions and approved browser sources.",
+  "purpose": "Review every published lesson against an explicit set of technical questions and approved browser sources. Diagram entries are reviewed with templates/05-diagram-review.md.",
   "priority_meaning": {
     "P0": "Must be correct and interview-ready before the tool can claim mid-level readiness.",
     "P1": "Important breadth or advanced follow-up coverage.",
@@ -12,388 +12,1711 @@
       "slug": "interview-framework",
       "track": "foundations",
       "priority": "P0",
-      "required_resources": ["system-design-primer", "bytebytego-interview", "google-sre"],
-      "topic_checks": ["requirements before architecture", "time-boxed interview flow", "explicit non-goals", "trade-offs and collaboration", "production-minded wrap-up"],
+      "required_resources": [
+        "system-design-primer",
+        "bytebytego-interview",
+        "google-sre"
+      ],
+      "topic_checks": [
+        "requirements before architecture",
+        "time-boxed interview flow",
+        "explicit non-goals",
+        "trade-offs and collaboration",
+        "production-minded wrap-up"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "What interviewers evaluate and why a framework helps."},
-        {"slug": "the-method", "provenance": "primer", "focus": "Validate the four-step method and keep it compatible with open-ended discussion."},
-        {"slug": "the-four-steps", "provenance": "primer", "focus": "Verify requirements, high-level design, core components, and iterative scaling."},
-        {"slug": "checklist", "provenance": "authored", "focus": "Ensure the checklist covers API, data model, failure, monitoring, and communication."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "What interviewers evaluate and why a framework helps."
+        },
+        {
+          "slug": "the-method",
+          "provenance": "primer",
+          "focus": "Validate the four-step method and keep it compatible with open-ended discussion."
+        },
+        {
+          "slug": "the-four-steps",
+          "provenance": "primer",
+          "focus": "Verify requirements, high-level design, core components, and iterative scaling."
+        },
+        {
+          "slug": "checklist",
+          "provenance": "authored",
+          "focus": "Ensure the checklist covers API, data model, failure, monitoring, and communication."
+        }
       ]
     },
     {
       "slug": "back-of-envelope",
       "track": "foundations",
       "priority": "P0",
-      "required_resources": ["system-design-primer", "ddia-2e", "google-sre"],
-      "topic_checks": ["orders of magnitude", "peak versus average", "QPS", "storage", "bandwidth", "availability math", "estimates that change a design decision"],
+      "required_resources": [
+        "system-design-primer",
+        "ddia-2e",
+        "google-sre"
+      ],
+      "topic_checks": [
+        "orders of magnitude",
+        "peak versus average",
+        "QPS",
+        "storage",
+        "bandwidth",
+        "availability math",
+        "estimates that change a design decision"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Estimation as a decision tool rather than decorative arithmetic."},
-        {"slug": "the-numbers", "provenance": "primer", "focus": "Check latency, powers of two, availability, and unit conventions."},
-        {"slug": "worked-examples", "provenance": "authored", "focus": "Recalculate every example and connect each result to a topology choice."},
-        {"slug": "checklist", "provenance": "authored", "focus": "Make the estimation routine executable under interview time pressure."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Estimation as a decision tool rather than decorative arithmetic."
+        },
+        {
+          "slug": "the-numbers",
+          "provenance": "primer",
+          "focus": "Check latency, powers of two, availability, and unit conventions."
+        },
+        {
+          "slug": "worked-examples",
+          "provenance": "authored",
+          "focus": "Recalculate every example and connect each result to a topology choice."
+        },
+        {
+          "slug": "checklist",
+          "provenance": "authored",
+          "focus": "Make the estimation routine executable under interview time pressure."
+        }
       ]
     },
     {
       "slug": "performance-and-latency",
       "track": "foundations",
       "priority": "P0",
-      "required_resources": ["ddia-2e", "google-sre", "aws-well-architected"],
-      "topic_checks": ["latency versus throughput", "Little's Law", "percentiles", "tail amplification", "timeouts", "load shedding", "capacity knee"],
+      "required_resources": [
+        "ddia-2e",
+        "google-sre",
+        "aws-well-architected"
+      ],
+      "topic_checks": [
+        "latency versus throughput",
+        "Little's Law",
+        "percentiles",
+        "tail amplification",
+        "timeouts",
+        "load shedding",
+        "capacity knee"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Definitions and the distinction between performance and scalability."},
-        {"slug": "performance-vs-scalability", "provenance": "primer", "focus": "Check that local optimization and horizontal scaling are not conflated."},
-        {"slug": "latency-vs-throughput", "provenance": "primer", "focus": "Verify the workload-dependent relationship and batching trade-off."},
-        {"slug": "tail-latency", "provenance": "authored", "focus": "Validate percentile math, fan-out, hedging, timeout budgets, and overload behavior."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Definitions and the distinction between performance and scalability."
+        },
+        {
+          "slug": "performance-vs-scalability",
+          "provenance": "primer",
+          "focus": "Check that local optimization and horizontal scaling are not conflated."
+        },
+        {
+          "slug": "latency-vs-throughput",
+          "provenance": "primer",
+          "focus": "Verify the workload-dependent relationship and batching trade-off."
+        },
+        {
+          "slug": "tail-latency",
+          "provenance": "authored",
+          "focus": "Validate percentile math, fan-out, hedging, timeout budgets, and overload behavior."
+        }
       ]
     },
     {
       "slug": "scaling-journey",
       "track": "foundations",
       "priority": "P0",
-      "required_resources": ["system-design-primer", "aws-well-architected", "gcp-well-architected", "google-sre"],
-      "topic_checks": ["start simple", "statelessness", "replication lag", "cache placement", "CDN", "queues", "sharding as a last resort"],
+      "required_resources": [
+        "system-design-primer",
+        "aws-well-architected",
+        "gcp-well-architected",
+        "google-sre"
+      ],
+      "topic_checks": [
+        "start simple",
+        "statelessness",
+        "replication lag",
+        "cache placement",
+        "CDN",
+        "queues",
+        "sharding as a last resort"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Causal sequence from one box to a distributed design."},
-        {"slug": "requirements", "provenance": "primer", "focus": "Check that assumptions and estimates drive scaling decisions."},
-        {"slug": "web-and-data-tier", "provenance": "authored", "focus": "Validate stateless web tiers, read replicas, lag, and failover fencing."},
-        {"slug": "scaling-out", "provenance": "primer", "focus": "Verify load balancing, cache, CDN, async work, and database scaling trade-offs."},
-        {"slug": "talking-points", "provenance": "primer", "focus": "Check that alternatives and bottleneck iteration remain explicit."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Causal sequence from one box to a distributed design."
+        },
+        {
+          "slug": "requirements",
+          "provenance": "primer",
+          "focus": "Check that assumptions and estimates drive scaling decisions."
+        },
+        {
+          "slug": "web-and-data-tier",
+          "provenance": "authored",
+          "focus": "Validate stateless web tiers, read replicas, lag, and failover fencing."
+        },
+        {
+          "slug": "scaling-out",
+          "provenance": "primer",
+          "focus": "Verify load balancing, cache, CDN, async work, and database scaling trade-offs."
+        },
+        {
+          "slug": "talking-points",
+          "provenance": "primer",
+          "focus": "Check that alternatives and bottleneck iteration remain explicit."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "full-stack",
+          "owning_section": "scaling-out",
+          "flows": [
+            "read-path",
+            "write-path"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        },
+        {
+          "slug": "single-server",
+          "owning_section": "overview",
+          "flows": [
+            "first-request"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        },
+        {
+          "slug": "web-data-tier",
+          "owning_section": "web-and-data-tier",
+          "flows": [
+            "read-request"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "cap-theorem",
       "track": "theory",
       "priority": "P0",
-      "required_resources": ["ddia-2e", "dynamo-paper", "system-design-primer"],
-      "topic_checks": ["partition tolerance is not optional", "C versus A during partition", "CAP scope", "PACELC", "per-operation choices", "avoid vendor absolutes"],
+      "required_resources": [
+        "ddia-2e",
+        "dynamo-paper",
+        "system-design-primer"
+      ],
+      "topic_checks": [
+        "partition tolerance is not optional",
+        "C versus A during partition",
+        "CAP scope",
+        "PACELC",
+        "per-operation choices",
+        "avoid vendor absolutes"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Correct the pick-two misconception without overclaiming."},
-        {"slug": "cap", "provenance": "primer", "focus": "Verify CP/AP examples and distinguish partitions from lag and cache staleness."},
-        {"slug": "pacelc", "provenance": "authored", "focus": "Fact-check PACELC classifications and quorum caveats."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Correct the pick-two misconception without overclaiming."
+        },
+        {
+          "slug": "cap",
+          "provenance": "primer",
+          "focus": "Verify CP/AP examples and distinguish partitions from lag and cache staleness."
+        },
+        {
+          "slug": "pacelc",
+          "provenance": "authored",
+          "focus": "Fact-check PACELC classifications and quorum caveats."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "partition-choice",
+          "owning_section": "cap",
+          "flows": [
+            "cp",
+            "ap",
+            "per-operation"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "consistency-patterns",
       "track": "theory",
       "priority": "P0",
-      "required_resources": ["ddia-2e", "dynamo-paper", "postgresql-docs"],
-      "topic_checks": ["ACID C versus distributed consistency", "read-your-writes", "monotonic reads", "bounded staleness", "conflict resolution", "quorum assumptions"],
+      "required_resources": [
+        "ddia-2e",
+        "dynamo-paper",
+        "postgresql-docs"
+      ],
+      "topic_checks": [
+        "ACID C versus distributed consistency",
+        "read-your-writes",
+        "monotonic reads",
+        "bounded staleness",
+        "conflict resolution",
+        "quorum assumptions"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Separate database integrity from replica visibility."},
-        {"slug": "the-three-models", "provenance": "primer", "focus": "Check weak, eventual, and strong consistency definitions."},
-        {"slug": "in-practice", "provenance": "authored", "focus": "Correct R+W>N claims and identify assumptions, repair, and concurrent-write limits."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Separate database integrity from replica visibility."
+        },
+        {
+          "slug": "the-three-models",
+          "provenance": "primer",
+          "focus": "Check weak, eventual, and strong consistency definitions."
+        },
+        {
+          "slug": "in-practice",
+          "provenance": "authored",
+          "focus": "Correct R+W>N claims and identify assumptions, repair, and concurrent-write limits."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "replication-lag",
+          "owning_section": "in-practice",
+          "flows": [
+            "the-bug",
+            "fix"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "availability-patterns",
       "track": "theory",
       "priority": "P0",
-      "required_resources": ["google-sre", "aws-well-architected", "gcp-well-architected"],
-      "topic_checks": ["series and parallel composition", "correlated failure", "timeouts", "retry budgets", "circuit breakers", "bulkheads", "tested failover"],
+      "required_resources": [
+        "google-sre",
+        "aws-well-architected",
+        "gcp-well-architected"
+      ],
+      "topic_checks": [
+        "series and parallel composition",
+        "correlated failure",
+        "timeouts",
+        "retry budgets",
+        "circuit breakers",
+        "bulkheads",
+        "tested failover"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Redundancy, isolation, graceful degradation, and realistic availability targets."},
-        {"slug": "failover-and-replication", "provenance": "primer", "focus": "Verify failover benefits, lag, split brain, and replica placement."},
-        {"slug": "availability-in-numbers", "provenance": "primer", "focus": "Recalculate nines and qualify independence assumptions."},
-        {"slug": "resilience-patterns", "provenance": "authored", "focus": "Validate timeout, retry, circuit-breaker, bulkhead, readiness, and recovery guidance."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Redundancy, isolation, graceful degradation, and realistic availability targets."
+        },
+        {
+          "slug": "failover-and-replication",
+          "provenance": "primer",
+          "focus": "Verify failover benefits, lag, split brain, and replica placement."
+        },
+        {
+          "slug": "availability-in-numbers",
+          "provenance": "primer",
+          "focus": "Recalculate nines and qualify independence assumptions."
+        },
+        {
+          "slug": "resilience-patterns",
+          "provenance": "authored",
+          "focus": "Validate timeout, retry, circuit-breaker, bulkhead, readiness, and recovery guidance."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "multi-dc-failover",
+          "owning_section": "failover-and-replication",
+          "flows": [
+            "normal",
+            "failover"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "consistent-hashing",
       "track": "theory",
       "priority": "P1",
-      "required_resources": ["dynamo-paper", "ddia-2e", "system-design-primer"],
-      "topic_checks": ["key movement", "ring ownership", "virtual nodes", "replica placement", "hot spots", "rendezvous and jump hashing"],
+      "required_resources": [
+        "dynamo-paper",
+        "ddia-2e",
+        "system-design-primer"
+      ],
+      "topic_checks": [
+        "key movement",
+        "ring ownership",
+        "virtual nodes",
+        "replica placement",
+        "hot spots",
+        "rendezvous and jump hashing"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Modulo failure and the limited-movement objective."},
-        {"slug": "the-ring", "provenance": "authored", "focus": "Check ring lookup, balance, membership, and ownership language."},
-        {"slug": "virtual-nodes", "provenance": "authored", "focus": "Validate balance, failure concentration, rack/AZ awareness, and token count trade-offs."},
-        {"slug": "tradeoffs", "provenance": "authored", "focus": "Fact-check alternatives and when a ring is unnecessary."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Modulo failure and the limited-movement objective."
+        },
+        {
+          "slug": "the-ring",
+          "provenance": "authored",
+          "focus": "Check ring lookup, balance, membership, and ownership language."
+        },
+        {
+          "slug": "virtual-nodes",
+          "provenance": "authored",
+          "focus": "Validate balance, failure concentration, rack/AZ awareness, and token count trade-offs."
+        },
+        {
+          "slug": "tradeoffs",
+          "provenance": "authored",
+          "focus": "Fact-check alternatives and when a ring is unnecessary."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "rehashing-problem",
+          "owning_section": "overview",
+          "flows": [
+            "collapse"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "unique-id-generator",
       "track": "theory",
       "priority": "P1",
-      "required_resources": ["ietf-uuid", "ddia-2e", "system-design-primer"],
-      "topic_checks": ["collision resistance", "ordering", "coordination", "clock regression", "machine ID assignment", "UUIDv7 versus Snowflake"],
+      "required_resources": [
+        "ietf-uuid",
+        "ddia-2e",
+        "system-design-primer"
+      ],
+      "topic_checks": [
+        "collision resistance",
+        "ordering",
+        "coordination",
+        "clock regression",
+        "machine ID assignment",
+        "UUIDv7 versus Snowflake"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Why multiple writers change identifier design."},
-        {"slug": "approaches", "provenance": "authored", "focus": "Compare auto-increment, ticket servers, UUIDs, and Snowflake by workload."},
-        {"slug": "snowflake", "provenance": "authored", "focus": "Check bit layout, sequence capacity, epoch, and machine identity."},
-        {"slug": "tradeoffs", "provenance": "authored", "focus": "Validate clock handling, information leakage, and ordering limits."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Why multiple writers change identifier design."
+        },
+        {
+          "slug": "approaches",
+          "provenance": "authored",
+          "focus": "Compare auto-increment, ticket servers, UUIDs, and Snowflake by workload."
+        },
+        {
+          "slug": "snowflake",
+          "provenance": "authored",
+          "focus": "Check bit layout, sequence capacity, epoch, and machine identity."
+        },
+        {
+          "slug": "tradeoffs",
+          "provenance": "authored",
+          "focus": "Validate clock handling, information leakage, and ordering limits."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "snowflake-layout",
+          "owning_section": "snowflake",
+          "flows": [
+            "generate",
+            "assignment",
+            "clock"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "dns",
       "track": "delivery",
       "priority": "P1",
-      "required_resources": ["ietf-dns", "cloudflare-cache", "system-design-primer"],
-      "topic_checks": ["recursive resolution", "delegation", "TTL", "record types", "routing policy", "DNS failure modes"],
+      "required_resources": [
+        "ietf-dns",
+        "cloudflare-cache",
+        "system-design-primer"
+      ],
+      "topic_checks": [
+        "recursive resolution",
+        "delegation",
+        "TTL",
+        "record types",
+        "routing policy",
+        "DNS failure modes"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "DNS as both naming and traffic-steering infrastructure."},
-        {"slug": "how-it-works", "provenance": "primer", "focus": "Verify resolver, authoritative server, delegation, and caching behavior."},
-        {"slug": "tradeoffs", "provenance": "primer", "focus": "Check TTL, failover, provider dependency, and stale-cache caveats."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "DNS as both naming and traffic-steering infrastructure."
+        },
+        {
+          "slug": "how-it-works",
+          "provenance": "primer",
+          "focus": "Verify resolver, authoritative server, delegation, and caching behavior."
+        },
+        {
+          "slug": "tradeoffs",
+          "provenance": "primer",
+          "focus": "Check TTL, failover, provider dependency, and stale-cache caveats."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "resolution-path",
+          "owning_section": "how-it-works",
+          "flows": [
+            "cold",
+            "warm",
+            "steering"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "cdn",
       "track": "delivery",
       "priority": "P1",
-      "required_resources": ["ietf-http", "cloudflare-cache", "s3-docs", "aws-well-architected"],
-      "topic_checks": ["cache keys", "TTL", "invalidation", "versioned assets", "private responses", "origin protection", "cost"],
+      "required_resources": [
+        "ietf-http",
+        "cloudflare-cache",
+        "s3-docs",
+        "aws-well-architected"
+      ],
+      "topic_checks": [
+        "cache keys",
+        "TTL",
+        "invalidation",
+        "versioned assets",
+        "private responses",
+        "origin protection",
+        "cost"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "When edge caching is appropriate and what it does not solve."},
-        {"slug": "push-vs-pull", "provenance": "primer", "focus": "Verify push/pull behavior and operational trade-offs."},
-        {"slug": "invalidation", "provenance": "authored", "focus": "Check HTTP cache semantics, immutable versioning, purge, and privacy."},
-        {"slug": "tradeoffs", "provenance": "primer", "focus": "Validate cost, staleness, and availability caveats."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "When edge caching is appropriate and what it does not solve."
+        },
+        {
+          "slug": "push-vs-pull",
+          "provenance": "primer",
+          "focus": "Verify push/pull behavior and operational trade-offs."
+        },
+        {
+          "slug": "invalidation",
+          "provenance": "authored",
+          "focus": "Check HTTP cache semantics, immutable versioning, purge, and privacy."
+        },
+        {
+          "slug": "tradeoffs",
+          "provenance": "primer",
+          "focus": "Validate cost, staleness, and availability caveats."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "pull-cdn",
+          "owning_section": "push-vs-pull",
+          "flows": [
+            "cold",
+            "warm",
+            "prewarm"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "load-balancing",
       "track": "delivery",
       "priority": "P1",
-      "required_resources": ["aws-well-architected", "gcp-well-architected", "kubernetes-docs", "system-design-primer"],
-      "topic_checks": ["L4 versus L7", "health checks", "readiness", "statelessness", "connection draining", "load-balancer redundancy"],
+      "required_resources": [
+        "aws-well-architected",
+        "gcp-well-architected",
+        "kubernetes-docs",
+        "system-design-primer"
+      ],
+      "topic_checks": [
+        "L4 versus L7",
+        "health checks",
+        "readiness",
+        "statelessness",
+        "connection draining",
+        "load-balancer redundancy"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "What a load balancer solves and what it cannot solve."},
-        {"slug": "what-it-does", "provenance": "primer", "focus": "Check routing, health checks, and distribution assumptions."},
-        {"slug": "l4-vs-l7", "provenance": "primer", "focus": "Verify layer boundaries and trade-offs."},
-        {"slug": "reverse-proxy", "provenance": "primer", "focus": "Distinguish reverse proxy, gateway, and load balancer roles."},
-        {"slug": "tradeoffs", "provenance": "primer", "focus": "Check single-point-of-failure and operational caveats."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "What a load balancer solves and what it cannot solve."
+        },
+        {
+          "slug": "what-it-does",
+          "provenance": "primer",
+          "focus": "Check routing, health checks, and distribution assumptions."
+        },
+        {
+          "slug": "l4-vs-l7",
+          "provenance": "primer",
+          "focus": "Verify layer boundaries and trade-offs."
+        },
+        {
+          "slug": "reverse-proxy",
+          "provenance": "primer",
+          "focus": "Distinguish reverse proxy, gateway, and load balancer roles."
+        },
+        {
+          "slug": "tradeoffs",
+          "provenance": "primer",
+          "focus": "Check single-point-of-failure and operational caveats."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "health-check-failover",
+          "owning_section": "what-it-does",
+          "flows": [
+            "failover",
+            "sticky"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "communication-protocols",
       "track": "delivery",
       "priority": "P0",
-      "required_resources": ["ietf-http", "ietf-websocket", "ietf-tls", "grpc-docs"],
-      "topic_checks": ["HTTP semantics", "TCP versus UDP", "TLS", "REST versus RPC", "deadlines", "streaming", "reconnection"],
+      "required_resources": [
+        "ietf-http",
+        "ietf-websocket",
+        "ietf-tls",
+        "grpc-docs"
+      ],
+      "topic_checks": [
+        "HTTP semantics",
+        "TCP versus UDP",
+        "TLS",
+        "REST versus RPC",
+        "deadlines",
+        "streaming",
+        "reconnection"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Choose protocols from interaction and failure requirements."},
-        {"slug": "transport", "provenance": "primer", "focus": "Fact-check HTTP, TCP, UDP, reliability, ordering, and congestion claims."},
-        {"slug": "rpc-vs-rest", "provenance": "primer", "focus": "Compare contracts, coupling, observability, evolution, and retries."},
-        {"slug": "realtime", "provenance": "authored", "focus": "Validate polling, SSE, WebSockets, heartbeats, and reconnect behavior."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Choose protocols from interaction and failure requirements."
+        },
+        {
+          "slug": "transport",
+          "provenance": "primer",
+          "focus": "Fact-check HTTP, TCP, UDP, reliability, ordering, and congestion claims."
+        },
+        {
+          "slug": "rpc-vs-rest",
+          "provenance": "primer",
+          "focus": "Compare contracts, coupling, observability, evolution, and retries."
+        },
+        {
+          "slug": "realtime",
+          "provenance": "authored",
+          "focus": "Validate polling, SSE, WebSockets, heartbeats, and reconnect behavior."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "realtime-options",
+          "owning_section": "realtime",
+          "flows": [
+            "walk",
+            "consequence"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "relational-databases",
       "track": "data",
       "priority": "P0",
-      "required_resources": ["postgresql-docs", "ddia-2e", "aws-well-architected"],
-      "topic_checks": ["ACID", "isolation anomalies", "MVCC", "indexes", "replication", "partitioning", "schema evolution", "query-driven design"],
+      "required_resources": [
+        "postgresql-docs",
+        "ddia-2e",
+        "aws-well-architected"
+      ],
+      "topic_checks": [
+        "ACID",
+        "isolation anomalies",
+        "MVCC",
+        "indexes",
+        "replication",
+        "partitioning",
+        "schema evolution",
+        "query-driven design"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "When relational storage is the simplest correct choice."},
-        {"slug": "rdbms", "provenance": "primer", "focus": "Replace broad RDBMS claims with precise transaction, index, and scaling explanations."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "When relational storage is the simplest correct choice."
+        },
+        {
+          "slug": "rdbms",
+          "provenance": "primer",
+          "focus": "Replace broad RDBMS claims with precise transaction, index, and scaling explanations."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "sharding",
+          "owning_section": "rdbms",
+          "flows": [
+            "single",
+            "scatter",
+            "costs"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "nosql-databases",
       "track": "data",
       "priority": "P0",
-      "required_resources": ["ddia-2e", "dynamo-paper", "postgresql-docs"],
-      "topic_checks": ["access-pattern-first modeling", "key-value", "document", "wide-column", "graph", "partitioning", "consistency", "SQL versus NoSQL decision"],
+      "required_resources": [
+        "ddia-2e",
+        "dynamo-paper",
+        "postgresql-docs"
+      ],
+      "topic_checks": [
+        "access-pattern-first modeling",
+        "key-value",
+        "document",
+        "wide-column",
+        "graph",
+        "partitioning",
+        "consistency",
+        "SQL versus NoSQL decision"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "What NoSQL optimizes and what it gives up."},
-        {"slug": "the-four-families", "provenance": "primer", "focus": "Verify the four families without implying rigid categories."},
-        {"slug": "sql-or-nosql", "provenance": "primer", "focus": "Turn technology selection into workload and access-pattern reasoning."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "What NoSQL optimizes and what it gives up."
+        },
+        {
+          "slug": "the-four-families",
+          "provenance": "primer",
+          "focus": "Verify the four families without implying rigid categories."
+        },
+        {
+          "slug": "sql-or-nosql",
+          "provenance": "primer",
+          "focus": "Turn technology selection into workload and access-pattern reasoning."
+        }
       ]
     },
     {
       "slug": "caching",
       "track": "data",
       "priority": "P0",
-      "required_resources": ["redis-docs", "ietf-http", "cloudflare-cache", "ddia-2e"],
-      "topic_checks": ["cache-aside", "write-through", "write-behind", "TTL", "eviction", "stampede protection", "negative caching", "invalidation"],
+      "required_resources": [
+        "redis-docs",
+        "ietf-http",
+        "cloudflare-cache",
+        "ddia-2e"
+      ],
+      "topic_checks": [
+        "cache-aside",
+        "write-through",
+        "write-behind",
+        "TTL",
+        "eviction",
+        "stampede protection",
+        "negative caching",
+        "invalidation"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Cache only when the workload and staleness tolerance justify it."},
-        {"slug": "where-to-cache", "provenance": "primer", "focus": "Compare client, CDN, web, database, and application caches."},
-        {"slug": "what-to-cache", "provenance": "primer", "focus": "Check object versus query caching and cache-key correctness."},
-        {"slug": "update-strategies", "provenance": "primer", "focus": "Validate cache update patterns, failure, and consistency."},
-        {"slug": "tradeoffs", "provenance": "primer", "focus": "Add stampede, cold-start, privacy, eviction, and cost follow-ups."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Cache only when the workload and staleness tolerance justify it."
+        },
+        {
+          "slug": "where-to-cache",
+          "provenance": "primer",
+          "focus": "Compare client, CDN, web, database, and application caches."
+        },
+        {
+          "slug": "what-to-cache",
+          "provenance": "primer",
+          "focus": "Check object versus query caching and cache-key correctness."
+        },
+        {
+          "slug": "update-strategies",
+          "provenance": "primer",
+          "focus": "Validate cache update patterns, failure, and consistency."
+        },
+        {
+          "slug": "tradeoffs",
+          "provenance": "primer",
+          "focus": "Add stampede, cold-start, privacy, eviction, and cost follow-ups."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "cache-aside",
+          "owning_section": "update-strategies",
+          "flows": [
+            "cache-hit",
+            "cache-miss",
+            "stampede"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "key-value-store",
       "track": "data",
       "priority": "P0",
-      "required_resources": ["dynamo-paper", "raft-paper", "ddia-2e", "redis-docs"],
-      "topic_checks": ["partitioning", "replication", "quorum", "repair", "conflicts", "hot keys", "failure semantics", "data movement"],
+      "required_resources": [
+        "dynamo-paper",
+        "raft-paper",
+        "ddia-2e",
+        "redis-docs"
+      ],
+      "topic_checks": [
+        "partitioning",
+        "replication",
+        "quorum",
+        "repair",
+        "conflicts",
+        "hot keys",
+        "failure semantics",
+        "data movement"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Define the workload and guarantees before designing the store."},
-        {"slug": "requirements", "provenance": "primer", "focus": "Recheck estimates, API shape, and access patterns."},
-        {"slug": "quorum", "provenance": "authored", "focus": "Fact-check quorum, sloppy quorum, hinted handoff, and conflict behavior."},
-        {"slug": "core-components", "provenance": "primer", "focus": "Verify partition and replication paths against the Dynamo paper."},
-        {"slug": "talking-points", "provenance": "primer", "focus": "Add repair, operations, rebalancing, and observability follow-ups."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Define the workload and guarantees before designing the store."
+        },
+        {
+          "slug": "requirements",
+          "provenance": "primer",
+          "focus": "Recheck estimates, API shape, and access patterns."
+        },
+        {
+          "slug": "quorum",
+          "provenance": "authored",
+          "focus": "Fact-check quorum, sloppy quorum, hinted handoff, and conflict behavior."
+        },
+        {
+          "slug": "core-components",
+          "provenance": "primer",
+          "focus": "Verify partition and replication paths against the Dynamo paper."
+        },
+        {
+          "slug": "talking-points",
+          "provenance": "primer",
+          "focus": "Add repair, operations, rebalancing, and observability follow-ups."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "quorum",
+          "owning_section": "quorum",
+          "flows": [
+            "write",
+            "read",
+            "tuning"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "graph-data-modeling",
       "track": "data",
       "priority": "P1",
-      "required_resources": ["ddia-2e", "system-design-primer", "bytebytego-interview"],
-      "topic_checks": ["adjacency modeling", "fan-out", "partition boundaries", "hot vertices", "shortest paths", "denormalization", "consistency"],
+      "required_resources": [
+        "ddia-2e",
+        "system-design-primer",
+        "bytebytego-interview"
+      ],
+      "topic_checks": [
+        "adjacency modeling",
+        "fan-out",
+        "partition boundaries",
+        "hot vertices",
+        "shortest paths",
+        "denormalization",
+        "consistency"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Treat graph design as query and locality design."},
-        {"slug": "requirements", "provenance": "primer", "focus": "Validate graph use cases and scale assumptions."},
-        {"slug": "core-components", "provenance": "primer", "focus": "Check adjacency storage, traversal cost, and sharding limits."},
-        {"slug": "talking-points", "provenance": "primer", "focus": "Add hot-node, cache, precomputation, and consistency follow-ups."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Treat graph design as query and locality design."
+        },
+        {
+          "slug": "requirements",
+          "provenance": "primer",
+          "focus": "Validate graph use cases and scale assumptions."
+        },
+        {
+          "slug": "core-components",
+          "provenance": "primer",
+          "focus": "Check adjacency storage, traversal cost, and sharding limits."
+        },
+        {
+          "slug": "talking-points",
+          "provenance": "primer",
+          "focus": "Add hot-node, cache, precomputation, and consistency follow-ups."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "graph-sharding",
+          "owning_section": "core-components",
+          "flows": [
+            "one-hop",
+            "two-hops",
+            "mitigations"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "application-layer",
       "track": "data",
       "priority": "P1",
-      "required_resources": ["ddia-2e", "grpc-docs", "kubernetes-docs", "aws-well-architected"],
-      "topic_checks": ["service boundaries", "data ownership", "service discovery", "synchronous chains", "sagas", "modular monolith", "operational overhead"],
+      "required_resources": [
+        "ddia-2e",
+        "grpc-docs",
+        "kubernetes-docs",
+        "aws-well-architected"
+      ],
+      "topic_checks": [
+        "service boundaries",
+        "data ownership",
+        "service discovery",
+        "synchronous chains",
+        "sagas",
+        "modular monolith",
+        "operational overhead"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Separate concerns without defaulting to microservices."},
-        {"slug": "services", "provenance": "primer", "focus": "Verify service discovery, communication, and ownership concepts."},
-        {"slug": "tradeoffs", "provenance": "primer", "focus": "Add transaction, latency, availability, debugging, and deployment costs."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Separate concerns without defaulting to microservices."
+        },
+        {
+          "slug": "services",
+          "provenance": "primer",
+          "focus": "Verify service discovery, communication, and ownership concepts."
+        },
+        {
+          "slug": "tradeoffs",
+          "provenance": "primer",
+          "focus": "Add transaction, latency, availability, debugging, and deployment costs."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "service-boundaries",
+          "owning_section": "services",
+          "flows": [
+            "routing",
+            "ownership",
+            "cost"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "asynchronism",
       "track": "data",
       "priority": "P0",
-      "required_resources": ["kafka-docs", "ddia-2e", "google-sre", "redis-docs"],
-      "topic_checks": ["queue versus log", "acknowledgement", "at-least-once", "idempotency", "ordering", "back pressure", "DLQ", "consumer lag"],
+      "required_resources": [
+        "kafka-docs",
+        "ddia-2e",
+        "google-sre",
+        "redis-docs"
+      ],
+      "topic_checks": [
+        "queue versus log",
+        "acknowledgement",
+        "at-least-once",
+        "idempotency",
+        "ordering",
+        "back pressure",
+        "DLQ",
+        "consumer lag"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "When asynchronous work improves isolation and when it only hides latency."},
-        {"slug": "queues", "provenance": "primer", "focus": "Distinguish message queues, task queues, and durable logs."},
-        {"slug": "delivery-semantics", "provenance": "authored", "focus": "Fact-check exactly-once boundaries, idempotency, ordering, retry, and DLQ guidance."},
-        {"slug": "tradeoffs", "provenance": "primer", "focus": "Validate back pressure and operational failure modes."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "When asynchronous work improves isolation and when it only hides latency."
+        },
+        {
+          "slug": "queues",
+          "provenance": "primer",
+          "focus": "Distinguish message queues, task queues, and durable logs."
+        },
+        {
+          "slug": "delivery-semantics",
+          "provenance": "authored",
+          "focus": "Fact-check exactly-once boundaries, idempotency, ordering, retry, and DLQ guidance."
+        },
+        {
+          "slug": "tradeoffs",
+          "provenance": "primer",
+          "focus": "Validate back pressure and operational failure modes."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "queue-workers",
+          "owning_section": "queues",
+          "flows": [
+            "happy-path",
+            "backlog",
+            "poison"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "batch-analytics",
       "track": "data",
       "priority": "P1",
-      "required_resources": ["ddia-2e", "kafka-docs", "google-sre", "aws-well-architected"],
-      "topic_checks": ["batch versus streaming", "replay", "aggregation", "late data", "idempotent jobs", "backfills", "serving precomputed results"],
+      "required_resources": [
+        "ddia-2e",
+        "kafka-docs",
+        "google-sre",
+        "aws-well-architected"
+      ],
+      "topic_checks": [
+        "batch versus streaming",
+        "replay",
+        "aggregation",
+        "late data",
+        "idempotent jobs",
+        "backfills",
+        "serving precomputed results"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Choose batch when freshness tolerance buys simpler and cheaper systems."},
-        {"slug": "categorization-pipeline", "provenance": "primer", "focus": "Validate pipeline stages, data volume, and retry behavior."},
-        {"slug": "ranking-pipeline", "provenance": "primer", "focus": "Check MapReduce assumptions, windows, skew, and serving design."},
-        {"slug": "talking-points", "provenance": "primer", "focus": "Add late events, schema evolution, backfills, and monitoring."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Choose batch when freshness tolerance buys simpler and cheaper systems."
+        },
+        {
+          "slug": "categorization-pipeline",
+          "provenance": "primer",
+          "focus": "Validate pipeline stages, data volume, and retry behavior."
+        },
+        {
+          "slug": "ranking-pipeline",
+          "provenance": "primer",
+          "focus": "Check MapReduce assumptions, windows, skew, and serving design."
+        },
+        {
+          "slug": "talking-points",
+          "provenance": "primer",
+          "focus": "Add late events, schema evolution, backfills, and monitoring."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "mapreduce-pipeline",
+          "owning_section": "ranking-pipeline",
+          "flows": [
+            "job",
+            "serve",
+            "why-batch"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "security",
       "track": "data",
       "priority": "P0",
-      "required_resources": ["owasp-asvs", "ietf-tls", "aws-well-architected", "google-sre"],
-      "topic_checks": ["authentication", "authorization", "TLS", "password hashing", "least privilege", "input validation", "secrets", "audit logging", "privacy"],
+      "required_resources": [
+        "owasp-asvs",
+        "ietf-tls",
+        "aws-well-architected",
+        "google-sre"
+      ],
+      "topic_checks": [
+        "authentication",
+        "authorization",
+        "TLS",
+        "password hashing",
+        "least privilege",
+        "input validation",
+        "secrets",
+        "audit logging",
+        "privacy"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Make security a design default without turning the lesson into a checklist recital."},
-        {"slug": "principles", "provenance": "primer", "focus": "Verify encryption, least privilege, input handling, and rate limiting."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Make security a design default without turning the lesson into a checklist recital."
+        },
+        {
+          "slug": "principles",
+          "provenance": "primer",
+          "focus": "Verify encryption, least privilege, input handling, and rate limiting."
+        }
       ]
     },
     {
       "slug": "url-shortener",
       "track": "case-studies",
       "priority": "P1",
-      "required_resources": ["ietf-http", "system-design-primer", "bytebytego-interview", "redis-docs"],
-      "topic_checks": ["requirements", "key generation", "collision handling", "redirect semantics", "read-heavy caching", "abuse and expiration"],
+      "required_resources": [
+        "ietf-http",
+        "system-design-primer",
+        "bytebytego-interview",
+        "redis-docs"
+      ],
+      "topic_checks": [
+        "requirements",
+        "key generation",
+        "collision handling",
+        "redirect semantics",
+        "read-heavy caching",
+        "abuse and expiration"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Scope the product and distinguish short-link creation from redirect serving."},
-        {"slug": "requirements", "provenance": "primer", "focus": "Recalculate volume, retention, and read/write ratio."},
-        {"slug": "key-generation", "provenance": "authored", "focus": "Validate Base62, hashing, collision, enumeration, and ID semantics."},
-        {"slug": "core-components", "provenance": "primer", "focus": "Check cache, storage, redirect, analytics, and scaling choices."},
-        {"slug": "talking-points", "provenance": "primer", "focus": "Add abuse, privacy, deletion, and cost follow-ups."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Scope the product and distinguish short-link creation from redirect serving."
+        },
+        {
+          "slug": "requirements",
+          "provenance": "primer",
+          "focus": "Recalculate volume, retention, and read/write ratio."
+        },
+        {
+          "slug": "key-generation",
+          "provenance": "authored",
+          "focus": "Validate Base62, hashing, collision, enumeration, and ID semantics."
+        },
+        {
+          "slug": "core-components",
+          "provenance": "primer",
+          "focus": "Check cache, storage, redirect, analytics, and scaling choices."
+        },
+        {
+          "slug": "talking-points",
+          "provenance": "primer",
+          "focus": "Add abuse, privacy, deletion, and cost follow-ups."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "shorten-and-redirect",
+          "owning_section": "key-generation",
+          "flows": [
+            "shorten",
+            "redirect"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "news-feed",
       "track": "case-studies",
       "priority": "P0",
-      "required_resources": ["ddia-2e", "kafka-docs", "redis-docs", "system-design-primer"],
-      "topic_checks": ["fan-out on write/read", "celebrity problem", "ranking", "pagination", "feed freshness", "hot keys", "backfill and repair"],
+      "required_resources": [
+        "ddia-2e",
+        "kafka-docs",
+        "redis-docs",
+        "system-design-primer"
+      ],
+      "topic_checks": [
+        "fan-out on write/read",
+        "celebrity problem",
+        "ranking",
+        "pagination",
+        "feed freshness",
+        "hot keys",
+        "backfill and repair"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Define timeline requirements, freshness, and interaction model."},
-        {"slug": "requirements", "provenance": "primer", "focus": "Validate traffic assumptions and read/write ratio."},
-        {"slug": "fanout", "provenance": "authored", "focus": "Check hybrid fan-out, celebrity handling, ordering, and asynchronous writes."},
-        {"slug": "core-components", "provenance": "primer", "focus": "Verify storage, cache, ranking, and scaling paths."},
-        {"slug": "talking-points", "provenance": "primer", "focus": "Add deletion, privacy, moderation, replay, and consistency follow-ups."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Define timeline requirements, freshness, and interaction model."
+        },
+        {
+          "slug": "requirements",
+          "provenance": "primer",
+          "focus": "Validate traffic assumptions and read/write ratio."
+        },
+        {
+          "slug": "fanout",
+          "provenance": "authored",
+          "focus": "Check hybrid fan-out, celebrity handling, ordering, and asynchronous writes."
+        },
+        {
+          "slug": "core-components",
+          "provenance": "primer",
+          "focus": "Verify storage, cache, ranking, and scaling paths."
+        },
+        {
+          "slug": "talking-points",
+          "provenance": "primer",
+          "focus": "Add deletion, privacy, moderation, replay, and consistency follow-ups."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "fanout-on-write",
+          "owning_section": "fanout",
+          "flows": [
+            "write-path",
+            "read-path",
+            "celebrity"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "web-crawler",
       "track": "case-studies",
       "priority": "P1",
-      "required_resources": ["robots-rfc", "kafka-docs", "ddia-2e", "system-design-primer"],
-      "topic_checks": ["URL frontier", "politeness", "robots.txt", "deduplication", "crawler traps", "back pressure", "storage", "recrawl policy"],
+      "required_resources": [
+        "robots-rfc",
+        "kafka-docs",
+        "ddia-2e",
+        "system-design-primer"
+      ],
+      "topic_checks": [
+        "URL frontier",
+        "politeness",
+        "robots.txt",
+        "deduplication",
+        "crawler traps",
+        "back pressure",
+        "storage",
+        "recrawl policy"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Separate fetching, scheduling, parsing, indexing, and storage concerns."},
-        {"slug": "requirements", "provenance": "primer", "focus": "Validate crawl scope, freshness, and scale assumptions."},
-        {"slug": "frontier", "provenance": "authored", "focus": "Check frontier partitioning, host politeness, robots policy, and retries."},
-        {"slug": "core-components", "provenance": "primer", "focus": "Verify deduplication, storage, workers, and failure handling."},
-        {"slug": "talking-points", "provenance": "primer", "focus": "Add legal, abuse, freshness, observability, and recrawl trade-offs."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Separate fetching, scheduling, parsing, indexing, and storage concerns."
+        },
+        {
+          "slug": "requirements",
+          "provenance": "primer",
+          "focus": "Validate crawl scope, freshness, and scale assumptions."
+        },
+        {
+          "slug": "frontier",
+          "provenance": "authored",
+          "focus": "Check frontier partitioning, host politeness, robots policy, and retries."
+        },
+        {
+          "slug": "core-components",
+          "provenance": "primer",
+          "focus": "Verify deduplication, storage, workers, and failure handling."
+        },
+        {
+          "slug": "talking-points",
+          "provenance": "primer",
+          "focus": "Add legal, abuse, freshness, observability, and recrawl trade-offs."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "frontier-loop",
+          "owning_section": "frontier",
+          "flows": [
+            "cycle",
+            "traps"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "rate-limiter",
       "track": "case-studies",
       "priority": "P0",
-      "required_resources": ["redis-docs", "aws-well-architected", "system-design-primer"],
-      "topic_checks": ["token bucket", "sliding window", "atomicity", "distributed counters", "fail open/closed", "identity", "429 semantics", "DDoS boundary"],
+      "required_resources": [
+        "redis-docs",
+        "aws-well-architected",
+        "system-design-primer"
+      ],
+      "topic_checks": [
+        "token bucket",
+        "sliding window",
+        "atomicity",
+        "distributed counters",
+        "fail open/closed",
+        "identity",
+        "429 semantics",
+        "DDoS boundary"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Scope policy, identity, placement, and enforcement accuracy."},
-        {"slug": "algorithms", "provenance": "authored", "focus": "Recalculate algorithm behavior and boundary conditions."},
-        {"slug": "distributed", "provenance": "authored", "focus": "Validate Redis atomicity, Lua, TTL races, leases, and failure policy."},
-        {"slug": "tradeoffs", "provenance": "authored", "focus": "Check headers, jitter, tenant tiers, and DDoS limitations."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Scope policy, identity, placement, and enforcement accuracy."
+        },
+        {
+          "slug": "algorithms",
+          "provenance": "authored",
+          "focus": "Recalculate algorithm behavior and boundary conditions."
+        },
+        {
+          "slug": "distributed",
+          "provenance": "authored",
+          "focus": "Validate Redis atomicity, Lua, TTL races, leases, and failure policy."
+        },
+        {
+          "slug": "tradeoffs",
+          "provenance": "authored",
+          "focus": "Check headers, jitter, tenant tiers, and DDoS limitations."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "limiter-placement",
+          "owning_section": "distributed",
+          "flows": [
+            "allowed",
+            "throttled"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "chat-system",
       "track": "case-studies",
       "priority": "P0",
-      "required_resources": ["ietf-websocket", "ddia-2e", "kafka-docs", "google-sre"],
-      "topic_checks": ["persistent connections", "presence", "ordering", "delivery", "offline sync", "partitioning", "fan-out", "encryption", "reconnect storms"],
+      "required_resources": [
+        "ietf-websocket",
+        "ddia-2e",
+        "kafka-docs",
+        "google-sre"
+      ],
+      "topic_checks": [
+        "persistent connections",
+        "presence",
+        "ordering",
+        "delivery",
+        "offline sync",
+        "partitioning",
+        "fan-out",
+        "encryption",
+        "reconnect storms"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Scope message, presence, receipt, history, and group requirements."},
-        {"slug": "connections", "provenance": "authored", "focus": "Validate connection registry, heartbeats, presence TTLs, and reconnect behavior."},
-        {"slug": "storage-and-sync", "provenance": "authored", "focus": "Check ordering, cursors, partitioning, idempotency, and multi-device sync."},
-        {"slug": "tradeoffs", "provenance": "authored", "focus": "Add E2E encryption, fan-out, retention, and deploy-drain trade-offs."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Scope message, presence, receipt, history, and group requirements."
+        },
+        {
+          "slug": "connections",
+          "provenance": "authored",
+          "focus": "Validate connection registry, heartbeats, presence TTLs, and reconnect behavior."
+        },
+        {
+          "slug": "storage-and-sync",
+          "provenance": "authored",
+          "focus": "Check ordering, cursors, partitioning, idempotency, and multi-device sync."
+        },
+        {
+          "slug": "tradeoffs",
+          "provenance": "authored",
+          "focus": "Add E2E encryption, fan-out, retention, and deploy-drain trade-offs."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "message-delivery",
+          "owning_section": "connections",
+          "flows": [
+            "online-delivery",
+            "offline-delivery"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "search-autocomplete",
       "track": "case-studies",
       "priority": "P1",
-      "required_resources": ["ddia-2e", "kafka-docs", "opentelemetry-docs", "bytebytego-interview"],
-      "topic_checks": ["latency budget", "trie", "top-k precomputation", "batch rebuild", "freshness", "hot prefixes", "safe filtering", "observability"],
+      "required_resources": [
+        "ddia-2e",
+        "kafka-docs",
+        "opentelemetry-docs",
+        "bytebytego-interview"
+      ],
+      "topic_checks": [
+        "latency budget",
+        "trie",
+        "top-k precomputation",
+        "batch rebuild",
+        "freshness",
+        "hot prefixes",
+        "safe filtering",
+        "observability"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Split low-latency serving from slower data gathering."},
-        {"slug": "trie", "provenance": "authored", "focus": "Validate trie complexity, top-k storage, replication, and sharding."},
-        {"slug": "pipeline", "provenance": "authored", "focus": "Check logging, aggregation, ranking, rebuild, swap, and safety filtering."},
-        {"slug": "tradeoffs", "provenance": "authored", "focus": "Recalculate sizing and monitor artifact age, latency, and quality."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Split low-latency serving from slower data gathering."
+        },
+        {
+          "slug": "trie",
+          "provenance": "authored",
+          "focus": "Validate trie complexity, top-k storage, replication, and sharding."
+        },
+        {
+          "slug": "pipeline",
+          "provenance": "authored",
+          "focus": "Check logging, aggregation, ranking, rebuild, swap, and safety filtering."
+        },
+        {
+          "slug": "tradeoffs",
+          "provenance": "authored",
+          "focus": "Recalculate sizing and monitor artifact age, latency, and quality."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "two-systems",
+          "owning_section": "trie",
+          "flows": [
+            "serving",
+            "building",
+            "decoupled"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "notification-system",
       "track": "case-studies",
       "priority": "P0",
-      "required_resources": ["firebase-fcm", "kafka-docs", "google-sre", "owasp-asvs"],
-      "topic_checks": ["provider boundary", "preferences", "quiet hours", "priority", "retries", "deduplication", "DLQ", "accepted versus delivered", "cost"],
+      "required_resources": [
+        "firebase-fcm",
+        "kafka-docs",
+        "google-sre",
+        "owasp-asvs"
+      ],
+      "topic_checks": [
+        "provider boundary",
+        "preferences",
+        "quiet hours",
+        "priority",
+        "retries",
+        "deduplication",
+        "DLQ",
+        "accepted versus delivered",
+        "cost"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Separate product policy from provider delivery mechanics."},
-        {"slug": "pipeline", "provenance": "authored", "focus": "Validate channel queues, preferences, templates, and fan-out."},
-        {"slug": "reliability", "provenance": "authored", "focus": "Check retry classification, idempotency, provider feedback, and DLQ."},
-        {"slug": "tradeoffs", "provenance": "authored", "focus": "Add cost, fatigue, suppression, retention, and delivery observability."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Separate product policy from provider delivery mechanics."
+        },
+        {
+          "slug": "pipeline",
+          "provenance": "authored",
+          "focus": "Validate channel queues, preferences, templates, and fan-out."
+        },
+        {
+          "slug": "reliability",
+          "provenance": "authored",
+          "focus": "Check retry classification, idempotency, provider feedback, and DLQ."
+        },
+        {
+          "slug": "tradeoffs",
+          "provenance": "authored",
+          "focus": "Add cost, fatigue, suppression, retention, and delivery observability."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "channel-queues",
+          "owning_section": "pipeline",
+          "flows": [
+            "normal",
+            "isolation"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     },
     {
       "slug": "media-and-file-storage",
       "track": "case-studies",
       "priority": "P0",
-      "required_resources": ["s3-docs", "hls-docs", "cloudflare-cache", "ddia-2e", "google-sre"],
-      "topic_checks": ["presigned upload", "multipart upload", "content addressing", "transcoding", "adaptive bitrate", "CDN", "metadata scale", "conflict handling", "garbage collection"],
+      "required_resources": [
+        "s3-docs",
+        "hls-docs",
+        "cloudflare-cache",
+        "ddia-2e",
+        "google-sre"
+      ],
+      "topic_checks": [
+        "presigned upload",
+        "multipart upload",
+        "content addressing",
+        "transcoding",
+        "adaptive bitrate",
+        "CDN",
+        "metadata scale",
+        "conflict handling",
+        "garbage collection"
+      ],
       "sections": [
-        {"slug": "overview", "provenance": "authored", "focus": "Separate immutable blobs from mutable metadata and product consistency."},
-        {"slug": "video-pipeline", "provenance": "authored", "focus": "Verify multipart upload, HLS/DASH terminology, transcoding DAG, and CDN delivery."},
-        {"slug": "file-sync", "provenance": "authored", "focus": "Check chunking, deduplication, version graphs, conflicts, and garbage collection."},
-        {"slug": "tradeoffs", "provenance": "authored", "focus": "Validate encryption versus dedup, tiering, retention, and metadata sizing."}
+        {
+          "slug": "overview",
+          "provenance": "authored",
+          "focus": "Separate immutable blobs from mutable metadata and product consistency."
+        },
+        {
+          "slug": "video-pipeline",
+          "provenance": "authored",
+          "focus": "Verify multipart upload, HLS/DASH terminology, transcoding DAG, and CDN delivery."
+        },
+        {
+          "slug": "file-sync",
+          "provenance": "authored",
+          "focus": "Check chunking, deduplication, version graphs, conflicts, and garbage collection."
+        },
+        {
+          "slug": "tradeoffs",
+          "provenance": "authored",
+          "focus": "Validate encryption versus dedup, tiering, retention, and metadata sizing."
+        }
+      ],
+      "diagrams": [
+        {
+          "slug": "upload-transcode",
+          "owning_section": "video-pipeline",
+          "flows": [
+            "upload",
+            "transcode",
+            "playback"
+          ],
+          "checks": [
+            "edge direction",
+            "step order",
+            "step/edge agreement",
+            "coverage",
+            "label arithmetic"
+          ]
+        }
       ]
     }
   ]
