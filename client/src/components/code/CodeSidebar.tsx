@@ -70,7 +70,7 @@ export function CodeSidebar({
     <>
       <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} aria-hidden="true" />
       <aside
-        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-xl flex-col border-l border-line bg-raised shadow-lift"
+        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l border-line bg-raised shadow-lift"
         role="dialog"
         aria-label="Code walkthrough"
       >

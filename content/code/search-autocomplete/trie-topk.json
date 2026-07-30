@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "trie-topk",
+  "title": "Dry-run: a trie with precomputed top-k",
+  "intro": "About 5 minutes. Build the plain trie first, show it collapsing on a hot prefix, then precompute. The collapse is the whole reason the real design exists.",
+  "language": "javascript",
+  "steps": [
+    {
+      "title": "The plain trie",
+      "kind": "code",
+      "explain": "Start with the obvious structure — a tree of characters where each terminal node holds a frequency. Walking to a prefix is a handful of pointer hops, essentially free.",
+      "saysOutLoud": "Finding the prefix node is O(p) and cheap. The problem is what comes after.",
+      "code": "function insert(root, term, freq) {\n  let node = root;\n  for (const ch of term) {\n    node.children[ch] ??= { children: {}, freq: 0 };\n    node = node.children[ch];\n  }\n  node.freq = freq;\n}\n\nfunction findPrefix(root, prefix) {\n  let node = root;\n  for (const ch of prefix) {\n    node = node.children[ch];\n    if (!node) return null;\n  }\n  return node; // O(p) — trivial\n}\n"
+    },
+    {
+      "title": "Break it on a one-letter prefix",
+      "kind": "code",
+      "explain": "To rank completions you must visit every descendant and sort. For 'zyg' that is a few nodes; for 'a' it is a large fraction of the entire trie — on a request that must finish under 100 ms. And 'a' is far more common than 'zyg', so the slowest case is also the most frequent one.",
+      "saysOutLoud": "The worst case here is also the most popular query — that's why this doesn't ship.",
+      "code": "function suggestNaive(root, prefix, k = 5) {\n  const node = findPrefix(root, prefix);\n  if (!node) return [];\n\n  const all = [];\n  (function walk(n, word) {            // visits EVERY descendant\n    if (n.freq > 0) all.push({ word, freq: n.freq });\n    for (const [ch, child] of Object.entries(n.children)) walk(child, word + ch);\n  })(node, prefix);\n\n  return all.sort((a, b) => b.freq - a.freq).slice(0, k);\n}\n\n// prefix 'a' → millions of nodes visited, per keystroke.\n"
+    },
+    {
+      "title": "Store the answer at every node",
+      "kind": "code",
+      "explain": "Trade space and build time for a flat read. Once each node carries its own top-k, lookup is a walk plus an array read — and it no longer matters whether the prefix is 'a' or 'zyg', because the work is identical either way.",
+      "code": "// node.top = [{ id, freq }] — precomputed, length k\n\nfunction suggest(root, prefix) {\n  const node = findPrefix(root, prefix);\n  return node ? node.top : [];       // O(p), no traversal at all\n}\n"
+    },
+    {
+      "title": "Build top-k bottom-up, in one pass",
+      "kind": "code",
+      "explain": "A node's top-k is derivable from its children's, so a single post-order pass computes the whole structure. Re-scanning descendants per node would be quadratic — this is the detail that makes the build tractable.",
+      "saysOutLoud": "One post-order pass — each node merges its children's lists rather than rescanning.",
+      "code": "function buildTopK(node, k = 5) {\n  const candidates = node.freq > 0 ? [{ id: node.id, freq: node.freq }] : [];\n\n  for (const child of Object.values(node.children)) {\n    candidates.push(...buildTopK(child, k)); // children already reduced to k\n  }\n\n  node.top = candidates.sort((a, b) => b.freq - a.freq).slice(0, k);\n  return node.top;\n}\n"
+    },
+    {
+      "title": "Bound the storage cost",
+      "kind": "code",
+      "explain": "Every node now carries k entries, which multiplies memory. Two mitigations keep it sane, and both are worth naming because they show you have thought about the cost rather than only the speed.",
+      "code": "// 1. Cap prefix depth — nobody autocompletes on 40 characters.\nconst MAX_PREFIX = 20;   // beyond this, fall through to normal search\n\n// 2. Store term IDs, not strings. 'apple' appears in the top list at\n//    'a', 'ap', 'app', 'appl' — store 4-byte ids and resolve once.\n//    const term = termsById[id];\n"
+    },
+    {
+      "title": "The trie is immutable and swapped, never mutated",
+      "kind": "infra",
+      "explain": "A batch pipeline builds a fresh trie offline and the serving tier flips a pointer to it, letting in-flight requests finish against the old one. This removes concurrent mutation from the only component with a hard latency budget — and it is bought entirely by accepting that suggestions may be minutes stale."
+    },
+    {
+      "title": "Filter at serving time, not build time",
+      "kind": "code",
+      "explain": "Fetch k plus a margin and drop blocked terms before returning. Filtering here rather than at build time means a newly-discovered problem term disappears in seconds instead of at the next rebuild — and suggestions are put in users' mouths, so that latency matters.",
+      "saysOutLoud": "I filter on read so a blocklist update takes effect immediately.",
+      "code": "function suggestSafe(root, prefix, k = 5) {\n  const node = findPrefix(root, prefix);\n  if (!node) return [];\n\n  return node.top                    // stored with k + margin\n    .filter((e) => !blocklist.has(e.id))\n    .slice(0, k)\n    .map((e) => termsById[e.id]);\n}\n"
+    },
+    {
+      "title": "Check whether you even need to shard",
+      "kind": "code",
+      "explain": "Say this before reaching for sharding. With capped depth and ID-based lists the trie plausibly fits in memory on one machine, so you replicate instead — strictly simpler. Sharding a trie is awkward and hot-spots on common letters.",
+      "code": "// 10M searches/day → ~200k terms worth storing after the frequency floor\n// → trie in the hundreds of MB to low GB → fits on ONE machine.\n//\n// So: replicate, don't shard. Every replica answers any prefix.\n//\n// If it truly doesn't fit: shard by first characters, and assign\n// ranges by MEASURED traffic — far more queries start with 's' than 'x'.\n"
+    }
+  ],
+  "closing": "If they ask about load: debouncing ~50 ms on the client turns 8 keystrokes into 2–3 requests. The cheapest request is the one never sent, and it costs nothing to mention."
+}

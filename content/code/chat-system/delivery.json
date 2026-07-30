@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "delivery",
+  "title": "Dry-run: message delivery and sync",
+  "intro": "About 6 minutes. The defining constraint is that the server has to speak first — everything here follows from that, including why the servers can't be stateless.",
+  "language": "javascript",
+  "steps": [
+    {
+      "title": "Name the constraint before designing",
+      "kind": "code",
+      "explain": "Almost everything else you design is request/response. Chat is server-initiated: a message arrives for you and the system must push it to a device that is not asking for anything. Saying this first frames every decision that follows.",
+      "saysOutLoud": "The server has to initiate, so I need a persistent connection — that makes the tier stateful.",
+      "code": "// Everywhere else:  client asks → server answers → connection closes\n// Chat:             message arrives → server must PUSH to a device\n//\n// → WebSocket (fallback: long polling where it's blocked)\n// → the connection lives on ONE machine → the tier is stateful\n"
+    },
+    {
+      "title": "A registry maps user to server",
+      "kind": "code",
+      "explain": "Because connections are stateful, delivering a message means first discovering which machine holds the recipient's socket. The TTL is the important detail — connections die without a close frame when a phone loses signal, so entries must expire on their own.",
+      "code": "const TTL = 45;   // seconds; heartbeat refreshes well inside it\n\nasync function onConnect(userId, serverId) {\n  await redis.set(`conn:${userId}`, serverId, { EX: TTL });\n}\n\nasync function onHeartbeat(userId, serverId) {\n  await redis.expire(`conn:${userId}`, TTL);   // still alive\n}\n\n// No explicit cleanup path needed for an ungraceful drop —\n// the key simply expires, which is why a TTL beats a delete.\n"
+    },
+    {
+      "title": "Persist before delivering",
+      "kind": "code",
+      "explain": "Store the message and assign a server-side ordering id first. Persisting before delivery is what makes the message survive a crash mid-send — and the id must come from the server because device clocks disagree, drift, and can be set by the user.",
+      "saysOutLoud": "Server-assigned id, never the client's clock — otherwise messages appear out of order.",
+      "code": "async function onSend(fromId, conversationId, body, idempotencyKey) {\n  const existing = await db.messages.byKey(idempotencyKey);\n  if (existing) return existing;               // retry — not a new message\n\n  const messageId = await ids.next();          // server-side, ~time-sortable\n  const msg = { messageId, conversationId, fromId, body, at: Date.now() };\n\n  await db.messages.insert(msg);               // durable BEFORE delivery\n  await deliver(conversationId, msg);\n  return msg;\n}\n"
+    },
+    {
+      "title": "Deliver via the registry, with one internal hop",
+      "kind": "code",
+      "explain": "Look up each recipient's server and forward. If there is no live entry the message is already durable in the conversation, so nothing is lost — you just trigger a mobile push as a side channel instead.",
+      "code": "async function deliver(conversationId, msg) {\n  const members = await db.conversations.members(conversationId);\n\n  await Promise.all(members.map(async (uid) => {\n    if (uid === msg.fromId) return;\n\n    const serverId = await redis.get(`conn:${uid}`);\n    if (serverId) return rpc(serverId).push(uid, msg);   // internal hop\n\n    return push.notify(uid, msg);   // offline: already stored, just nudge\n  }));\n}\n"
+    },
+    {
+      "title": "Per-device cursors do all the sync work",
+      "kind": "code",
+      "explain": "This is the idea worth landing. One mechanism covers first sync, catch-up after a week offline, and recovery from a two-second blip — there is no special case for any of them, which is why it is worth choosing deliberately.",
+      "saysOutLoud": "A cursor per device. A two-second blip and a two-week absence take the same path.",
+      "code": "async function onReconnect(userId, deviceId) {\n  const cursors = await db.cursors.forDevice(deviceId);   // per conversation\n\n  return Promise.all(cursors.map(({ conversationId, lastSeenId }) =>\n    db.messages.after(conversationId, lastSeenId, 500)\n  ));\n}\n\nasync function onAck(deviceId, conversationId, messageId) {\n  await db.cursors.advance(deviceId, conversationId, messageId);\n}\n"
+    },
+    {
+      "title": "Storage is partitioned by conversation",
+      "kind": "infra",
+      "explain": "A wide-column store partitioned by conversation and clustered by message id puts the newest messages physically contiguous, so fetching a screenful is one sequential read and scrolling back continues along the same partition. Add a time bucket to the partition key so a group chat running for years does not grow one partition without bound."
+    },
+    {
+      "title": "At-least-once plus idempotency, not exactly-once",
+      "kind": "code",
+      "explain": "Networks drop acknowledgements, so clients retry and the server may see the same message twice. The client-generated key makes the repeat a no-op — that is how you get exactly-once behaviour without claiming a guarantee you cannot provide.",
+      "code": "// Client generates the key at compose time, reuses it across retries:\n//   const key = `${deviceId}:${localCounter++}`;\n//\n// Server side, the check must be ATOMIC with the insert or two\n// concurrent retries both pass it:\nawait db.messages.insertIfAbsent({ idempotencyKey: key, ...msg });\n\n// Exactly-once delivery isn't achievable end to end.\n// At-least-once + idempotency is observably the same thing.\n"
+    },
+    {
+      "title": "Group fan-out inverts above a cap",
+      "kind": "code",
+      "explain": "For a capped group, delivery is a loop — which is why the cap exists. Above that, per-message fan-out stops being viable and you store once and let clients pull, which is the same trade as the news feed and worth naming as such.",
+      "code": "const PUSH_LIMIT = 500;\n\nasync function deliverGroup(conversationId, msg) {\n  const members = await db.conversations.members(conversationId);\n\n  if (members.length <= PUSH_LIMIT) return deliver(conversationId, msg);\n\n  // large group: store once, signal cheaply, let clients pull by cursor\n  return rpc.broadcastChanged(conversationId);\n}\n"
+    },
+    {
+      "title": "Plan for the reconnect storm",
+      "kind": "code",
+      "explain": "Restarting a connection server drops every socket it holds and they all reconnect at once. Drain before shutdown and require jittered client backoff — without jitter the fleet synchronises and knocks the server over again as it comes back.",
+      "saysOutLoud": "Deploys drop thousands of sockets at once, so drain first and jitter the reconnects.",
+      "code": "// server: stop accepting new connections, let existing ones migrate\nasync function drain(server) {\n  server.rejectNewConnections();\n  await server.notifyClientsToMigrate();\n  await sleep(30_000);\n}\n\n// client: never reconnect on a fixed schedule\nconst backoff = (n) => Math.min(30_000, 2 ** n * 500) * (0.5 + Math.random());\n"
+    }
+  ],
+  "closing": "If they raise end-to-end encryption: say plainly what it costs — the server can no longer read content, so server-side search, previews and moderation move to the client, and multi-device sync gets substantially harder because each device needs its own key material."
+}

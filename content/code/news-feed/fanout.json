@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "fanout",
+  "title": "Dry-run: fan-out on write, then the hybrid",
+  "intro": "About 6 minutes. Write the push version, break it on a celebrity account, then show the hybrid. The break is the part interviewers are waiting for.",
+  "language": "javascript",
+  "steps": [
+    {
+      "title": "Establish the ratio first",
+      "kind": "code",
+      "explain": "Lead with the read:write ratio, because it decides the whole design. Two orders of magnitude more reads than writes says do the work at write time so reads stay cheap.",
+      "saysOutLoud": "Reads outnumber writes about a hundred to one, so I'll pay at write time.",
+      "code": "// 150M DAU × 2 posts    → ~3,000 writes/sec\n// reads at ~100:1       → ~300,000 reads/sec\n//\n// → precompute each follower's feed at write time (fan-out on write)\n"
+    },
+    {
+      "title": "The write path, without fan-out inline",
+      "kind": "code",
+      "explain": "Persist once, then enqueue. Doing fan-out inside the request would make the author wait for millions of writes — the queue is what keeps their response fast while the work happens behind them.",
+      "code": "async function createPost(authorId, text) {\n  const postId = await ids.next();             // roughly time-sortable\n  await db.posts.insert({ postId, authorId, text, createdAt: Date.now() });\n\n  // fan out asynchronously — the author's request returns now\n  await queue.publish('fanout', { postId, authorId });\n\n  return postId;\n}\n"
+    },
+    {
+      "title": "The fan-out worker",
+      "kind": "code",
+      "explain": "Insert the post id into every follower's feed list, trimmed so lists cannot grow without bound. Note it stores ids, not post bodies — so editing or deleting a post never means rewriting millions of feeds.",
+      "saysOutLoud": "Feeds hold ids only. The post itself is stored once and hydrated on read.",
+      "code": "async function onFanout({ postId, authorId }) {\n  const followers = await db.followers.of(authorId);   // could be millions\n\n  for (const batch of chunk(followers, 500)) {\n    await Promise.all(batch.map((uid) =>\n      cache.lpushTrim(`feed:${uid}`, postId, 800)      // cap the list\n    ));\n  }\n}\n"
+    },
+    {
+      "title": "The read path is now trivial",
+      "kind": "code",
+      "explain": "One cache read plus a hydrate. No joins, no merging across sources, no ranking over unbounded input — which is exactly the payoff for having paid at write time.",
+      "code": "async function getFeed(userId, cursor, limit = 20) {\n  const ids = await cache.lrange(`feed:${userId}`, cursor, limit);\n  return db.posts.mget(ids);        // hydrate bodies once, on read\n}\n"
+    },
+    {
+      "title": "Break it with a celebrity",
+      "kind": "code",
+      "explain": "One post becoming ten million cache writes saturates the workers and delays fan-out for everyone else on the queue. The system's worst case is triggered by its most visible users — say that plainly before offering the fix.",
+      "saysOutLoud": "Ten million followers means one action becomes ten million writes. That's the ceiling.",
+      "code": "// author with 10M followers posts:\n//   → 10M lpush operations from one event\n//   → fan-out workers saturate\n//   → ordinary users' posts sit behind it in the queue\n//\n// Note WHO suffers: not the celebrity. Everyone else.\n"
+    },
+    {
+      "title": "Split by follower count",
+      "kind": "code",
+      "explain": "The pathological case is a small, identifiable set of accounts — so handle it with a different mechanism instead of making every user pay. Skip fan-out above a threshold and merge those posts at read time.",
+      "code": "const CELEBRITY = 100_000;   // tunable WITHOUT a deploy\n\nasync function onFanoutHybrid({ postId, authorId }) {\n  const n = await db.followers.count(authorId);\n\n  if (n > CELEBRITY) return;   // no fan-out; readers will pull it\n\n  await onFanout({ postId, authorId });\n}\n"
+    },
+    {
+      "title": "Merge the celebrity posts on read",
+      "kind": "code",
+      "explain": "Most users get a fully precomputed feed and pay nothing extra. A read costs one cache lookup plus a small merge from the handful of high-follower accounts that user follows — bounded, because nobody follows thousands of celebrities.",
+      "saysOutLoud": "Precomputed feed plus a small merge — the expensive case scales with the mechanism that handles it.",
+      "code": "async function getFeedHybrid(userId, cursor, limit = 20) {\n  const [precomputed, celebs] = await Promise.all([\n    cache.lrange(`feed:${userId}`, cursor, limit),\n    db.followees.celebrities(userId),        // usually a short list\n  ]);\n\n  const recent = await db.posts.recentFrom(celebs, limit);\n  const merged = mergeByIdDesc(await db.posts.mget(precomputed), recent);\n\n  return merged.slice(0, limit);\n}\n"
+    },
+    {
+      "title": "Use cursor pagination, not offset",
+      "kind": "code",
+      "explain": "A feed has items inserted at the head between page loads, so OFFSET shifts and users see duplicates or gaps. Cursor pagination is stable under insertion, and roughly time-sortable ids are what make it work — the same ids from the unique-ID topic.",
+      "code": "// ✗ OFFSET 20  → new posts arrive, the window slides, items repeat\n// ✓ after_id   → stable regardless of what was inserted since\n\nasync function page(userId, afterId, limit = 20) {\n  return db.posts.where({ feedOf: userId, idLessThan: afterId })\n                 .orderByIdDesc()\n                 .limit(limit);\n}\n"
+    },
+    {
+      "title": "Ranking belongs on the read path",
+      "kind": "infra",
+      "explain": "Precompute the candidate set with fan-out, then score a few hundred candidates per request using engagement signals and affinity. Ranking at write time would mean re-ranking every follower's feed whenever any signal changes, which is unbounded work — the same shape as the autocomplete split between candidate generation and per-request personalisation."
+    }
+  ],
+  "closing": "If they push on storage: capping each feed list at ~800 ids bounds memory per user, and anything older is served by falling back to a query rather than the cache."
+}

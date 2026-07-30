@@ -46,9 +46,10 @@ function crossCheck(spec: Spec, fileBase: string): string[] {
     }
     if (s.kind === 'code') {
       if (!s.code || s.code.trim() === '') errors.push(`${at}: code step has empty code`);
-      // A snippet nobody can read on a phone is not a whiteboard dry run.
+      // The sidebar fits ~83 monospace columns. Past that a trailing comment gets
+      // clipped, and comments are where the teaching lives — so cap below the fit.
       const longest = (s.code ?? '').split('\n').reduce((m, l) => Math.max(m, l.length), 0);
-      if (longest > 100) errors.push(`${at}: line of ${longest} chars — keep snippets under 100 cols`);
+      if (longest > 84) errors.push(`${at}: line of ${longest} cols — keep snippets under 84`);
       const lines = (s.code ?? '').split('\n').length;
       if (lines > 40) errors.push(`${at}: ${lines} lines — split it; a dry-run step should be scannable`);
     }

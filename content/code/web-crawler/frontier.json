@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "frontier",
+  "title": "Dry-run: the crawl loop and its frontier",
+  "intro": "About 6 minutes. The naive loop is ten lines and is an accidental denial-of-service tool. Write it, then fix politeness and termination.",
+  "language": "javascript",
+  "steps": [
+    {
+      "title": "The naive loop, and why it's hostile",
+      "kind": "code",
+      "explain": "Write it first and name the problem. A single FIFO means consecutive URLs share a host — because a big page contributes many links at once — so the fleet hammers one server. You have built a load test against someone else's site.",
+      "saysOutLoud": "One queue means consecutive URLs share a host, so I'd be attacking one server.",
+      "code": "async function crawlNaive(queue) {\n  while (!queue.isEmpty()) {\n    const url = await queue.pop();          // consecutive URLs share a host\n    const html = await fetch(url);\n    for (const link of extractLinks(html)) queue.push(link);\n  }\n}\n\n// A global delay fixes politeness and destroys throughput:\n// now the whole crawler fetches one page per interval.\n"
+    },
+    {
+      "title": "Split the frontier in two layers",
+      "kind": "code",
+      "explain": "Priority is decided on the way in, politeness on the way out. The invariant that matters: all URLs for one host live in exactly one back queue, and one worker drains it — that is what makes per-host rate limiting possible while thousands of hosts stay in flight.",
+      "code": "// FRONT queues → priority bands (PageRank, update rate, staleness)\n// BACK queues  → exactly one per host, one worker each\n\nconst backQueueFor = new Map();   // hostname → queue id\nconst nextEligibleAt = new Map(); // queue id  → timestamp\n\nfunction routeToBack(url) {\n  const host = new URL(url).hostname;\n  backQueueFor.set(host, backQueueFor.get(host) ?? allocateQueue(host));\n  return backQueueFor.get(host);\n}\n"
+    },
+    {
+      "title": "The scheduler hands out only eligible queues",
+      "kind": "code",
+      "explain": "A worker asks for work and gets the queue whose per-host delay has elapsed. Politeness and throughput stop competing: each host is contacted gently while the fleet stays busy across everything else.",
+      "saysOutLoud": "Each host has its own next-eligible timestamp, so slow hosts don't block fast ones.",
+      "code": "function nextEligibleQueue(now = Date.now()) {\n  for (const [qid, readyAt] of nextEligibleAt) {\n    if (readyAt <= now && !isEmpty(qid)) return qid;\n  }\n  return null;                       // everything is cooling down\n}\n\nfunction markFetched(qid, host, responseMs) {\n  // adapt: a slow server is crawled more gently, automatically\n  const delay = Math.max(1000, responseMs * 10);\n  nextEligibleAt.set(qid, Date.now() + delay);\n}\n"
+    },
+    {
+      "title": "robots.txt is fetched and cached per host",
+      "kind": "infra",
+      "explain": "Fetch it once per host, respect its own expiry, and re-check periodically because sites change their rules. It also may specify Crawl-delay, which overrides your adaptive default. This is a hard requirement rather than a courtesy — a crawler that ignores it will get your IP range blocked."
+    },
+    {
+      "title": "Normalise before you deduplicate",
+      "kind": "code",
+      "explain": "Skipping this stores the same page many times and lets session IDs mint infinite 'new' URLs. Normalisation is the cheap defence that makes the dedup filter actually work.",
+      "code": "function normalise(raw) {\n  const u = new URL(raw);\n  u.hash = '';                       // fragments aren't separate pages\n  u.hostname = u.hostname.toLowerCase();\n  if ((u.protocol === 'http:'  && u.port === '80') ||\n      (u.protocol === 'https:' && u.port === '443')) u.port = '';\n\n  for (const p of ['utm_source', 'utm_medium', 'sessionid', 'sid']) {\n    u.searchParams.delete(p);        // volatile → would look novel forever\n  }\n  u.searchParams.sort();\n  return u.toString();\n}\n"
+    },
+    {
+      "title": "A Bloom filter for the seen set",
+      "kind": "code",
+      "explain": "At a billion pages an exact set does not fit in memory. A Bloom filter gives constant space with no false negatives — and be explicit that false positives mean a small fraction of genuinely new pages are silently skipped. That is the trade, and naming it is the point.",
+      "saysOutLoud": "No false negatives, but about 1% of new pages get skipped. That's the trade I'm accepting.",
+      "code": "function seenBefore(filter, url) {\n  const key = normalise(url);\n  if (filter.has(key)) return true;  // 'probably seen' — may be wrong ~1%\n  filter.add(key);\n  return false;                      // 'definitely new' — never wrong\n}\n\n// ~1.2 GB holds ~1B URLs at a 1% false-positive rate.\n// Exact membership would be an order of magnitude more.\n"
+    },
+    {
+      "title": "The corrected loop",
+      "kind": "code",
+      "explain": "Now assemble it. Note the content checksum — a page whose bytes have not changed since the last crawl can skip downstream indexing entirely, which is a large saving on re-crawls.",
+      "code": "async function crawl(frontier, filter, store) {\n  while (true) {\n    const qid = nextEligibleQueue();\n    if (!qid) { await sleep(50); continue; }\n\n    const url = frontier.pop(qid);\n    const started = Date.now();\n    const html = await fetch(url);\n    markFetched(qid, new URL(url).hostname, Date.now() - started);\n\n    const digest = sha256(html);\n    if (await store.digestChanged(url, digest)) await store.put(url, html, digest);\n\n    for (const link of extractLinks(html)) {\n      if (!seenBefore(filter, link) && withinBudget(link)) {\n        frontier.push(routeToBack(link), link);\n      }\n    }\n  }\n}\n"
+    },
+    {
+      "title": "Bound the traps the filter can't catch",
+      "kind": "code",
+      "explain": "Calendars with infinite 'next month' links and generated link mazes produce URLs that really are new, so the dedup filter never fires. Depth and per-host budgets are what stop one pathological domain consuming the whole crawl.",
+      "code": "const MAX_DEPTH = 8;\nconst MAX_PAGES_PER_HOST = 100_000;\n\nfunction withinBudget(url) {\n  const host = new URL(url).hostname;\n  return depthOf(url) <= MAX_DEPTH && pagesSeen(host) < MAX_PAGES_PER_HOST;\n}\n\n// The filter can't help here — an infinite calendar generates\n// genuinely novel URLs forever. Only a budget terminates it.\n"
+    }
+  ],
+  "closing": "If they ask about re-crawl scheduling: track observed change frequency per page and feed it back into the priority band, so a news homepage is revisited constantly and a decade-old archive page rarely."
+}

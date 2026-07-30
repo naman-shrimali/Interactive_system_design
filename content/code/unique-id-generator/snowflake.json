@@ -34,7 +34,7 @@
       "title": "Decoding is free, and that cuts both ways",
       "kind": "code",
       "explain": "Because fields are positional, an ID is self-describing — given one from a bug report you know when and where it was made with no database lookup. The flip side is that it leaks creation time and generation rate, so use a separate opaque identifier for anything user-facing where enumeration matters.",
-      "code": "function decode(id) {\n  const seq       = id & BigInt(MAX_SEQ);\n  const machine   = (id >> BigInt(SEQ_BITS)) & BigInt((1 << MACHINE_BITS) - 1);\n  const timestamp = (id >> BigInt(MACHINE_BITS + SEQ_BITS)) + BigInt(EPOCH);\n\n  return { at: new Date(Number(timestamp)), machine: Number(machine), seq: Number(seq) };\n}\n"
+      "code": "function decode(id) {\n  const seq     = id & BigInt(MAX_SEQ);\n  const machine = (id >> BigInt(SEQ_BITS)) & BigInt((1 << MACHINE_BITS) - 1);\n  const ms      = (id >> BigInt(MACHINE_BITS + SEQ_BITS)) + BigInt(EPOCH);\n\n  return {\n    at: new Date(Number(ms)),\n    machine: Number(machine),\n    seq: Number(seq),\n  };\n}\n"
     },
     {
       "title": "Be precise about the ordering guarantee",
