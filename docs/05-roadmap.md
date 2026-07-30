@@ -13,7 +13,7 @@
 | 6. Content authoring | ✅ shipped — 0 topics under 800 words; 30/30 published |
 | 7. Diagram authoring | ✅ shipped — 27 diagrams across 25 of 30 topics; 5 left deliberately prose-only |
 | 8. Polish — dashboard, search, notes export | ✅ shipped |
-| 9. Code dry-runs — per-topic step-through sidebar | 🟡 in progress — 10 of 30 topics |
+| 9. Code dry-runs — per-topic step-through sidebar | ✅ shipped — 22 of 30 topics; 8 left deliberately code-free |
 
 The original phases 1–3 were re-cut when the curriculum moved from a source-first to a topic-first
 model ([docs/06-topic-model.md](06-topic-model.md)). Task files for that shipped work are kept as
@@ -88,8 +88,10 @@ keyboard-select/navigate, and export producing well-formed markdown from a real 
 
 ## Phase 9 — Code dry-runs
 
-A per-topic sidebar that walks the topic's implementation in JavaScript, one step at a time, for
-practising the "dry run this for me" moment in an interview.
+A per-topic sidebar that walks the topic's implementation in code, one step at a time, for
+practising the "dry run this for me" moment in an interview. Mostly JavaScript; the one topic where
+SQL is the natural language (`relational-databases`) uses it instead, and the syntax highlighter
+recognises both `//` and `--` line comments so it renders correctly either way.
 
 Content lives at `content/code/<topicSlug>/<slug>.json`, validated by `npm run validate:code` against
 `scripts/code-walkthrough.schema.json`. Authoring is a data change — no TypeScript.
@@ -102,8 +104,18 @@ The validator enforces what makes a step usable at a whiteboard: infra steps nee
 rather than a stub, snippets stay under 84 columns and 40 lines, and every step's `explain` has to
 say something beyond restating the code.
 
-Written so far (10): rate-limiter, consistent-hashing, unique-id-generator, url-shortener, caching,
-search-autocomplete, news-feed, key-value-store, web-crawler, chat-system.
+**Status: done.** Written for 22 of 30 topics: rate-limiter, consistent-hashing, unique-id-generator,
+url-shortener, caching, search-autocomplete, news-feed, key-value-store, web-crawler, chat-system,
+notification-system, asynchronism, media-and-file-storage, load-balancing, graph-data-modeling,
+availability-patterns, communication-protocols, relational-databases, application-layer,
+batch-analytics, dns, cdn.
+
+Eight topics are **deliberately** code-free, the same reasoning as the five prose-only diagram
+topics in Phase 7: `interview-framework`, `back-of-envelope`, `performance-and-latency`, and
+`security` are a process or a checklist, not a system to dry-run; `cap-theorem`,
+`consistency-patterns`, and `nosql-databases` are trade-off comparisons a table already serves;
+`scaling-journey` is an evolution across three systems rather than one implementation. A forced
+walkthrough there would be filler standing in for a diagram or a table that already does the job.
 
 Snippets are capped at 84 columns because the sidebar fits roughly 83 — past that a trailing comment
 gets clipped, and the comments are where the teaching lives.

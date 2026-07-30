@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "adjacency-list",
+  "title": "Dry-run: modeling a social graph on a normal database",
+  "intro": "About 5 minutes. No graph database here — the point is showing an adjacency list works fine until one specific query stops scaling.",
+  "language": "javascript",
+  "steps": [
+    {
+      "title": "The edge table is the whole schema",
+      "kind": "code",
+      "explain": "A follow graph is just directed edges: who follows whom. Storing it as rows rather than an array on the user row is what makes 'who follows me' and 'who do I follow' both single indexed lookups instead of a scan.",
+      "code": "// edges(follower_id, followee_id, created_at)\n// PRIMARY KEY (follower_id, followee_id)\n// INDEX on (followee_id, follower_id)  -- for the reverse direction\n\nasync function follow(followerId, followeeId) {\n  await db.edges.insert({ followerId, followeeId, createdAt: Date.now() });\n}\n"
+    },
+    {
+      "title": "One-hop queries are cheap in both directions",
+      "kind": "code",
+      "explain": "This is the entire reason to index both columns: 'who do I follow' hits the primary key, 'who follows me' hits the secondary index, and neither one touches a row it doesn't need.",
+      "code": "function following(userId) {\n  return db.edges.where({ followerId: userId }).select('followeeId');\n}\n\nfunction followers(userId) {\n  return db.edges.where({ followeeId: userId }).select('followerId');\n}\n"
+    },
+    {
+      "title": "Mutual friends: still one hop each side",
+      "kind": "code",
+      "explain": "A two-set intersection of one-hop queries covers 'friends in common,' which is the query people actually mean by 'graph query' most of the time — no traversal engine required.",
+      "code": "async function mutualFriends(userA, userB) {\n  const [a, b] = await Promise.all([following(userA), following(userB)]);\n  const setB = new Set(b);\n  return a.filter((id) => setB.has(id));\n}\n"
+    },
+    {
+      "title": "Second-degree — where the naive version breaks",
+      "kind": "code",
+      "explain": "Friend-of-friend looks like just one more hop, but naively it means N+1 queries — one to get your friends, then one per friend to get theirs. At a few hundred friends this is a request storm against the database.",
+      "code": "// NAIVE: 1 + N queries, N round trips to the DB\nasync function friendsOfFriendsNaive(userId) {\n  const friends = await following(userId);\n  const results = [];\n  for (const f of friends) results.push(...(await following(f)));  // N round trips\n  return results;\n}\n"
+    },
+    {
+      "title": "Fix: one join instead of N round trips",
+      "kind": "code",
+      "explain": "Pushing the second hop into the database as a join collapses N round trips into one, and lets the query planner use the index instead of the application looping over network calls.",
+      "saysOutLoud": "The fix isn't a different data model, it's doing the hop where the index lives.",
+      "code": "async function friendsOfFriends(userId) {\n  return db.raw(`\n    SELECT DISTINCT e2.followee_id\n    FROM edges e1\n    JOIN edges e2 ON e2.follower_id = e1.followee_id\n    WHERE e1.follower_id = ? AND e2.followee_id != ?\n  `, [userId, userId]);\n}\n"
+    },
+    {
+      "title": "Beyond two hops, stop doing this in the primary store",
+      "kind": "infra",
+      "explain": "Three-plus hop traversals (recommendation-style 'people you may know') fan out combinatorially and a relational join stops being viable. That workload moves to a dedicated graph engine (Neo4j) or a precomputed nightly batch job that materializes candidate results — the edge table stays the source of truth, the traversal store is a derived cache."
+    },
+    {
+      "title": "A celebrity account skews the whole shape",
+      "kind": "code",
+      "explain": "The one-hop queries above assume follower counts in the hundreds. An account with millions of followers turns 'who follows me' into a query returning millions of rows, and the join in step 5 becomes enormous for anyone who follows one. Cap and paginate rather than assuming any hop is bounded.",
+      "code": "function following(userId, { limit = 200, cursor } = {}) {\n  return db.edges\n    .where({ followerId: userId })\n    .andWhere(cursor ? 'followee_id > ?' : '1=1', cursor ? [cursor] : [])\n    .orderBy('followee_id')\n    .limit(limit);\n}\n"
+    }
+  ],
+  "closing": "If they ask why not a graph database from the start: relational joins handle one and two hops fine at a fraction of the operational cost, and most social-graph queries in practice are one hop — reach for a graph engine only once traversal depth actually demands it."
+}

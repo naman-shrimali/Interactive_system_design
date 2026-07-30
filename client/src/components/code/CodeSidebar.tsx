@@ -17,7 +17,7 @@ function highlight(code: string): string {
     .replace(/>/g, '&gt;');
 
   return escaped.replace(
-    /(\/\/[^\n]*)|(`(?:[^`\\]|\\.)*`|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|\b(const|let|function|return|if|else|async|await|new|for|of|throw|try|catch)\b|\b(\d+(?:\.\d+)?)\b/g,
+    /(\/\/[^\n]*|(?<!\w)--[^\n]*)|(`(?:[^`\\]|\\.)*`|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|\b(const|let|function|return|if|else|async|await|new|for|of|throw|try|catch)\b|\b(\d+(?:\.\d+)?)\b/g,
     (m, comment, str, kw, num) => {
       if (comment) return `<span class="text-ink-faint italic">${comment}</span>`;
       if (str) return `<span class="text-emerald-500">${str}</span>`;

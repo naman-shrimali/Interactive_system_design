@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "task-queue",
+  "title": "Dry-run: a background job queue",
+  "intro": "About 5 minutes. The interesting part isn't the queue — it's making the worker safe to run twice.",
+  "language": "javascript",
+  "steps": [
+    {
+      "title": "Enqueue is fire-and-forget from the caller's view",
+      "kind": "code",
+      "explain": "The request handler's job is to persist the work and return fast — the caller should never wait on the actual processing. Everything after this is invisible to the user who triggered it.",
+      "saysOutLoud": "The request path only has to guarantee the job is durably queued, not that it's done.",
+      "code": "async function enqueue(type, payload) {\n  const jobId = await ids.next();\n  await queue.push({ jobId, type, payload, attempts: 0 });\n  return jobId;   // caller can poll status by jobId if it needs to\n}\n"
+    },
+    {
+      "title": "A naive worker — breaks the moment it crashes mid-job",
+      "kind": "code",
+      "explain": "This looks fine until the process dies between 'do the work' and 'mark done'. The queue never saw an ack, redelivers the job, and if the work wasn't idempotent — like charging a card — it happens twice.",
+      "code": "// NAIVE: works until a crash lands between these two lines\nasync function workerNaive() {\n  const job = await queue.pop();\n  await process(job);       // <-- crash here, then queue redelivers\n  await queue.ack(job);\n}\n"
+    },
+    {
+      "title": "Fix: make the handler itself idempotent",
+      "kind": "code",
+      "explain": "Rather than trying to make delivery exactly-once — which distributed queues generally can't promise — make redelivery harmless. A processed-set check plus atomic insert means a duplicate delivery is a no-op, so at-least-once delivery is fine.",
+      "saysOutLoud": "I don't fight the queue's at-least-once semantics — I make the handler idempotent instead.",
+      "code": "async function process(job) {\n  const done = await db.processed.exists(job.jobId);\n  if (done) return;                       // already handled, redelivery is a no-op\n\n  await runHandler(job.type, job.payload);\n  await db.processed.insertIfAbsent(job.jobId);  // atomic with completion\n}\n"
+    },
+    {
+      "title": "Visibility timeout, not a manual lock",
+      "kind": "code",
+      "explain": "While a worker holds a job it's invisible to other consumers for a bounded window. If the worker dies without acking, the job silently reappears after the timeout — no separate heartbeat or lock table needed for the common case.",
+      "code": "async function pop() {\n  // atomically: fetch oldest visible job, hide it for VISIBILITY_SECONDS\n  return queue.reserve({ visibilityTimeout: 30 });\n}\n\n// if processing legitimately takes longer, worker extends it explicitly:\nasync function extend(job) {\n  await queue.changeVisibility(job, 30);\n}\n"
+    },
+    {
+      "title": "Retry with backoff, then dead-letter",
+      "kind": "code",
+      "explain": "Same shape as any retry policy: transient errors get exponential backoff, and a job that keeps failing moves to a dead-letter queue rather than looping forever and starving the main queue of throughput.",
+      "code": "async function onFailure(job, err) {\n  job.attempts += 1;\n  if (job.attempts >= 5) return deadLetter.push({ job, err: err.message });\n\n  const delay = 2 ** job.attempts * 1000;\n  return queue.push({ ...job, availableAt: Date.now() + delay });\n}\n"
+    },
+    {
+      "title": "The broker holds durability, not the app",
+      "kind": "infra",
+      "explain": "SQS, Redis Streams, or Kafka persist the queue itself — the app process holds nothing across a restart. This is what makes 'the worker crashed' a survivable event instead of data loss: the job is sitting in the broker whether or not any worker is currently alive to pop it."
+    },
+    {
+      "title": "Ordering is per-partition, not global",
+      "kind": "code",
+      "explain": "Workers scale horizontally by adding more consumers, which means global ordering is gone by default. If a job type genuinely needs order — events for one user, say — key the partition by user id so all of that user's jobs land on the same worker.",
+      "code": "// Global order:      not guaranteed once you have > 1 worker\n// Per-key order:      guaranteed if partitioned by that key\n\nfunction partitionFor(job) {\n  return hash(job.payload.userId) % NUM_PARTITIONS;\n}\n"
+    }
+  ],
+  "closing": "If they ask 'why not just a cron job': cron re-runs on a schedule regardless of backlog size and has no natural backpressure — a queue lets producers and consumers scale independently, and a slow spike just grows the queue depth instead of overlapping runs."
+}
