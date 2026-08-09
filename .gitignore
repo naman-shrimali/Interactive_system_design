@@ -1,7 +1,10 @@
 node_modules/
 dist/
 vendor/
+*.tsbuildinfo
 server/data/*.db
 server/data/*.db-*
+# Generated from the seeded database by scripts/export-static.ts
+client/public/data/
 .DS_Store
 *.log
