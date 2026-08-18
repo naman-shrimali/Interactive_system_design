@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-08-18",
+  "updated": "2026-08-19",
   "entries": [
     {
       "topic": "cap-theorem",
@@ -242,6 +242,340 @@
       "answer": "They sort by time within one generator and only approximately across generators. Two machines producing IDs in the same millisecond order by machine id, not by which event actually happened first, and a clock correction can perturb this further. That is fine for feed pagination and cursors, where approximate ordering is all you need. It is not sufficient for causal ordering or financial sequencing, which need logical clocks or a consensus sequencer — considerably more expensive than three bit shifts.",
       "source": "https://www.rfc-editor.org/rfc/rfc9562.html",
       "followUp": "If you need strict cross-machine ordering, what would you reach for instead?"
+    },
+    {
+      "topic": "interview-framework",
+      "kind": "misconception",
+      "prompt": "The goal is to produce the correct architecture before time runs out.",
+      "answer": "There is no correct architecture, and interviewers are not holding a reference answer to compare yours against. What is being assessed is whether you extract requirements before designing, justify choices against those requirements, and notice what your design breaks. A candidate who draws a reasonable system and names its three weaknesses outperforms one who draws a better system and claims it has none.",
+      "source": "https://github.com/donnemartin/system-design-primer",
+      "followUp": "What is the weakest part of what you just drew?"
+    },
+    {
+      "topic": "interview-framework",
+      "kind": "trap",
+      "prompt": "The interviewer says \"design Twitter\" — where do you start drawing?",
+      "answer": "You do not start drawing. The prompt is deliberately underspecified, and jumping to boxes signals you will do the same on a real project. Spend the first several minutes on scope: which features are in and out, how many users, read-to-write ratio, latency expectations, and consistency requirements. Those answers determine nearly every later decision, and eliciting them is a substantial part of what is being graded.",
+      "source": "https://github.com/donnemartin/system-design-primer",
+      "followUp": "Which of those requirements would change your design the most if reversed?"
+    },
+    {
+      "topic": "interview-framework",
+      "kind": "question",
+      "prompt": "You realise mid-interview that an earlier decision was wrong. What do you do?",
+      "answer": "Say so, explain what you missed, and revise. Interviewers actively look for this because production engineering is mostly revising decisions under new information. Quietly building on a design you no longer believe in is a much worse signal than changing course. Name the constraint that invalidated the choice, state what you are switching to, and carry on rather than restarting.",
+      "followUp": "What would you have asked at the start to have caught that earlier?"
+    },
+    {
+      "topic": "back-of-envelope",
+      "kind": "misconception",
+      "prompt": "You need accurate numbers, so it is better to say you would measure than to estimate.",
+      "answer": "Estimation here is checking feasibility by orders of magnitude, not forecasting. The useful output is 'this fits on one machine' versus 'this needs a hundred', and being within a factor of two or three is entirely sufficient for that. Declining to estimate reads as an inability to reason quantitatively, which is precisely the skill under test. Round aggressively, state assumptions aloud, and let the interviewer correct a premise if they disagree.",
+      "source": "https://gist.github.com/jboner/2841832",
+      "followUp": "What assumption in that estimate would change the answer most if it were wrong?"
+    },
+    {
+      "topic": "back-of-envelope",
+      "kind": "trap",
+      "prompt": "Your service handles 1 billion requests a day — is that a lot?",
+      "answer": "Convert before judging. A billion a day is roughly 11,600 per second on average, and averages hide the peak — a diurnal product often peaks two to three times its mean, so budget for perhaps 30,000 per second. Whether that is 'a lot' depends entirely on cost per request: 30,000 cache reads is unremarkable, while 30,000 uncached joins is not. The number alone means nothing without the per-request work.",
+      "source": "https://gist.github.com/jboner/2841832",
+      "followUp": "What is the most expensive thing that happens on that request path?"
+    },
+    {
+      "topic": "back-of-envelope",
+      "kind": "question",
+      "prompt": "How much storage does 1 million users' profile photos need at 2 MB each?",
+      "answer": "About 2 TB raw. The point of the exercise is what follows: replication at 3x makes it 6 TB, thumbnails and derived sizes add perhaps 30 percent, and a year of growth at the same rate doubles it. So provision on the order of 15 TB, not 2 TB, and note that this comfortably fits object storage and does not justify anything exotic. Naming the multipliers is the substance; the initial multiplication is not.",
+      "followUp": "Which of those multipliers would you actually pay for, and which would you skip?"
+    },
+    {
+      "topic": "performance-and-latency",
+      "kind": "misconception",
+      "prompt": "Our average response time is 200 ms, so the service is fast.",
+      "answer": "Averages hide the users having the worst experience, and those are the ones who leave. A service averaging 200 ms can easily have a p99 of several seconds, meaning one request in a hundred is unacceptable — and on a page making twenty backend calls, most page loads then contain at least one slow call. Percentiles are what to state, and p99 matters more than p50 because it describes the tail your users actually notice.",
+      "source": "https://sre.google/sre-book/service-level-objectives/",
+      "followUp": "On a page making 20 calls, what fraction of loads hit your p99 at least once?"
+    },
+    {
+      "topic": "performance-and-latency",
+      "kind": "misconception",
+      "prompt": "Throughput and latency are two ways of describing the same thing.",
+      "answer": "They are distinct and often traded against each other. Latency is how long one request takes; throughput is how many complete per unit time. Batching raises throughput while raising latency for the individual request that waits to be batched. A system can have excellent throughput and terrible latency, and improving one frequently harms the other — so a design has to say which it is optimising and why.",
+      "source": "https://opentelemetry.io/docs/",
+      "followUp": "Which does your product actually care about on this path?"
+    },
+    {
+      "topic": "performance-and-latency",
+      "kind": "trap",
+      "prompt": "The database is slow, so add more application servers.",
+      "answer": "Adding application servers increases concurrent load on the database, so if the database is the bottleneck this makes it worse. The general trap is scaling the tier you can scale rather than the one that is constrained. Measure where time is actually spent first — a missing index is a far more common cause of a slow database than insufficient hardware, and it is free to fix relative to adding capacity.",
+      "source": "https://www.postgresql.org/docs/current/indexes.html",
+      "followUp": "How would you confirm the database is the bottleneck rather than assuming it?"
+    },
+    {
+      "topic": "scaling-journey",
+      "kind": "misconception",
+      "prompt": "Design for millions of users from day one so you don't have to rewrite later.",
+      "answer": "Premature distribution usually costs more than the rewrite it was meant to avoid. Sharding, eventual consistency, and service decomposition all impose permanent complexity on every feature you build afterwards, in exchange for capacity you do not yet need. The cheaper sequence is indexing, a bigger machine, read replicas, caching — and most systems never exhaust it. Knowing the order and where you currently sit is the actual skill.",
+      "source": "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html",
+      "followUp": "What signal would tell you it is genuinely time for the next step?"
+    },
+    {
+      "topic": "scaling-journey",
+      "kind": "trap",
+      "prompt": "Split the monolith into microservices to scale.",
+      "answer": "Microservices are an organisational solution more than a scaling one — they let teams deploy independently. They do not add capacity by themselves, and they convert reliable in-process calls into unreliable network calls, so you inherit partial failure, retries, and distributed tracing as new problems. A monolith scales horizontally perfectly well when it is stateless. Split along team and failure-isolation boundaries, not because it sounds like scaling.",
+      "source": "https://aws.amazon.com/builders-library/",
+      "followUp": "What availability do you get from five services in a synchronous chain?"
+    },
+    {
+      "topic": "cdn",
+      "kind": "misconception",
+      "prompt": "A CDN makes the site faster for everyone by copying it worldwide.",
+      "answer": "A pull CDN caches nothing until someone requests it, so the first user at each edge location pays full origin latency and populates the cache for those after them. It also only helps content that is cacheable — a personalised, authenticated response with no-store gains nothing from an edge that cannot keep it. The benefit is concentrated in static assets and shared content with a decent hit rate, not spread evenly over all traffic.",
+      "source": "https://developers.cloudflare.com/cache/",
+      "followUp": "What fraction of your responses are actually cacheable?"
+    },
+    {
+      "topic": "cdn",
+      "kind": "trap",
+      "prompt": "Set a long max-age so the CDN caches aggressively, then purge when content changes.",
+      "answer": "Purging works but is the wrong default because it is a manual, global operation you must remember to perform, and any miss leaves stale content live for the full TTL. The robust pattern is content-hashed filenames: the URL changes when the bytes change, so the old URL can be cached immutably forever and no purge is ever needed. Reserve purge for takedowns and bad deploys rather than routine updates.",
+      "source": "https://developers.cloudflare.com/cache/",
+      "followUp": "What do you do for HTML itself, which cannot be content-hashed?"
+    },
+    {
+      "topic": "cdn",
+      "kind": "question",
+      "prompt": "Why does a cache key that ignores query strings cause bugs?",
+      "answer": "Requests that differ only in query parameters collapse onto one cache entry, so whichever variant is fetched first is served to everyone. An image resizer at /img.jpg?w=200 and /img.jpg?w=800 would return one size for both until it expires. The fix is including the relevant parameters in the key, while deliberately excluding tracking parameters that do not change the response so they do not fragment the cache.",
+      "source": "https://developers.cloudflare.com/cache/",
+      "followUp": "Which parameters would you exclude, and what breaks if you exclude the wrong one?"
+    },
+    {
+      "topic": "communication-protocols",
+      "kind": "misconception",
+      "prompt": "gRPC is faster than REST, so use it everywhere.",
+      "answer": "The gains are real but narrower than claimed: binary Protobuf framing and HTTP/2 multiplexing help most on chatty internal service-to-service calls with small payloads. Against that, browsers cannot speak gRPC natively without a proxy layer, debugging is harder without human-readable payloads, and every client needs generated stubs and a schema you must version. For a public API consumed by third parties, JSON over HTTP is usually the better engineering choice.",
+      "source": "https://grpc.io/docs/what-is-grpc/core-concepts/",
+      "followUp": "Who consumes this API, and can they use gRPC at all?"
+    },
+    {
+      "topic": "communication-protocols",
+      "kind": "misconception",
+      "prompt": "HTTP/2 multiplexing removed head-of-line blocking.",
+      "answer": "It removed it at the HTTP layer — many streams share one connection instead of queueing behind each other. But those streams still ride a single TCP connection, and TCP delivers in order, so one lost packet stalls every multiplexed stream until it is retransmitted. That is why HTTP/3 moves to QUIC over UDP, where loss on one stream does not block the others. So the blocking moved down a layer rather than disappearing.",
+      "source": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "followUp": "When would that TCP-level stall actually be noticeable to a user?"
+    },
+    {
+      "topic": "communication-protocols",
+      "kind": "question",
+      "prompt": "When would you choose long polling over WebSockets?",
+      "answer": "When updates are server-to-client only and infrequent, and you would rather not operate a stateful connection tier. Long polling reuses ordinary HTTP, so it passes through proxies and load balancers that mishandle upgrades, needs no connection registry, and degrades gracefully. WebSockets earn their operational cost when the client also sends frequently — chat, collaborative editing, live cursors — where a request per message would be wasteful.",
+      "source": "https://www.rfc-editor.org/rfc/rfc6455.html",
+      "followUp": "What does your load balancer do with an idle long-polling request for 30 seconds?"
+    },
+    {
+      "topic": "nosql-databases",
+      "kind": "misconception",
+      "prompt": "NoSQL databases are schemaless, so you don't have to design a schema.",
+      "answer": "The schema moves rather than disappears — it becomes implicit in application code, and every service reading the data must agree on it without the database enforcing anything. In practice you design the schema harder, because access patterns must be known up front: a wide-column store's partition and clustering keys determine which queries are efficient and which are impossible, and changing them later means rewriting the data.",
+      "source": "https://research.google/pubs/bigtable-a-distributed-storage-system-for-structured-data/",
+      "followUp": "What query would be impossible with the partition key you just chose?"
+    },
+    {
+      "topic": "nosql-databases",
+      "kind": "trap",
+      "prompt": "We expect a lot of data, so we should use NoSQL.",
+      "answer": "Data volume alone rarely decides this — a single PostgreSQL instance handles terabytes comfortably. What actually pushes you toward a non-relational store is an access pattern the relational model serves poorly, a write rate exceeding what one primary can absorb, or a genuine need for multi-region writes. Choosing on volume alone typically trades away joins, transactions, and ad-hoc queries for capacity you could have obtained with an index.",
+      "source": "https://dataintensive.net/",
+      "followUp": "What is the actual write rate, and what does one primary top out at?"
+    },
+    {
+      "topic": "graph-data-modeling",
+      "kind": "misconception",
+      "prompt": "Social graph queries need a graph database.",
+      "answer": "One- and two-hop queries — who I follow, who follows me, friends in common — are ordinary indexed lookups and joins on an edge table, and that covers the large majority of real social queries. A dedicated graph engine earns its operational cost at deeper traversals and path-finding, where relational joins fan out combinatorially. Reaching for one before you have that workload adds a system to operate for no gain.",
+      "source": "https://www.usenix.org/conference/atc13/technical-sessions/presentation/bronson",
+      "followUp": "How deep do your traversals actually go in practice?"
+    },
+    {
+      "topic": "graph-data-modeling",
+      "kind": "trap",
+      "prompt": "Fetch a user's friends, then loop over them to fetch each of their friends.",
+      "answer": "That is the N+1 problem: one query for the friends plus one per friend, so a few hundred friends becomes a few hundred round trips, each paying network latency the database never sees. Pushing the second hop into a single join or an IN clause collapses it into one round trip and lets the index do the work. This is among the most common real performance bugs, and interviewers watch for whether you notice it unprompted.",
+      "source": "https://www.usenix.org/conference/atc13/technical-sessions/presentation/bronson",
+      "followUp": "What bounds the result size once you join instead of looping?"
+    },
+    {
+      "topic": "application-layer",
+      "kind": "misconception",
+      "prompt": "Our services are stateless because they don't have a database.",
+      "answer": "Statelessness means no request depends on state held in one particular process — session data in a local map, an in-memory cache the logic relies on, an uploaded file on local disk, or a scheduled job that only one instance runs. Any of those breaks when the load balancer sends the next request elsewhere or the instance is replaced. Having no database is unrelated; what matters is whether any instance can serve any request.",
+      "source": "https://kubernetes.io/docs/concepts/services-networking/service/",
+      "followUp": "What would break if this instance were killed mid-request?"
+    },
+    {
+      "topic": "application-layer",
+      "kind": "trap",
+      "prompt": "Health checks pass, so the deployment succeeded.",
+      "answer": "A liveness check confirming the process responds says nothing about whether it can serve real traffic — a new version can start cleanly and fail on every request because of a bad config or an unreachable dependency. Readiness must exercise something meaningful before an instance receives traffic, and the deploy needs to be progressive with automatic rollback on error rate, so a bad version reaches a small fraction rather than the entire fleet.",
+      "source": "https://kubernetes.io/docs/concepts/services-networking/service/",
+      "followUp": "What metric would trigger your rollback, and over what window?"
+    },
+    {
+      "topic": "batch-analytics",
+      "kind": "misconception",
+      "prompt": "Streaming has replaced batch processing.",
+      "answer": "They answer different questions. Streaming gives continuously updating results with bounded latency, at the cost of complexity around late and out-of-order events, windowing, and reprocessing history. Batch remains simpler, cheaper per record, and trivially reprocessable — rerun it over the same input and get the same answer. Most organisations run both, often with batch as the correctness backstop that recomputes what the stream approximated.",
+      "source": "https://research.google/pubs/mapreduce-simplified-data-processing-on-large-clusters/",
+      "followUp": "How would you recover from a bug in your streaming job that ran for a week?"
+    },
+    {
+      "topic": "batch-analytics",
+      "kind": "trap",
+      "prompt": "The job is slow, so add more reducers.",
+      "answer": "If one key holds a disproportionate share of the records, the reducer handling it takes as long regardless of how many others you add — the job finishes when its slowest task finishes. That is data skew, and the fixes are different: a combiner to pre-aggregate on the map side, salting the hot key across several reducers then merging, or filtering it out and handling it separately. More parallelism does nothing for a single overloaded partition.",
+      "source": "https://research.google/pubs/mapreduce-simplified-data-processing-on-large-clusters/",
+      "followUp": "How would you find which key is skewed?"
+    },
+    {
+      "topic": "search-autocomplete",
+      "kind": "misconception",
+      "prompt": "Autocomplete is just a search query with a wildcard on the end.",
+      "answer": "Running full search per keystroke is both too slow and too expensive — suggestions need a response in tens of milliseconds and arrive several times per typed word. Autocomplete is served instead by a structure built for prefixes with results precomputed, typically a trie holding the top completions at each node, so a lookup walks the prefix and returns a stored list rather than ranking documents. Search and suggest are separate systems sharing a corpus.",
+      "source": "https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html",
+      "followUp": "How would you keep those precomputed lists fresh as popularity shifts?"
+    },
+    {
+      "topic": "search-autocomplete",
+      "kind": "trap",
+      "prompt": "Precompute the top ten completions for every prefix and serve from cache.",
+      "answer": "That works and is the right shape, but the trap is treating the index as mutable. Rebuilding in place while serving produces inconsistent results mid-update, and per-prefix invalidation is intractable because one new popular query affects every prefix of itself. The usual answer is building a new index offline and swapping it atomically, accepting that suggestions lag reality by the rebuild interval — which is nearly always acceptable for this feature.",
+      "source": "https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html",
+      "followUp": "What breaks if a trending term takes an hour to appear?"
+    },
+    {
+      "topic": "notification-system",
+      "kind": "misconception",
+      "prompt": "Push notifications are delivered reliably by the platform provider.",
+      "answer": "Providers explicitly offer best-effort delivery. A message can be dropped when the device is offline beyond a retention window, coalesced with others, delayed by battery optimisation, or rejected outright because the token is stale after a reinstall. Anything that must be seen needs to exist durably in your own system and be visible in-app, with push treated as a hint that something is waiting rather than as the delivery mechanism.",
+      "source": "https://firebase.google.com/docs/cloud-messaging",
+      "followUp": "How does a user see the notification they never received?"
+    },
+    {
+      "topic": "notification-system",
+      "kind": "trap",
+      "prompt": "The provider returned an error, so retry the send.",
+      "answer": "Only some errors are worth retrying. A timeout or a 5xx is transient and deserves backoff with jitter. An invalid or unregistered token is permanent — the app was uninstalled — and retrying burns quota forever while never succeeding; that token should be deleted. Retrying everything uniformly is how a notification backlog becomes permanently wedged behind messages that can never be delivered.",
+      "source": "https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/",
+      "followUp": "Where do the permanently failed messages go so someone can see them?"
+    },
+    {
+      "topic": "media-and-file-storage",
+      "kind": "misconception",
+      "prompt": "Uploads go through the API so it can validate them.",
+      "answer": "Proxying file bytes through application servers ties up a request thread for the whole transfer, burns bandwidth twice, and makes a large upload a denial-of-service vector. The standard pattern is a presigned URL: the API authorises the upload and the client sends bytes directly to object storage. Validation still happens — it moves after the fact, triggered by a storage event, with the object not marked usable until it passes.",
+      "source": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html",
+      "followUp": "What stops someone uploading a 10 GB file to a URL you signed?"
+    },
+    {
+      "topic": "media-and-file-storage",
+      "kind": "trap",
+      "prompt": "Store the video once at the highest quality and let clients downscale.",
+      "answer": "The client cannot downscale what it has not downloaded, so a phone on a slow connection still pulls the full-resolution stream and stalls. Transcoding into several renditions ahead of time exists precisely so the player can choose by available bandwidth and switch mid-playback. The storage cost of extra renditions is small next to the bandwidth and abandonment cost of serving one oversized file to everyone.",
+      "source": "https://developer.apple.com/streaming/",
+      "followUp": "What does the player do when bandwidth drops mid-stream?"
+    },
+    {
+      "topic": "key-value-store",
+      "kind": "misconception",
+      "prompt": "Adding more replicas makes the store more available.",
+      "answer": "It raises durability and read capacity, but availability depends on the quorum you require, not the replica count. With N=5 and W=3, a write still fails when three nodes are unreachable no matter how many replicas exist in total. Replicas also cost write latency, because a quorum write waits for W acknowledgements. The lever for availability is lowering W or R and accepting weaker consistency, which is the trade the dials exist to express.",
+      "source": "https://www.amazon.science/publications/dynamo-amazons-highly-available-key-value-store",
+      "followUp": "What R and W would you pick for a shopping cart, versus for a balance?"
+    },
+    {
+      "topic": "key-value-store",
+      "kind": "trap",
+      "prompt": "Use last-write-wins to resolve conflicts — it's simple and always converges.",
+      "answer": "It converges by silently discarding data. Last-write-wins picks by timestamp, so with clock skew across nodes the surviving write may be the one that happened first in real time, and the loser is gone with no record. That is acceptable for a cache entry and unacceptable for a shopping cart, which is why Dynamo kept siblings and pushed resolution to the application. The honest answer names what LWW throws away rather than calling it simple.",
+      "source": "https://www.amazon.science/publications/dynamo-amazons-highly-available-key-value-store",
+      "followUp": "Which of your data types could tolerate losing a concurrent write?"
+    },
+    {
+      "topic": "dns",
+      "kind": "misconception",
+      "prompt": "DNS round robin is a load balancer.",
+      "answer": "It distributes queries, not load. Resolvers and clients cache the answer for its TTL, so one client keeps hitting the same address regardless of how loaded it is, and a returned address is served whether or not that host is healthy — DNS has no health signal. It also cannot weight by capacity or drain a host quickly. It is a coarse spreading mechanism, usually used to reach a set of real load balancers rather than backends.",
+      "source": "https://www.rfc-editor.org/rfc/rfc1034.html",
+      "followUp": "How would a client discover the host it was given is down?"
+    },
+    {
+      "topic": "load-balancing",
+      "kind": "misconception",
+      "prompt": "Least connections is strictly better than round robin.",
+      "answer": "It adapts to uneven request durations, which round robin ignores, but it is not free or universally better. It requires tracking live state per backend, and it can send a burst of traffic to a newly added instance precisely because it has zero connections — sometimes before it is warm. It also measures connections rather than actual load, so a backend holding cheap idle connections looks busy. Weighted or least-request policies with slow start exist to patch these.",
+      "source": "https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/load_balancing",
+      "followUp": "What happens to a cold instance the moment you add it to the pool?"
+    },
+    {
+      "topic": "load-balancing",
+      "kind": "trap",
+      "prompt": "Use sticky sessions so users keep hitting the same server.",
+      "answer": "Stickiness reintroduces the statefulness you were trying to escape. Load becomes uneven because a heavy user is pinned to one backend, removing a server logs out everyone bound to it, and scaling out does not relieve existing sessions since they stay where they are. It is a workaround for state living in process memory; the durable fix is moving that state to a shared store so any instance can serve any request.",
+      "source": "https://kubernetes.io/docs/concepts/services-networking/service/",
+      "followUp": "What state is actually pinned, and could it live in Redis instead?"
+    },
+    {
+      "topic": "news-feed",
+      "kind": "misconception",
+      "prompt": "The feed should show every post from everyone you follow, newest first.",
+      "answer": "Chronological completeness stops being possible at scale and stops being desirable earlier than that. Following a thousand accounts produces far more posts than anyone reads, so the system must select, and selection means ranking with a model that needs features computed at read time. That is why ranking usually happens on read over a candidate set produced by fan-out, rather than the feed being a straight merge of timelines.",
+      "source": "https://www.usenix.org/conference/atc13/technical-sessions/presentation/bronson",
+      "followUp": "Where do you compute ranking features without adding read latency?"
+    },
+    {
+      "topic": "news-feed",
+      "kind": "trap",
+      "prompt": "Paginate the feed with LIMIT and OFFSET.",
+      "answer": "Offset pagination breaks on a feed because the underlying list changes between requests. New posts arriving shift everything down, so page two repeats items from page one, and deletions cause items to be skipped entirely. Offset also gets slower as it grows, since the database walks and discards the skipped rows. Cursor pagination — remember the last id and ask for items after it — is stable under insertion and stays cheap.",
+      "source": "https://dataintensive.net/",
+      "followUp": "What does your cursor encode so it survives a ranking change?"
+    },
+    {
+      "topic": "url-shortener",
+      "kind": "trap",
+      "prompt": "Hash the long URL and use the first seven characters as the short code.",
+      "answer": "Truncating a hash creates collisions, and by the birthday bound they arrive far sooner than the key space suggests — so you need a lookup and retry loop on every insert, which is the cost you were avoiding. It also makes the same long URL always produce the same code, which prevents per-user analytics and lets anyone test whether a URL was shortened. A counter encoded in base62, allocated in blocks per server, avoids collisions entirely.",
+      "source": "https://github.com/twitter-archive/snowflake",
+      "followUp": "How would you still support a custom vanity alias alongside that?"
+    },
+    {
+      "topic": "chat-system",
+      "kind": "trap",
+      "prompt": "Use the client's timestamp to order messages in a conversation.",
+      "answer": "Device clocks disagree, drift, and can be set by the user, so client timestamps produce conversations where the reply precedes the message. Ordering must come from something the server controls — a server-assigned, roughly time-sortable id issued when the message is persisted. Client time is still worth storing as a display hint, but it cannot be the sort key. This is the same reason Snowflake-style ids exist.",
+      "source": "https://www.rfc-editor.org/rfc/rfc9562.html",
+      "followUp": "Two messages arrive at different servers in the same millisecond — what breaks the tie?"
+    },
+    {
+      "topic": "web-crawler",
+      "kind": "trap",
+      "prompt": "Track visited URLs in a set so you never fetch the same page twice.",
+      "answer": "At billions of URLs an exact set no longer fits in memory, which is why crawlers use a Bloom filter — constant space per URL, with false positives but never false negatives. The consequence must be stated: a false positive means a page is silently never crawled, and you cannot tell which. That is an acceptable trade at this scale, and claiming the filter is exact is the actual mistake. URLs also need normalising first, or trivial variants defeat the check entirely.",
+      "source": "https://developers.google.com/search/docs/crawling-indexing/overview-google-crawlers",
+      "followUp": "What normalisation would you apply before hashing the URL?"
+    },
+    {
+      "topic": "unique-id-generator",
+      "kind": "misconception",
+      "prompt": "UUIDs are a bad primary key because they're large.",
+      "answer": "Size is the smaller problem; locality is the real one. A random UUIDv4 as a clustered primary key scatters inserts across the whole B-tree, causing page splits and poor cache behaviour, which is what actually degrades write throughput. Time-ordered identifiers fix that by making inserts append near the end, which is why UUIDv7 exists and why it is usually the right answer when you want no coordination.",
+      "source": "https://www.rfc-editor.org/rfc/rfc9562.html",
+      "followUp": "When would you still prefer a random UUID over a time-ordered one?"
     }
   ]
 }
