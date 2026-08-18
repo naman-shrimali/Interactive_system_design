@@ -1,0 +1,473 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-08-18",
+  "entries": [
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "title": "HTTP Semantics (RFC 9110)",
+      "publisher": "IETF",
+      "kind": "rfc",
+      "tier": "normative",
+      "topics": ["communication-protocols", "application-layer", "url-shortener"],
+      "why": "The standard itself, so it settles arguments about idempotency, safe methods, and what 301 versus 302 actually mean rather than what blog posts claim they mean.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc6455.html",
+      "title": "The WebSocket Protocol (RFC 6455)",
+      "publisher": "IETF",
+      "kind": "rfc",
+      "tier": "normative",
+      "topics": ["communication-protocols", "chat-system"],
+      "why": "Defines the handshake and framing precisely, which is the boundary between what the protocol gives you and what your chat architecture still has to solve itself.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc8446.html",
+      "title": "TLS 1.3 (RFC 8446)",
+      "publisher": "IETF",
+      "kind": "rfc",
+      "tier": "normative",
+      "topics": ["security", "communication-protocols"],
+      "why": "The normative source for handshake properties and round-trip counts, which matters whenever you are estimating connection setup latency.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc1034.html",
+      "title": "Domain Names: Concepts and Facilities (RFC 1034)",
+      "publisher": "IETF",
+      "kind": "rfc",
+      "tier": "normative",
+      "topics": ["dns"],
+      "why": "Defines delegation, caching, and TTL semantics, including the negative-caching behaviour that surprises people bringing up a new subdomain.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc9562.html",
+      "title": "Universally Unique Identifiers (RFC 9562)",
+      "publisher": "IETF",
+      "kind": "rfc",
+      "tier": "normative",
+      "topics": ["unique-id-generator"],
+      "why": "The current UUID standard, and the definitive statement of what UUIDv7 guarantees about time ordering, which is the usual alternative to Snowflake.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc9309.html",
+      "title": "Robots Exclusion Protocol (RFC 9309)",
+      "publisher": "IETF",
+      "kind": "rfc",
+      "tier": "normative",
+      "topics": ["web-crawler"],
+      "why": "Standardises robots.txt parsing, and makes explicit that it is a politeness protocol rather than an access-control mechanism.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc6749.html",
+      "title": "The OAuth 2.0 Authorization Framework (RFC 6749)",
+      "publisher": "IETF",
+      "kind": "rfc",
+      "tier": "normative",
+      "topics": ["security"],
+      "why": "The source for what OAuth actually specifies, which is authorization rather than authentication — a distinction candidates routinely get backwards.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc7519.html",
+      "title": "JSON Web Token (RFC 7519)",
+      "publisher": "IETF",
+      "kind": "rfc",
+      "tier": "normative",
+      "topics": ["security", "application-layer"],
+      "why": "Defines what a JWT is and is not, which matters for the common claim that stateless tokens make session revocation free.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://www.amazon.science/publications/dynamo-amazons-highly-available-key-value-store",
+      "title": "Dynamo: Amazon's Highly Available Key-value Store",
+      "publisher": "Amazon Science",
+      "kind": "paper",
+      "tier": "authoritative",
+      "topics": ["consistent-hashing", "key-value-store", "availability-patterns"],
+      "why": "The primary source for consistent hashing with virtual nodes, sloppy quorums, vector clocks, and anti-entropy — most secondhand explanations of these blur the details.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://web.stanford.edu/~ouster/cgi-bin/papers/raft-extended.pdf",
+      "title": "In Search of an Understandable Consensus Algorithm (Raft)",
+      "publisher": "Ongaro and Ousterhout, Stanford",
+      "kind": "paper",
+      "tier": "authoritative",
+      "topics": ["availability-patterns", "consistency-patterns"],
+      "why": "The clearest primary treatment of leader election and replicated logs, and the reference point for why fencing prevents split brain.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://research.google/pubs/mapreduce-simplified-data-processing-on-large-clusters/",
+      "title": "MapReduce: Simplified Data Processing on Large Clusters",
+      "publisher": "Google Research",
+      "kind": "paper",
+      "tier": "authoritative",
+      "topics": ["batch-analytics"],
+      "why": "The original description of the model, including combiners and speculative execution for stragglers, both of which are usually omitted from summaries.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://research.google/pubs/bigtable-a-distributed-storage-system-for-structured-data/",
+      "title": "Bigtable: A Distributed Storage System for Structured Data",
+      "publisher": "Google Research",
+      "kind": "paper",
+      "tier": "authoritative",
+      "topics": ["nosql-databases", "chat-system"],
+      "why": "The origin of the wide-column model that message storage designs borrow, including why partition and clustering keys determine your read pattern.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://research.google/pubs/spanner-googles-globally-distributed-database/",
+      "title": "Spanner: Google's Globally-Distributed Database",
+      "publisher": "Google Research",
+      "kind": "paper",
+      "tier": "authoritative",
+      "topics": ["relational-databases", "consistency-patterns", "cap-theorem"],
+      "why": "The counterexample to the folklore that distributed systems cannot offer strong consistency, and an honest account of what it costs to get it.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://www.usenix.org/conference/atc13/technical-sessions/presentation/bronson",
+      "title": "TAO: Facebook's Distributed Data Store for the Social Graph",
+      "publisher": "USENIX ATC",
+      "kind": "paper",
+      "tier": "authoritative",
+      "topics": ["graph-data-modeling", "news-feed"],
+      "why": "A production account of serving a social graph at scale, and why the read path is optimised so aggressively relative to writes.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://www.usenix.org/system/files/conference/nsdi13/nsdi13-final170_update.pdf",
+      "title": "Scaling Memcache at Facebook",
+      "publisher": "USENIX NSDI",
+      "kind": "paper",
+      "tier": "authoritative",
+      "topics": ["caching"],
+      "why": "The best real-world treatment of cache stampedes, leases, and the failure modes that only appear once a cache tier is genuinely large.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html",
+      "title": "How to do distributed locking",
+      "publisher": "Martin Kleppmann",
+      "kind": "critique",
+      "tier": "authoritative",
+      "topics": ["caching", "rate-limiter", "availability-patterns"],
+      "why": "The standard critique of using Redis locks for correctness, and the source of the fencing-token argument. Essential counterweight to the Redis lock documentation.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://martin.kleppmann.com/2015/05/11/please-stop-calling-databases-cp-or-ap.html",
+      "title": "Please stop calling databases CP or AP",
+      "publisher": "Martin Kleppmann",
+      "kind": "critique",
+      "tier": "authoritative",
+      "topics": ["cap-theorem", "consistency-patterns"],
+      "why": "Explains why the casual CP/AP labelling most interview material uses is not meaningful, which is the single most common inaccuracy in this subject.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://jepsen.io/analyses",
+      "title": "Jepsen Analyses",
+      "publisher": "Jepsen",
+      "kind": "critique",
+      "tier": "authoritative",
+      "topics": ["consistency-patterns", "nosql-databases", "relational-databases"],
+      "why": "Empirical testing of what databases actually guarantee under partition, as opposed to what their marketing claims. The reference for checking a consistency claim.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/transaction-iso.html",
+      "title": "PostgreSQL: Transaction Isolation",
+      "publisher": "PostgreSQL Global Development Group",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["relational-databases", "consistency-patterns"],
+      "why": "Precise definitions of each isolation level and the anomalies each one still permits, including why Read Committed does not stop lost updates.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/indexes.html",
+      "title": "PostgreSQL: Indexes",
+      "publisher": "PostgreSQL Global Development Group",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["relational-databases"],
+      "why": "Covers multicolumn index ordering and when the planner can use an index at all, which is the mechanism behind most 'why is this query slow' answers.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://kafka.apache.org/documentation/",
+      "title": "Apache Kafka Documentation",
+      "publisher": "Apache Software Foundation",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["asynchronism", "batch-analytics"],
+      "why": "Authoritative on partitions, consumer groups, and delivery semantics, including the limits of what Kafka's exactly-once actually covers.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://redis.io/docs/latest/",
+      "title": "Redis Documentation",
+      "publisher": "Redis",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["caching", "rate-limiter", "chat-system"],
+      "why": "Reference for atomic operations, Lua scripting, and expiration — the primitives that make a correct rate limiter possible on a single round trip.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://cassandra.apache.org/doc/latest/",
+      "title": "Apache Cassandra Documentation",
+      "publisher": "Apache Software Foundation",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["nosql-databases", "key-value-store"],
+      "why": "A production implementation of the Dynamo ideas, useful for checking how quorum tuning and partition keys behave in practice rather than in theory.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html",
+      "title": "Amazon S3: Multipart Upload Overview",
+      "publisher": "Amazon Web Services",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["media-and-file-storage"],
+      "why": "Defines part sizes, limits, and retry behaviour, which is the concrete detail behind 'chunk the upload so a failure does not restart it'.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html",
+      "title": "Amazon S3: Using Presigned URLs",
+      "publisher": "Amazon Web Services",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["media-and-file-storage", "security"],
+      "why": "The mechanism that lets clients upload directly to storage without the API proxying bytes, plus the expiry semantics that bound the risk.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://developers.cloudflare.com/cache/",
+      "title": "Cloudflare Cache Documentation",
+      "publisher": "Cloudflare",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["cdn", "caching"],
+      "why": "Concrete edge behaviour for cache keys, TTLs, and purging — particularly the cache-key rules behind query-string collisions.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://developer.apple.com/streaming/",
+      "title": "HTTP Live Streaming",
+      "publisher": "Apple Developer",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["media-and-file-storage"],
+      "why": "The reference for manifests, segments, and adaptive bitrate, which is why transcoding fans out into multiple renditions at all.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://firebase.google.com/docs/cloud-messaging",
+      "title": "Firebase Cloud Messaging",
+      "publisher": "Google Firebase",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["notification-system"],
+      "why": "Authoritative on device tokens, provider feedback, and the delivery guarantees a push channel actually offers, which are weaker than most designs assume.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://grpc.io/docs/what-is-grpc/core-concepts/",
+      "title": "gRPC Core Concepts",
+      "publisher": "gRPC project",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["communication-protocols"],
+      "why": "Defines streaming modes, deadlines, and status codes, which is the substance behind choosing RPC over REST for internal calls.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/services-networking/service/",
+      "title": "Kubernetes: Service",
+      "publisher": "Kubernetes project",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["application-layer", "load-balancing"],
+      "why": "How service discovery and virtual IPs actually work in the most common orchestrator, rather than as an abstract registry concept.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/load_balancing",
+      "title": "Envoy: Load Balancing Architecture",
+      "publisher": "Envoy project",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["load-balancing"],
+      "why": "A precise description of real load-balancing policies including outlier detection, which is what health checking looks like in production.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://opentelemetry.io/docs/",
+      "title": "OpenTelemetry Documentation",
+      "publisher": "CNCF",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["performance-and-latency", "application-layer"],
+      "why": "The vocabulary for metrics, logs, and traces, and why tail latency needs tracing rather than averages to diagnose.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://owasp.org/www-project-top-ten/",
+      "title": "OWASP Top Ten",
+      "publisher": "OWASP Foundation",
+      "kind": "docs",
+      "tier": "normative",
+      "topics": ["security"],
+      "why": "The common reference for the risks a design review is expected to name, and specific enough to check a design against rather than gesture at.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://owasp.org/www-project-application-security-verification-standard/",
+      "title": "OWASP Application Security Verification Standard",
+      "publisher": "OWASP Foundation",
+      "kind": "docs",
+      "tier": "normative",
+      "topics": ["security"],
+      "why": "Turns 'we should be secure' into enumerated verifiable controls, which is the difference between a checklist and an actual security argument.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://sre.google/sre-book/service-level-objectives/",
+      "title": "Google SRE Book: Service Level Objectives",
+      "publisher": "Google",
+      "kind": "book",
+      "tier": "authoritative",
+      "topics": ["availability-patterns", "performance-and-latency"],
+      "why": "Defines SLIs, SLOs, and error budgets properly, including why an availability target is a product decision rather than an engineering one.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://sre.google/sre-book/addressing-cascading-failures/",
+      "title": "Google SRE Book: Addressing Cascading Failures",
+      "publisher": "Google",
+      "kind": "book",
+      "tier": "authoritative",
+      "topics": ["availability-patterns", "load-balancing", "rate-limiter"],
+      "why": "The definitive treatment of how retries and overload interact to take a system down, and why load shedding beats queueing under saturation.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/",
+      "title": "Timeouts, retries, and backoff with jitter",
+      "publisher": "Amazon Web Services",
+      "kind": "article",
+      "tier": "authoritative",
+      "topics": ["asynchronism", "chat-system", "notification-system"],
+      "why": "The clearest primary explanation of why jitter is not optional, with the reasoning for how retry storms synchronise without it.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://aws.amazon.com/builders-library/",
+      "title": "The Amazon Builders' Library",
+      "publisher": "Amazon Web Services",
+      "kind": "article",
+      "tier": "authoritative",
+      "topics": ["availability-patterns", "scaling-journey", "application-layer"],
+      "why": "First-hand accounts of operating large systems, which is the closest thing to production experience available as reading material.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html",
+      "title": "AWS Well-Architected Framework",
+      "publisher": "Amazon Web Services",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["scaling-journey", "security", "availability-patterns"],
+      "why": "A structured checklist across reliability, performance, security, and cost that is useful for auditing a design you have just drawn.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://gist.github.com/jboner/2841832",
+      "title": "Latency Numbers Every Programmer Should Know",
+      "publisher": "Jeff Dean, via Jonas Bonér",
+      "kind": "reference",
+      "tier": "interview",
+      "topics": ["back-of-envelope", "performance-and-latency"],
+      "why": "The canonical order-of-magnitude table. Treat the absolute values as dated but the ratios as still correct, which is what estimation actually relies on.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://github.com/donnemartin/system-design-primer",
+      "title": "The System Design Primer",
+      "publisher": "Donne Martin",
+      "kind": "reference",
+      "tier": "interview",
+      "topics": ["interview-framework", "scaling-journey"],
+      "why": "The breadth reference this curriculum is partly built from, best used for vocabulary coverage rather than as a technical authority.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://github.com/twitter-archive/snowflake",
+      "title": "Twitter Snowflake",
+      "publisher": "Twitter (archived)",
+      "kind": "reference",
+      "tier": "authoritative",
+      "topics": ["unique-id-generator"],
+      "why": "The original implementation the bit layout comes from, including how it handled clock regression — worth reading before reciting the scheme.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://discord.com/blog/how-discord-stores-billions-of-messages",
+      "title": "How Discord Stores Billions of Messages",
+      "publisher": "Discord",
+      "kind": "article",
+      "tier": "authoritative",
+      "topics": ["chat-system", "nosql-databases"],
+      "why": "A concrete production account of partitioning message history by channel and time bucket, matching the storage step in the chat dry run.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://developers.google.com/search/docs/crawling-indexing/overview-google-crawlers",
+      "title": "Google Crawlers Overview",
+      "publisher": "Google Search Central",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["web-crawler"],
+      "why": "How a crawler at real scale identifies itself and paces requests, which grounds the politeness and per-host delay logic.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html",
+      "title": "Elasticsearch Reference",
+      "publisher": "Elastic",
+      "kind": "docs",
+      "tier": "authoritative",
+      "topics": ["search-autocomplete"],
+      "why": "Authoritative on inverted indexes, analyzers, and suggesters, and the practical difference between search and autocomplete workloads.",
+      "lastVerified": "2026-08-18"
+    },
+    {
+      "url": "https://dataintensive.net/",
+      "title": "Designing Data-Intensive Applications, 2nd Edition",
+      "publisher": "Kleppmann and Riccomini, O'Reilly",
+      "kind": "book",
+      "tier": "authoritative",
+      "topics": [
+        "relational-databases",
+        "nosql-databases",
+        "consistency-patterns",
+        "cap-theorem",
+        "asynchronism",
+        "batch-analytics"
+      ],
+      "why": "The single best book on data-system trade-offs, and the source most worth reading end to end if you only read one thing on this list.",
+      "lastVerified": "2026-08-18"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Curated reading list",
+  "type": "object",
+  "required": ["schemaVersion", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "updated": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["url", "title", "publisher", "kind", "tier", "topics", "why", "lastVerified"],
+        "additionalProperties": false,
+        "properties": {
+          "url": { "type": "string", "pattern": "^https://" },
+          "title": { "type": "string", "minLength": 4 },
+          "publisher": { "type": "string", "minLength": 2 },
+          "kind": {
+            "enum": ["rfc", "paper", "docs", "book", "article", "critique", "reference"]
+          },
+          "tier": {
+            "description": "normative = the standard itself; authoritative = primary implementer or researcher; interview = framing and breadth.",
+            "enum": ["normative", "authoritative", "interview"]
+          },
+          "topics": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "pattern": "^[a-z0-9-]+$" }
+          },
+          "why": {
+            "description": "What this source settles that the lesson cannot settle on its own.",
+            "type": "string",
+            "minLength": 40
+          },
+          "lastVerified": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+        }
+      }
+    }
+  }
+}

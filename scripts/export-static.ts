@@ -168,6 +168,32 @@ for (const c of codeRows) {
   });
 }
 
+// --- curated reading list, grouped by topic. This one bypasses the database
+// --- deliberately: entries need no generated ids because read state is keyed
+// --- by url, so one paper cited by three topics is marked read in all of them.
+const READING_LIST = path.join(ROOT, 'content', 'reading-list.json');
+if (fs.existsSync(READING_LIST)) {
+  interface ReadingEntry {
+    url: string;
+    topics: string[];
+  }
+  const list = JSON.parse(fs.readFileSync(READING_LIST, 'utf-8')) as {
+    entries: ReadingEntry[];
+  };
+
+  const byTopic: Record<string, Omit<ReadingEntry, 'topics'>[]> = {};
+  for (const entry of list.entries) {
+    const { topics: entryTopics, ...rest } = entry;
+    for (const slug of entryTopics) {
+      (byTopic[slug] ??= []).push(rest);
+    }
+  }
+  write('reading-list.json', byTopic);
+  console.log(
+    `Reading list: ${list.entries.length} entries across ${Object.keys(byTopic).length} topics.`,
+  );
+}
+
 // --- anchor titles, so locally-stored notes can render their heading
 const sectionAnchors = db
   .prepare(

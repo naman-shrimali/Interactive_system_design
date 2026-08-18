@@ -13,11 +13,21 @@ interface UserState {
   sections: Record<number, ProgressStatus>;
   links: Record<number, boolean>;
   diagrams: Record<number, boolean>;
+  /** Reading-list state is keyed by url, so a source shared by several topics
+   *  is marked read in all of them at once. */
+  reading: Record<string, boolean>;
   notes: Note[];
   nextNoteId: number;
 }
 
-const EMPTY: UserState = { sections: {}, links: {}, diagrams: {}, notes: [], nextNoteId: 1 };
+const EMPTY: UserState = {
+  sections: {},
+  links: {},
+  diagrams: {},
+  reading: {},
+  notes: [],
+  nextNoteId: 1,
+};
 
 function read(): UserState {
   try {
@@ -69,6 +79,15 @@ export function saveLinkCompleted(id: number, completed: boolean): void {
 export function saveDiagramViewed(id: number): void {
   const state = read();
   state.diagrams[id] = true;
+  write(state);
+}
+
+export function readingRead(url: string): boolean {
+  return read().reading[url] === true;
+}
+export function saveReadingRead(url: string, isRead: boolean): void {
+  const state = read();
+  state.reading[url] = isRead;
   write(state);
 }
 

@@ -104,6 +104,23 @@ export interface TopicDetail {
   next: TopicNeighbor | null;
 }
 
+export type ReadingKind = 'rfc' | 'paper' | 'docs' | 'book' | 'article' | 'critique' | 'reference';
+/** normative = the standard itself; authoritative = primary implementer; interview = framing. */
+export type ReadingTier = 'normative' | 'authoritative' | 'interview';
+
+/** A curated source, stored in the repo so the list is the same on every device. */
+export interface ReadingEntry {
+  url: string;
+  title: string;
+  publisher: string;
+  kind: ReadingKind;
+  tier: ReadingTier;
+  why: string;
+  lastVerified: string;
+  /** Local, per-browser: whether this has been read. Keyed by url, not id. */
+  read: boolean;
+}
+
 export interface Note {
   id: number;
   topicId: number | null;

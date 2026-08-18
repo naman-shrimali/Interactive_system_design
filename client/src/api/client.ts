@@ -16,6 +16,7 @@ import type {
   NoteWithAnchor,
   CodeWalkthrough,
   DiagramMeta,
+  ReadingEntry,
 } from '../types';
 import * as local from './localStore';
 
@@ -113,6 +114,21 @@ export function fetchCodeWalkthrough(
   id: number,
 ): Promise<{ id: number; slug: string; title: string; spec: CodeWalkthrough }> {
   return getJson(`code/${id}.json`);
+}
+
+let readingCache: Record<string, Omit<ReadingEntry, 'read'>[]> | null = null;
+
+/** Curated sources for a topic, from the repo — identical on every device. */
+export async function fetchReadingList(topicSlug: string): Promise<ReadingEntry[]> {
+  if (!readingCache) {
+    readingCache = await getJson<Record<string, Omit<ReadingEntry, 'read'>[]>>('reading-list.json')
+      .catch(() => ({}));
+  }
+  return (readingCache[topicSlug] ?? []).map((e) => ({ ...e, read: local.readingRead(e.url) }));
+}
+
+export async function setReadingRead(url: string, isRead: boolean): Promise<void> {
+  local.saveReadingRead(url, isRead);
 }
 
 export async function setSectionProgress(id: number, status: ProgressStatus): Promise<void> {

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Clock, Code2, ExternalLink as LinkIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Clock, Code2, ExternalLink as LinkIcon } from 'lucide-react';
 import { fetchTopic } from '../api/client';
 import { useAppStore } from '../store/useAppStore';
 import { MarkdownView } from '../components/reader/MarkdownView';
 import { ProgressControls } from '../components/reader/ProgressControls';
 import { LinksPanel } from '../components/reader/LinksPanel';
+import { ReadingList } from '../components/reader/ReadingList';
 import { NotesPanel } from '../components/reader/NotesPanel';
 import { SectionDiagram } from '../components/diagram/SectionDiagram';
 import { CodeSidebar } from '../components/code/CodeSidebar';
@@ -200,6 +201,7 @@ export function TopicPage() {
             </section>
           )}
 
+          <ReadingList topicSlug={topic.slug} />
           <LinksPanel links={topic.links} onChanged={refresh} />
           <NotesPanel anchor={{ topicId: topic.id }} />
 
@@ -255,6 +257,14 @@ export function TopicPage() {
                   </li>
                 );
               })}
+              <li>
+                <a
+                  href="#reading-list"
+                  className="flex items-center gap-1.5 border-l-2 border-transparent py-1 pl-3 text-[13px] text-ink-muted hover:text-ink"
+                >
+                  <BookOpen size={11} /> Go to the source
+                </a>
+              </li>
               {topic.links.length > 0 && (
                 <li>
                   <a
