@@ -28,7 +28,7 @@ Run this in order. It takes two minutes and it earns the right to make architect
 - **Peak ≈ 2–3× average**, more for consumer products with a strong daily rhythm.
 - **80/20**: ~20% of content drives ~80% of traffic. Cache sizing starts here.
 - **Availability multiplies** across dependencies — three 99.9% services in series ceilings at 99.7%.
-- **Memory ~100× faster than SSD; SSD ~100× faster than disk seek.**
+- **Memory ~1000× faster than SSD; SSD ~100× faster than disk seek.**
 - **Cross-continent round trip ~150 ms** — geography beats optimisation.
 - A single well-provisioned relational instance handles **thousands** of writes/second. Don't shard an estimate that says hundreds.
 

@@ -41,7 +41,7 @@ version: 1
 | Disk (HDD) seek | ~10 ms |
 | Round trip across continents | ~150 ms |
 
-The three conclusions that matter: **memory is ~100× faster than SSD, SSD is ~100× faster than a disk seek, and a cross-continent round trip dwarfs everything you do locally.** That last one is why you put data near users and why a chatty protocol across regions is fatal.
+The three conclusions that matter: **memory is ~1000× faster than SSD, SSD is ~100× faster than a disk seek, and a cross-continent round trip dwarfs everything you do locally.** That last one is why you put data near users and why a chatty protocol across regions is fatal.
 
 **Availability** — what nines cost you:
 

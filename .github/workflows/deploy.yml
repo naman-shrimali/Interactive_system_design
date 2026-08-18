@@ -32,6 +32,10 @@ jobs:
           npm ci --prefix server
           npm ci --prefix client
 
+      # Fail the deploy rather than publish contradictory or malformed content.
+      - name: Validate content
+        run: npm run validate --prefix scripts
+
       # The static export reads the seeded SQLite database, which is not in git.
       # Seeding needs only content/curriculum.json (committed) — the ingest step
       # is skipped here because it parses vendor/, which is not in the repo.

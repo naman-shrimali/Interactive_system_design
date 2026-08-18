@@ -2,7 +2,7 @@
 version: 1
 ---
 
-Caching is the cheapest large win available in system design. Reads usually outnumber writes heavily, the same small set of items is requested disproportionately often, and memory is roughly a hundred times faster than SSD. Put those three facts together and a modest cache absorbs the large majority of your read traffic.
+Caching is the cheapest large win available in system design. Reads usually outnumber writes heavily, the same small set of items is requested disproportionately often, and memory is roughly a thousand times faster than SSD. Put those three facts together and a modest cache absorbs the large majority of your read traffic.
 
 It is also the source of some of the most confusing bugs you will ever debug, because a cache is a second copy of the truth that is allowed to be wrong.
 

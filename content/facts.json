@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-08-18",
+  "facts": [
+    {
+      "id": "memory-read",
+      "label": "Main memory reference",
+      "value": 100,
+      "unit": "ns",
+      "source": "https://gist.github.com/jboner/2841832",
+      "lastVerified": "2026-08-18",
+      "note": "Order of magnitude, not a spec. The ratios between these figures are what estimation relies on; the absolute values drift with hardware."
+    },
+    {
+      "id": "ssd-random-read",
+      "label": "Random read from SSD",
+      "value": 100,
+      "unit": "us",
+      "source": "https://gist.github.com/jboner/2841832",
+      "lastVerified": "2026-08-18",
+      "note": "The classic list says 150 us for 4 KB; modern NVMe is faster, so 100 us is the round number used throughout this curriculum."
+    },
+    {
+      "id": "disk-seek",
+      "label": "Spinning disk seek",
+      "value": 10,
+      "unit": "ms",
+      "source": "https://gist.github.com/jboner/2841832",
+      "lastVerified": "2026-08-18",
+      "note": "Mechanical, so this one has not improved and will not."
+    },
+    {
+      "id": "datacenter-round-trip",
+      "label": "Round trip within one datacenter",
+      "value": 0.5,
+      "unit": "ms",
+      "source": "https://gist.github.com/jboner/2841832",
+      "lastVerified": "2026-08-18",
+      "note": "Bounded by switching and software, not distance."
+    },
+    {
+      "id": "cross-continent-round-trip",
+      "label": "Round trip across continents",
+      "value": 150,
+      "unit": "ms",
+      "source": "https://gist.github.com/jboner/2841832",
+      "lastVerified": "2026-08-18",
+      "note": "Bounded by the speed of light in fibre, so no amount of engineering removes it. This is why replica placement is a product decision."
+    },
+    {
+      "id": "availability-three-nines-year",
+      "label": "Downtime per year at 99.9%",
+      "value": 8.8,
+      "unit": "hours",
+      "source": "https://sre.google/sre-book/service-level-objectives/",
+      "lastVerified": "2026-08-18",
+      "note": "0.1% of 365.25 days is 8.766 hours."
+    },
+    {
+      "id": "availability-four-nines-year",
+      "label": "Downtime per year at 99.99%",
+      "value": 53,
+      "unit": "minutes",
+      "source": "https://sre.google/sre-book/service-level-objectives/",
+      "lastVerified": "2026-08-18",
+      "note": "52.6 minutes, rounded."
+    },
+    {
+      "id": "availability-five-nines-year",
+      "label": "Downtime per year at 99.999%",
+      "value": 5.3,
+      "unit": "minutes",
+      "source": "https://sre.google/sre-book/service-level-objectives/",
+      "lastVerified": "2026-08-18",
+      "note": "5.26 minutes. Below any human reaction time, so it implies automated recovery with no manual step."
+    }
+  ],
+  "derived": [
+    {
+      "id": "memory-vs-ssd",
+      "description": "How much faster main memory is than a random SSD read",
+      "slower": "ssd-random-read",
+      "faster": "memory-read",
+      "patterns": [
+        "memory is (?:roughly |about |approximately )?~?([\\d,]+|a hundred|a thousand)\\s*(?:×|x|-fold| times)? faster than (?:an? )?SSD",
+        "Memory ~?([\\d,]+|a hundred|a thousand)\\s*(?:×|x) faster than SSD"
+      ]
+    },
+    {
+      "id": "ssd-vs-disk",
+      "description": "How much faster an SSD read is than a spinning-disk seek",
+      "slower": "disk-seek",
+      "faster": "ssd-random-read",
+      "patterns": [
+        "SSD is ~?([\\d,]+|a hundred|a thousand)\\s*(?:×|x|-fold| times)? faster than (?:a )?disk seek",
+        "SSD ~?([\\d,]+|a hundred|a thousand)\\s*(?:×|x) faster than disk seek"
+      ]
+    }
+  ]
+}
