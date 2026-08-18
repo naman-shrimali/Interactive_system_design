@@ -142,3 +142,30 @@ fetches every url. Bot-blocking responses (401/403/405/429) are warnings rather 
 publisher refusing our user-agent is not a dead link, and a checker that cries wolf gets ignored.
 
 Adding a source is a data change: append an entry, re-run the export, push.
+
+## Phase 12 — Facts registry
+
+`content/facts.json` is the single source of truth for the curriculum's hard numbers — latency
+figures and availability budgets. The defect it targets is not a wrong number in isolation but the
+**same number stated two different ways in two topics**, which is the most common flaw in study
+material and the hardest to notice by reading.
+
+Each fact carries a `source` url that must appear in `content/reading-list.json`, so no canonical
+number is self-asserted, plus a `lastVerified` date.
+
+`derived` entries express a relationship between two facts (memory versus SSD, SSD versus disk
+seek) and carry regex `patterns` matching how that ratio gets written in prose.
+`npm run validate:facts` computes the ratio from the absolute values and compares it against every
+prose claim across authored sections **and** code walkthroughs — so the table and the sentences
+quoting it cannot drift apart silently. A claim fails only when off by more than 3×, which catches
+a factor-of-ten slip without arguing about 1000 versus 1500.
+
+It earned its place on the first run, catching a genuine 10× error in three places across two
+topics: `back-of-envelope` lists memory at 100 ns and SSD at 100 µs — a 1000× ratio — while its own
+headline conclusion, its checklist, and the `caching` overview all claimed ~100×.
+
+The deploy workflow runs `npm run validate` before building, so contradictory content fails the
+build rather than reaching the site.
+
+Adding a canonical number is a data change: add the fact, cite a reading-list url, and add a
+`derived` entry with patterns if prose quotes a ratio of it.
