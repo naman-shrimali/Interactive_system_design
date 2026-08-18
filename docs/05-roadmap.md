@@ -169,3 +169,32 @@ build rather than reaching the site.
 
 Adding a canonical number is a data change: add the fact, cite a reading-list url, and add a
 `derived` entry with patterns if prose quotes a ratio of it.
+
+## Phase 13 — Questions, misconceptions, and traps
+
+`content/questions.json` covers interview questions, common confusions, and "common wrong answers"
+as **one** format rather than three sections, because they are facets of the same artifact: a place
+where the obvious answer fails.
+
+Every entry has a `kind`:
+
+- `question` — asked directly; the prompt must actually ask something.
+- `misconception` — a plausible belief that is wrong, written the way someone would assert it. The
+  validator rejects a misconception phrased as a question, because that is a `question`.
+- `trap` — the obvious answer fails.
+
+Misconceptions and traps **must** cite a `source` that already exists in `content/reading-list.json`,
+so every correction is traceable rather than asserted — the same rule the facts registry applies to
+canonical numbers.
+
+On sourcing: there is no authoritative corpus of "questions asked at company X", and scraped lists
+are unverifiable and frequently wrong. These are derived instead from the primary sources already
+curated — Kleppmann on CP/AP labelling and on Redlock, Jepsen on what quorums actually guarantee,
+RFC 6749 on OAuth being authorization rather than authentication, RFC 7519 on what stateless tokens
+cost at revocation time.
+
+The UI collapses every prompt by default so the answer must be attempted before it is revealed:
+recognising an answer is not the same as being able to produce one. An optional `followUp` records
+what a good interviewer asks once you answer well.
+
+Adding an entry is a data change. `npm run validate:questions` enforces the rules above.
