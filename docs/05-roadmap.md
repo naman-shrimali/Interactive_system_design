@@ -14,6 +14,8 @@
 | 7. Diagram authoring | ✅ shipped — 27 diagrams across 25 of 30 topics; 5 left deliberately prose-only |
 | 8. Polish — dashboard, search, notes export | ✅ shipped |
 | 9. Code dry-runs — per-topic step-through sidebar | ✅ shipped — 22 of 30 topics; 8 left deliberately code-free |
+| 10. Static deploy to GitHub Pages | ✅ shipped — no backend; progress in localStorage |
+| 11. Curated reading list — primary sources per topic | ✅ shipped — 46 entries, 30 of 30 topics |
 
 The original phases 1–3 were re-cut when the curriculum moved from a source-first to a topic-first
 model ([docs/06-topic-model.md](06-topic-model.md)). Task files for that shipped work are kept as
@@ -119,3 +121,24 @@ walkthrough there would be filler standing in for a diagram or a table that alre
 
 Snippets are capped at 84 columns because the sidebar fits roughly 83 — past that a trailing comment
 gets clipped, and the comments are where the teaching lives.
+
+## Phase 11 — Curated reading list
+
+`content/reading-list.json` is a hand-authored list of primary sources, kept in the repo so it is
+identical on every device (unlike progress, which is per-browser localStorage). It sits above the
+183 auto-harvested primer links, which are unranked and carry no rationale.
+
+Each entry names a **tier** — `normative` (the standard itself), `authoritative` (primary
+implementer or researcher), or `interview` (framing and breadth) — plus a `why` stating what the
+source settles that the lesson cannot settle on its own, and a `lastVerified` date.
+
+Read state is keyed by **url**, not a generated id. A source cited by several topics is therefore
+marked read in all of them at once, and the list needs no database table: it exports straight from
+content to `client/public/data/reading-list.json`.
+
+`npm run validate:reading` checks structure (known topic slugs, no duplicate urls, no future
+verification dates, `why` that does not merely restate the title). `npm run validate:links` also
+fetches every url. Bot-blocking responses (401/403/405/429) are warnings rather than failures — a
+publisher refusing our user-agent is not a dead link, and a checker that cries wolf gets ignored.
+
+Adding a source is a data change: append an entry, re-run the export, push.
