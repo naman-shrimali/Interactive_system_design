@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-08-18",
+  "entries": [
+    {
+      "topic": "cap-theorem",
+      "kind": "misconception",
+      "prompt": "You pick two of consistency, availability, and partition tolerance.",
+      "answer": "Partition tolerance is not a choice — partitions happen to you whether or not you planned for them. The theorem only says something once a partition is already occurring, and at that moment you must either refuse requests to protect consistency or answer them and risk divergence. So the real decision is C or A during a partition, and it is a per-operation decision rather than a property of the whole database.",
+      "source": "https://martin.kleppmann.com/2015/05/11/please-stop-calling-databases-cp-or-ap.html",
+      "followUp": "Which of your endpoints would you let serve stale data during a partition, and which would you fail closed?"
+    },
+    {
+      "topic": "cap-theorem",
+      "kind": "misconception",
+      "prompt": "MongoDB is CP and Cassandra is AP.",
+      "answer": "These labels are not well defined for real systems. Both are tunable per operation — Cassandra with QUORUM reads and writes behaves very differently from Cassandra with ONE, and the same database can sit on either side depending on configuration and which operation you are talking about. Saying a database 'is CP' hides the setting that actually determines the behaviour.",
+      "source": "https://martin.kleppmann.com/2015/05/11/please-stop-calling-databases-cp-or-ap.html",
+      "followUp": "What consistency level would you set for this specific read, and why that one?"
+    },
+    {
+      "topic": "cap-theorem",
+      "kind": "trap",
+      "prompt": "Is a single-node database CA — consistent and available, since it has no partitions?",
+      "answer": "This sounds clean and is a dead end. With no network between replicas there is no partition for the theorem to talk about, so CAP simply says nothing useful about that system. Calling it 'CA' implies you achieved something, when what you actually did was decline to distribute. The honest answer is that CAP is not the right frame for a single node — availability there is limited by that one machine failing, which the theorem does not address at all.",
+      "source": "https://martin.kleppmann.com/2015/05/11/please-stop-calling-databases-cp-or-ap.html"
+    },
+    {
+      "topic": "cap-theorem",
+      "kind": "question",
+      "prompt": "What does the 'A' in CAP formally require?",
+      "answer": "That every request to a non-failing node returns a non-error response, with no bound on how long it takes. That is both stronger and less useful than what people usually mean by 'highly available' — a system answering every request in ten minutes satisfies CAP availability and satisfies no real product. This gap is why practical designs talk about latency budgets and SLOs rather than CAP availability.",
+      "followUp": "So what would you actually put in an SLO for this service?"
+    },
+    {
+      "topic": "consistency-patterns",
+      "kind": "misconception",
+      "prompt": "The C in ACID is the same consistency as in CAP.",
+      "answer": "They are unrelated. ACID's C means a transaction moves the database from one state satisfying your declared invariants to another — foreign keys, constraints, and application-level rules. CAP's C is linearizability: every read sees the most recent completed write, as if there were a single copy. A system can be fully ACID on one node and offer nothing like linearizability across replicas.",
+      "source": "https://dataintensive.net/",
+      "followUp": "Which one does your read replica break, and does that matter for this feature?"
+    },
+    {
+      "topic": "consistency-patterns",
+      "kind": "misconception",
+      "prompt": "Eventual consistency means the data will be correct after a short delay.",
+      "answer": "Eventual consistency is a liveness guarantee with no bound attached: it promises replicas converge if writes stop, and says nothing about how stale a read can be or for how long. In practice the window is usually milliseconds and occasionally minutes during replication lag or a partition. If your product needs a bound, eventual consistency does not give you one — you need read-your-writes, a quorum read, or a primary read.",
+      "source": "https://dataintensive.net/",
+      "followUp": "A user posts a comment and immediately reloads. Which guarantee do you need for that specific read?"
+    },
+    {
+      "topic": "consistency-patterns",
+      "kind": "question",
+      "prompt": "What is the difference between read-your-writes and monotonic reads?",
+      "answer": "Read-your-writes guarantees you see your own updates after making them — it says nothing about other users' writes. Monotonic reads guarantees you never see time move backwards: having read a value, a later read will not return an older one. They solve different complaints. Read-your-writes fixes 'I posted and it vanished'; monotonic reads fixes 'I refreshed and the comment disappeared again' when two replicas with different lag serve consecutive requests.",
+      "followUp": "How would you implement each one with a read-replica setup?"
+    },
+    {
+      "topic": "caching",
+      "kind": "misconception",
+      "prompt": "A Redis lock is a safe way to guarantee only one worker does something.",
+      "answer": "Not for correctness. A lock holder can pause — GC, a slow syscall, a VM freeze — past the lock's expiry, and while it is paused another worker legitimately acquires the lock. Both then believe they hold it. The standard mitigation is a fencing token: the lock hands out a monotonically increasing number, the downstream store rejects writes carrying an older token, so the stalled worker's late write is refused. If you only need efficiency (avoiding duplicate work), a Redis lock is fine; if correctness depends on it, it is not sufficient alone.",
+      "source": "https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html",
+      "followUp": "Does your downstream store actually support rejecting a stale fencing token?"
+    },
+    {
+      "topic": "caching",
+      "kind": "trap",
+      "prompt": "Invalidating the cache on every write keeps the cache consistent with the database.",
+      "answer": "It narrows the window without closing it. A reader can miss, read the old value from the database, and then write it into the cache after the writer's invalidation has already run — so the cache ends up holding the stale value with a full TTL ahead of it. Ordering the operations (invalidate after commit, not before) removes the common case, and a short TTL bounds the damage, but the race remains. Treating TTL as the correctness backstop rather than the optimisation is the honest framing.",
+      "source": "https://www.usenix.org/system/files/conference/nsdi13/nsdi13-final170_update.pdf",
+      "followUp": "What is the worst-case staleness a user can observe, and is that acceptable here?"
+    },
+    {
+      "topic": "caching",
+      "kind": "question",
+      "prompt": "What is a cache stampede, and how do you prevent it?",
+      "answer": "A popular key expires and every concurrent request misses at once, so all of them hit the database together — the load spike is proportional to your traffic, exactly when the cache was supposed to protect you. Two fixes compose: single-flight, where the first miss takes a lock and the rest wait for its result rather than issuing their own query; and TTL jitter, so keys written together do not all expire together. Serving stale content while one request refreshes in the background avoids the wait entirely.",
+      "followUp": "What happens to the waiting requests if the single refresh fails?"
+    },
+    {
+      "topic": "relational-databases",
+      "kind": "misconception",
+      "prompt": "Wrapping statements in a transaction prevents concurrent updates from clobbering each other.",
+      "answer": "Atomicity and isolation are different guarantees. A transaction ensures both statements apply or neither does, which fixes crashes mid-way. It does not by itself stop two transactions from reading the same balance and both writing a decrement based on it — under Read Committed, the default in many databases, that lost update is permitted. You need the check inside the write (UPDATE ... WHERE balance >= 100), an explicit SELECT ... FOR UPDATE, or SERIALIZABLE isolation with retry on abort.",
+      "source": "https://www.postgresql.org/docs/current/transaction-iso.html",
+      "followUp": "Which isolation level is your database actually running at right now?"
+    },
+    {
+      "topic": "relational-databases",
+      "kind": "misconception",
+      "prompt": "Relational databases don't scale.",
+      "answer": "They scale a long way, and most systems never exhaust the cheap steps — indexing, a bigger machine, read replicas, caching. What is true is that the guarantees get expensive at the far end: a transaction spanning shards is genuinely costly, and that specific cost is what NoSQL systems trade away deliberately. Spanner is the standing counterexample that distribution and strong consistency can coexist, at a price. The useful question is never SQL versus NoSQL in the abstract but which guarantee this data needs and what the cheapest step is that preserves it.",
+      "source": "https://research.google/pubs/spanner-googles-globally-distributed-database/",
+      "followUp": "Which of the cheap scaling steps have you actually exhausted?"
+    },
+    {
+      "topic": "relational-databases",
+      "kind": "trap",
+      "prompt": "Add an index on the columns in the WHERE clause and the query gets faster.",
+      "answer": "Column order decides whether the index is usable at all. An index on (user_id, created_at) serves 'this user's rows, newest first' as one range scan; the same columns declared as (created_at, user_id) cannot narrow by user first and degrades to a scan. Indexes also are not free — every write maintains them, and an index nobody reads is pure write amplification. The question to answer is not which columns the query mentions but how it filters and sorts.",
+      "source": "https://www.postgresql.org/docs/current/indexes.html",
+      "followUp": "What does EXPLAIN say it is actually doing?"
+    },
+    {
+      "topic": "consistent-hashing",
+      "kind": "misconception",
+      "prompt": "Consistent hashing solves hot keys.",
+      "answer": "It solves a different problem — how many keys move when a node joins or leaves. Plain modulo remaps almost everything on a membership change; a ring moves roughly 1/N. But a single wildly popular key still hashes to exactly one node, and the ring does nothing about that. Hot keys need a different tool: replicating the key across several nodes, adding a random suffix to spread it, or caching it in front of the store.",
+      "source": "https://www.amazon.science/publications/dynamo-amazons-highly-available-key-value-store",
+      "followUp": "How would you detect a hot key in production before it melts a node?"
+    },
+    {
+      "topic": "consistent-hashing",
+      "kind": "question",
+      "prompt": "Why virtual nodes instead of placing each server once on the ring?",
+      "answer": "With one point per server the arcs between them vary enormously, so load is uneven by construction, and removing a server dumps its entire arc onto whichever single node follows it. Giving each server many points — on the order of a hundred or two — averages the arc sizes so load spread tightens roughly as one over the square root of the count, and a departing server's keys scatter across many successors instead of landing on one.",
+      "followUp": "What does increasing the virtual node count cost you?"
+    },
+    {
+      "topic": "key-value-store",
+      "kind": "misconception",
+      "prompt": "R + W > N gives you strong consistency.",
+      "answer": "It guarantees the read set and the write set overlap in at least one replica, so a quorum read sees at least one copy of the latest acknowledged write. That is weaker than linearizability. Concurrent writes can still produce siblings you have to resolve; a sloppy quorum with hinted handoff can acknowledge writes on nodes outside the intended set, breaking the overlap argument entirely during a partition; and without care around read repair, a read can still observe values moving backwards.",
+      "source": "https://jepsen.io/analyses",
+      "followUp": "What does your store do when two writes to the same key are genuinely concurrent?"
+    },
+    {
+      "topic": "asynchronism",
+      "kind": "misconception",
+      "prompt": "Kafka gives exactly-once delivery, so I don't need idempotency.",
+      "answer": "Kafka's exactly-once applies within its own transactional boundary: consume from a topic, process, and produce back to Kafka, committing offsets atomically. The moment your handler touches anything outside that boundary — charging a card, sending an email, writing to another database — that external effect is not covered and can happen twice. The general answer remains at-least-once delivery plus an idempotent handler, which is observably the same as exactly-once without claiming a guarantee the system cannot make end to end.",
+      "source": "https://kafka.apache.org/documentation/",
+      "followUp": "Where would you store the idempotency key so the check is atomic with the effect?"
+    },
+    {
+      "topic": "asynchronism",
+      "kind": "trap",
+      "prompt": "The service is overloaded, so clients should retry until it recovers.",
+      "answer": "Retries under overload are how a degraded service becomes a dead one. Every retry adds load precisely when there is none to spare, and clients retrying on a fixed schedule synchronise into waves that arrive together. Retries need exponential backoff with jitter, a cap on attempts, and ideally a circuit breaker that stops sending entirely once failures dominate. Above some load the correct behaviour is shedding — rejecting requests cheaply and immediately — because a fast rejection costs far less than a slow timeout.",
+      "source": "https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/",
+      "followUp": "What does your client do when the circuit is open — fail, queue, or degrade?"
+    },
+    {
+      "topic": "availability-patterns",
+      "kind": "misconception",
+      "prompt": "Automatic failover makes the system more available.",
+      "answer": "Only if it cannot fire when the primary is actually alive. A monitor that loses contact cannot distinguish a dead primary from a network partition between itself and a healthy one, so promoting a replica on that signal alone can leave two nodes accepting writes. Safe failover needs fencing — provably preventing the old primary from writing before the new one starts — via a revoked lease, a cut route, or a token the storage layer enforces. Without it, automatic failover trades a clear outage for silent data divergence, which is worse.",
+      "source": "https://web.stanford.edu/~ouster/cgi-bin/papers/raft-extended.pdf",
+      "followUp": "How does the old primary learn it has been demoted if it is partitioned?"
+    },
+    {
+      "topic": "availability-patterns",
+      "kind": "question",
+      "prompt": "Two services each at 99.9% are called in sequence. What is the availability of the request?",
+      "answer": "About 99.8% — the availabilities multiply, so 0.999 × 0.999 ≈ 0.998, and roughly 17.5 hours a year rather than 8.8. Every synchronous dependency you add lowers the ceiling, which is the quantitative argument for making calls asynchronous, adding caches that can serve during a dependency outage, or degrading gracefully instead of failing. It also means a chain of ten such services cannot beat about 99%, no matter how carefully each one is run.",
+      "followUp": "Which of those dependencies could you make non-blocking?"
+    },
+    {
+      "topic": "security",
+      "kind": "misconception",
+      "prompt": "JWTs make sessions stateless, so there's nothing to store server-side.",
+      "answer": "Stateless verification is exactly what makes revocation hard. A signed token is valid until it expires because verifying it requires no lookup — which also means logging someone out, banning an account, or responding to a stolen token has no natural mechanism. Real deployments add back state: a short expiry with refresh tokens, or a denylist checked on each request, at which point you have traded the statelessness you chose JWTs for. That trade can be right; not noticing you made it is the mistake.",
+      "source": "https://www.rfc-editor.org/rfc/rfc7519.html",
+      "followUp": "How quickly must a compromised token stop working, and does your expiry meet that?"
+    },
+    {
+      "topic": "security",
+      "kind": "misconception",
+      "prompt": "We use OAuth, so users are authenticated.",
+      "answer": "OAuth 2.0 is an authorization framework — it grants a client limited access to a resource on a user's behalf. It does not define how the user's identity is conveyed to the client, and an access token is not proof of who the user is. OpenID Connect is the layer built on top of OAuth that adds authentication, with an ID token carrying verified identity claims. Using a raw OAuth access token as a login mechanism is a well-known source of vulnerabilities.",
+      "source": "https://www.rfc-editor.org/rfc/rfc6749.html",
+      "followUp": "Which token are you actually using to establish identity, and what validates it?"
+    },
+    {
+      "topic": "dns",
+      "kind": "trap",
+      "prompt": "We're having an outage — drop the DNS TTL so we can fail over quickly.",
+      "answer": "By the time the incident starts it is already too late. Resolvers worldwide cached the record with the TTL that was in effect when they last queried, and they will keep serving that answer for its remaining lifetime regardless of what you change now. Lowering the TTL only affects resolvers that query after the change. Fast DNS failover has to be bought in advance by running a low TTL continuously and paying the extra query volume — or avoided entirely by putting an anycast address or a load balancer in front, so the IP never needs to change.",
+      "source": "https://www.rfc-editor.org/rfc/rfc1034.html",
+      "followUp": "What is the longest a stale resolver could keep sending traffic to the dead IP?"
+    },
+    {
+      "topic": "rate-limiter",
+      "kind": "trap",
+      "prompt": "A counter reset every minute limits a client to N requests per minute.",
+      "answer": "A fixed window lets a client send up to 2N across a one-minute span: N in the last instant of one window and N in the first instant of the next. The burst is real and lands exactly at the boundary, which is also when many clients fire because they are aligned to the clock. A sliding window log or a weighted sliding counter smooths it, and a token bucket handles it naturally by making the refill continuous rather than stepped.",
+      "source": "https://redis.io/docs/latest/",
+      "followUp": "Does your limit need to bound the burst, or just the sustained rate?"
+    },
+    {
+      "topic": "rate-limiter",
+      "kind": "question",
+      "prompt": "Should the limiter fail open or fail closed when Redis is unreachable?",
+      "answer": "It depends on what the limiter is protecting. Guarding a fragile downstream means failing closed, because letting unlimited traffic through takes down the thing the limiter existed to defend. Protecting against casual abuse on an otherwise robust endpoint means failing open, because turning a cache outage into a full API outage is a worse trade. The wrong answer is not having decided — stating the choice and its reason is the substance of the question.",
+      "followUp": "How would you make that behaviour configurable per endpoint?"
+    },
+    {
+      "topic": "load-balancing",
+      "kind": "misconception",
+      "prompt": "Health checks remove failed servers from rotation, so the system self-heals.",
+      "answer": "A shallow health check often reports success while the server is useless — the process is up and returning 200 on /health, but its database pool is exhausted and every real request times out. Conversely a deep check that exercises dependencies will mark the whole fleet unhealthy the moment a shared dependency degrades, removing every backend and turning partial degradation into total outage. The usual resolution is a shallow liveness check for restarts, a slightly deeper readiness check for routing, and a floor on how many backends may be removed at once.",
+      "source": "https://kubernetes.io/docs/concepts/services-networking/service/",
+      "followUp": "What happens if your health check itself depends on the thing that is down?"
+    },
+    {
+      "topic": "news-feed",
+      "kind": "trap",
+      "prompt": "Fan-out on write is faster for reads, so use it for everyone.",
+      "answer": "It is excellent until one account has ten million followers, at which point a single post becomes ten million writes and the queue backs up for everyone. The standard answer is hybrid: fan out on write for ordinary accounts, and for accounts above a follower threshold write once and merge their posts into the feed at read time. Naming the threshold and admitting it is a tuned constant rather than a principled boundary is part of a good answer.",
+      "source": "https://www.usenix.org/conference/atc13/technical-sessions/presentation/bronson",
+      "followUp": "Where do you put the threshold, and what happens to an account that crosses it?"
+    },
+    {
+      "topic": "url-shortener",
+      "kind": "question",
+      "prompt": "Should the redirect be 301 or 302?",
+      "answer": "301 is permanent and browsers cache it aggressively, so subsequent visits skip your service entirely — cheaper for you, but you lose click analytics and cannot change the destination later, because caches will not ask again. 302 is found/temporary: every click reaches your service, so you keep analytics and retain control, at the cost of serving all that traffic. It is a product decision rather than a technical one, and saying so is the answer.",
+      "source": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "followUp": "If you shipped 301 and later need to change a destination, what are your options?"
+    },
+    {
+      "topic": "chat-system",
+      "kind": "misconception",
+      "prompt": "WebSockets make the chat servers stateless because the protocol handles reconnection.",
+      "answer": "The opposite — a live connection is held by one specific process, so that tier is inherently stateful and you need a registry mapping user to server in order to deliver a message to someone. The protocol reconnects the transport; it does not restore your place in the conversation. Catch-up after a drop needs per-device cursors so the client can ask for everything after the last message it acknowledged, which is the same mechanism that serves a two-week absence and a two-second blip.",
+      "source": "https://www.rfc-editor.org/rfc/rfc6455.html",
+      "followUp": "What happens to the registry entry when a phone loses signal without closing the socket?"
+    },
+    {
+      "topic": "web-crawler",
+      "kind": "misconception",
+      "prompt": "robots.txt stops a crawler from accessing a page.",
+      "answer": "It is a voluntary politeness protocol, not access control. A compliant crawler reads it and obeys; nothing prevents a non-compliant one from fetching the URL anyway, and the file itself is public, so listing sensitive paths there advertises them. Anything that must not be fetched needs authentication or network controls. In an interview the useful point is that robots.txt bounds your crawler's behaviour, not the origin's exposure.",
+      "source": "https://www.rfc-editor.org/rfc/rfc9309.html",
+      "followUp": "How do you handle a site that has no robots.txt at all?"
+    },
+    {
+      "topic": "unique-id-generator",
+      "kind": "trap",
+      "prompt": "Snowflake IDs are sortable by time, so I can order events with them.",
+      "answer": "They sort by time within one generator and only approximately across generators. Two machines producing IDs in the same millisecond order by machine id, not by which event actually happened first, and a clock correction can perturb this further. That is fine for feed pagination and cursors, where approximate ordering is all you need. It is not sufficient for causal ordering or financial sequencing, which need logical clocks or a consensus sequencer — considerably more expensive than three bit shifts.",
+      "source": "https://www.rfc-editor.org/rfc/rfc9562.html",
+      "followUp": "If you need strict cross-machine ordering, what would you reach for instead?"
+    }
+  ]
+}

@@ -121,6 +121,18 @@ export interface ReadingEntry {
   read: boolean;
 }
 
+/** question = asked directly; misconception = a plausible belief that is wrong;
+ *  trap = a question where the obvious answer fails. */
+export type QuestionKind = 'question' | 'misconception' | 'trap';
+
+export interface TopicQuestion {
+  kind: QuestionKind;
+  prompt: string;
+  answer: string;
+  source?: string;
+  followUp?: string;
+}
+
 export interface Note {
   id: number;
   topicId: number | null;

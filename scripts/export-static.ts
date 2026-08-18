@@ -194,6 +194,25 @@ if (fs.existsSync(READING_LIST)) {
   );
 }
 
+// --- questions, misconceptions, and traps, grouped by topic
+const QUESTIONS = path.join(ROOT, 'content', 'questions.json');
+if (fs.existsSync(QUESTIONS)) {
+  interface QEntry {
+    topic: string;
+  }
+  const qs = JSON.parse(fs.readFileSync(QUESTIONS, 'utf-8')) as { entries: QEntry[] };
+
+  const byTopic: Record<string, Omit<QEntry, 'topic'>[]> = {};
+  for (const entry of qs.entries) {
+    const { topic, ...rest } = entry;
+    (byTopic[topic] ??= []).push(rest);
+  }
+  write('questions.json', byTopic);
+  console.log(
+    `Questions: ${qs.entries.length} entries across ${Object.keys(byTopic).length} topics.`,
+  );
+}
+
 // --- anchor titles, so locally-stored notes can render their heading
 const sectionAnchors = db
   .prepare(

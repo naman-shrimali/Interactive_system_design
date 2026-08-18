@@ -17,6 +17,7 @@ import type {
   CodeWalkthrough,
   DiagramMeta,
   ReadingEntry,
+  TopicQuestion,
 } from '../types';
 import * as local from './localStore';
 
@@ -129,6 +130,18 @@ export async function fetchReadingList(topicSlug: string): Promise<ReadingEntry[
 
 export async function setReadingRead(url: string, isRead: boolean): Promise<void> {
   local.saveReadingRead(url, isRead);
+}
+
+let questionsCache: Record<string, TopicQuestion[]> | null = null;
+
+/** Questions, misconceptions, and traps for a topic — repo content, not local. */
+export async function fetchQuestions(topicSlug: string): Promise<TopicQuestion[]> {
+  if (!questionsCache) {
+    questionsCache = await getJson<Record<string, TopicQuestion[]>>('questions.json').catch(
+      () => ({}),
+    );
+  }
+  return questionsCache[topicSlug] ?? [];
 }
 
 export async function setSectionProgress(id: number, status: ProgressStatus): Promise<void> {

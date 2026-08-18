@@ -12,7 +12,8 @@
     "validate:reading": "tsx validate-reading-list.ts",
     "validate:links": "tsx validate-reading-list.ts --check-links",
     "validate:facts": "tsx validate-facts.ts",
-    "validate": "npm run validate:diagrams && npm run validate:code && npm run validate:reading && npm run validate:facts",
+    "validate:questions": "tsx validate-questions.ts",
+    "validate": "npm run validate:diagrams && npm run validate:code && npm run validate:reading && npm run validate:facts && npm run validate:questions",
     "export:static": "tsx export-static.ts"
   },
   "dependencies": {
