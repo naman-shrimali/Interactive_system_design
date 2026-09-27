@@ -174,7 +174,7 @@ function run(k: KnobValues): Frame[] {
     return [
       { label: 'Leader', value: l ? `${l.id} · term ${l.term}` : 'none', tone: l ? 'ok' : 'warn' },
       { label: 'Highest term', value: String(Math.max(...IDS.map((i) => S[i].term))) },
-      { label: 'Leader has committed', value: `${committed} ${committed === 1 ? 'entry' : 'entries'}` },
+      { label: l ? 'Leader has committed' : 'Committed anywhere', value: `${committed} ${committed === 1 ? 'entry' : 'entries'}` },
       { label: 'Clock', value: `${(t / 1000).toFixed(3)} s` },
     ];
   };
