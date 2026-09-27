@@ -22,7 +22,7 @@ export function DiagramCanvas({
   );
 
   return (
-    <div className={cn('w-full overflow-hidden rounded-2xl border border-line bg-surface', heightClassName)}>
+    <div className={cn('w-full overflow-hidden rounded-md border border-line bg-surface', heightClassName)}>
       <ReactFlow
         nodes={nodes}
         edges={edges}

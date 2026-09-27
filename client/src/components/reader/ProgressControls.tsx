@@ -9,15 +9,14 @@ const OPTIONS: { value: ProgressStatus; label: string }[] = [
   { value: 'completed', label: 'Done' },
 ];
 
+/** Segmented control. Done is the only state that earns colour. */
 export function ProgressControls({
   sectionId,
   status,
-  accent,
   onChanged,
 }: {
   sectionId: number;
   status: ProgressStatus;
-  accent: string;
   onChanged: () => Promise<void> | void;
 }) {
   const [busy, setBusy] = useState(false);
@@ -34,25 +33,27 @@ export function ProgressControls({
   };
 
   return (
-    <div className="inline-flex shrink-0 overflow-hidden rounded-full border border-line text-[12px]">
-      {OPTIONS.map((o) => {
+    <div
+      className="inline-flex shrink-0 overflow-hidden rounded border border-line font-mono text-[11.5px]"
+      role="radiogroup"
+      aria-label="Section progress"
+    >
+      {OPTIONS.map((o, i) => {
         const active = o.value === status;
         return (
           <button
             key={o.value}
+            role="radio"
+            aria-checked={active}
             disabled={busy}
             onClick={() => onSet(o.value)}
             className={cn(
-              'px-3 py-1 transition-colors disabled:opacity-60',
-              !active && 'text-ink-muted hover:bg-surface',
+              'px-2.5 py-1 disabled:opacity-60',
+              i > 0 && 'border-l border-line',
+              !active && 'text-ink-faint hover:bg-surface hover:text-ink',
+              active && o.value === 'completed' && 'bg-ok text-white',
+              active && o.value !== 'completed' && 'bg-surface text-ink',
             )}
-            style={
-              active
-                ? o.value === 'completed'
-                  ? { background: accent, color: '#fff' }
-                  : { background: `color-mix(in srgb, ${accent} 16%, transparent)`, color: accent }
-                : undefined
-            }
           >
             {o.label}
           </button>

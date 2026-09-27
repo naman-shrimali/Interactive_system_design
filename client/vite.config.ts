@@ -34,5 +34,8 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    // Scenarios read content/facts.json directly so timings have one source
+    // of truth; the dev server must be allowed to serve it from outside client/.
+    fs: { allow: [path.resolve(__dirname, '..')] },
   },
 });

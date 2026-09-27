@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { HelpCircle, ChevronDown, CornerDownRight, ExternalLink } from 'lucide-react';
+import { ChevronDown, CornerDownRight, ExternalLink } from 'lucide-react';
 import { fetchQuestions } from '../../api/client';
 import { cn } from '../../lib/cn';
 import type { TopicQuestion, QuestionKind } from '../../types';
@@ -18,14 +18,16 @@ function Prompt({ q }: { q: TopicQuestion }) {
   return <>&ldquo;{q.prompt}&rdquo;</>;
 }
 
+/** Kind as plain mono text. Colour follows meaning: a question is neutral, a
+ *  misconception is a wrong belief, a trap is a place to slow down. */
 function KindBadge({ kind }: { kind: QuestionKind }) {
   return (
     <span
       className={cn(
-        'shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide',
-        kind === 'question' && 'bg-sky-500/12 text-sky-600 dark:text-sky-400',
-        kind === 'misconception' && 'bg-rose-500/12 text-rose-600 dark:text-rose-400',
-        kind === 'trap' && 'bg-amber-500/12 text-amber-600 dark:text-amber-500',
+        'w-[118px] shrink-0 pt-px font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em]',
+        kind === 'question' && 'text-ink-faint',
+        kind === 'misconception' && 'text-fail',
+        kind === 'trap' && 'text-cp',
       )}
     >
       {KIND_LABEL[kind]}
@@ -37,11 +39,11 @@ function Item({ q }: { q: TopicQuestion }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <li className="rounded-xl border border-line">
+    <li className="border-b border-line">
       <button
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex w-full items-start gap-2.5 p-3 text-left"
+        className="flex w-full items-start gap-3 py-3 text-left hover:bg-surface"
       >
         <KindBadge kind={q.kind} />
         <span
@@ -59,7 +61,7 @@ function Item({ q }: { q: TopicQuestion }) {
       </button>
 
       {open && (
-        <div className="animate-fade-up border-t border-line px-3 pb-3 pt-2.5">
+        <div className="pb-4 pl-[130px] pr-6">
           <p className="text-[13px] leading-relaxed text-ink-muted">{q.answer}</p>
 
           {q.followUp && (
@@ -105,19 +107,18 @@ export function QuestionsPanel({ topicSlug }: { topicSlug: string }) {
   return (
     <section
       id="questions"
-      className="mt-4 scroll-mt-20 rounded-2xl border border-line bg-raised p-5"
+      className="mb-16 scroll-mt-20"
     >
-      <div className="mb-1 flex items-center gap-2">
-        <HelpCircle size={15} className="text-ink-faint" />
-        <h2 className="font-semibold tracking-tight">Where this gets tested</h2>
-        <span className="ml-auto text-[12px] tabular-nums text-ink-faint">{items.length}</span>
+      <div className="mb-2 flex items-baseline justify-between gap-3 border-t border-ink pt-3">
+        <h2 className="font-display text-[22px] font-semibold">Where this gets tested</h2>
+        <span className="font-mono text-[12px] tabular-nums text-ink-faint">{items.length}</span>
       </div>
       <p className="mb-4 text-[12px] leading-relaxed text-ink-muted">
         Answer each one before expanding it — recognising an answer is not the same as being able to
         produce it.
       </p>
 
-      <ul className="space-y-2">
+      <ul className="border-t border-line">
         {items.map((q) => (
           <Item key={q.prompt} q={q} />
         ))}

@@ -50,7 +50,7 @@ export function DiagramPreviewPage() {
         <select
           value={selected}
           onChange={(e) => setSelected(e.target.value)}
-          className="rounded-xl border border-line bg-raised px-3 py-2 text-sm text-ink"
+          className="rounded-md border border-line bg-raised px-3 py-2 text-sm text-ink"
         >
           {(files ?? []).map((f) => (
             <option key={f} value={f}>
@@ -60,14 +60,14 @@ export function DiagramPreviewPage() {
         </select>
         <button
           onClick={() => load(selected)}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-sm text-ink-muted hover:bg-surface"
+          className="inline-flex items-center gap-1.5 rounded-md border border-line px-3 py-2 text-sm text-ink-muted hover:bg-surface"
         >
           <RefreshCw size={13} /> Reload file
         </button>
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-4 text-red-500">{error}</div>
+        <div className="rounded-md border border-red-500/30 bg-red-500/5 p-4 text-red-500">{error}</div>
       )}
       {files?.length === 0 && (
         <EmptyState

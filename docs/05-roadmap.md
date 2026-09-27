@@ -15,7 +15,10 @@
 | 8. Polish — dashboard, search, notes export | ✅ shipped |
 | 9. Code dry-runs — per-topic step-through sidebar | ✅ shipped — 22 of 30 topics; 8 left deliberately code-free |
 | 10. Static deploy to GitHub Pages | ✅ shipped — no backend; progress in localStorage |
-| 11. Curated reading list — primary sources per topic | ✅ shipped — 46 entries, 30 of 30 topics |
+| 11. Curated reading list — primary sources per topic | ✅ shipped — 47 entries, 30 of 30 topics |
+| 12. Facts registry — canonical numbers, cross-checked | ✅ shipped |
+| 13. Questions, misconceptions, traps | ✅ shipped — 73 entries, 30 of 30 topics |
+| 14. Systems in Motion — redesign + scenario engine | 🟡 P0–P2 shipped: design reset, engine, 3 flagship scenarios; P3 partly, P4–P5 to do |
 
 The original phases 1–3 were re-cut when the curriculum moved from a source-first to a topic-first
 model ([docs/06-topic-model.md](06-topic-model.md)). Task files for that shipped work are kept as
@@ -198,3 +201,54 @@ recognising an answer is not the same as being able to produce one. An optional 
 what a good interviewer asks once you answer well.
 
 Adding an entry is a data change. `npm run validate:questions` enforces the rules above.
+
+
+## Phase 14 — Systems in Motion
+
+Plan and working prototype: [Systems in Motion](https://claude.ai/artifact/2HuZA1DoM8e5ArnRWuUCKs).
+The static diagrams became a step-through instrument: one timeline drives the architecture, its live
+state, the code that produced it, and the reasoning behind each step, with checkpoints that stop
+playback to ask for a prediction.
+
+**Scenarios are executed, not drawn.** Each is a TypeScript module in `client/src/sim/scenarios/`
+whose `run(knobs)` models the system and returns one frame per step. Every number on screen is
+computed by that run, so the state view can't disagree with the narration, and changing a knob just
+runs it again. This deliberately breaks the "content is data" rule; `scripts/validate-scenarios.ts`
+takes the safety back by running every scenario under every knob combination and checking:
+
+- **anchors** — every highlighted code line contains its anchor text
+- **determinism** — two runs with the same knobs give identical frames (seeded `sim/rng.ts`)
+- **references** — nodes, edges and packets exist on the stage; nodes sit inside it
+- **checkpoints** — predict answers are real options; sources are in the reading list; every run has
+  a predict checkpoint and a why/break one
+- **coverage** — every drawn edge carries a packet in some run
+- **facts** — no latency literal (ms/µs/ns) in a scenario's text; timings come from
+  `content/facts.json` through `factMs()`. A hypothetical figure is marked `fact-exempt`.
+
+Proven by injecting a bad anchor, a latency literal and an out-of-range answer: all three fail.
+
+**Engine** (`client/src/sim/`): `types.ts` (Scenario, Frame, Checkpoint), `Stage.tsx` (fixed-scale SVG;
+scrolls instead of shrinking text; generic node rows — kv, bar, slots, log; polyline edges; packets
+interpolated between frames), `Player.tsx` (transport, scrubber with checkpoint marks, speed, knobs
+that re-run and keep your place at the last checkpoint before the runs diverge, Why/Code panel,
+`#step-N` deep links, keyboard, reduced motion, container-query layout).
+
+**Wave 1** — each exercises a different part of the engine:
+
+| Scenario | Topic | What it proves |
+|---|---|---|
+| Cache stampede | caching | concurrency (bursts), a lock, TTL bars; knobs single-flight and TTL jitter |
+| Anatomy of a request | scaling-journey | a latency ledger timed hop by hop from facts; knobs route, warm, cacheable — CDN saves exactly two ocean crossings cold and nothing warm |
+| Raft | availability-patterns | protocol rules computed, not scripted: up-to-date vote check, majority, step-down on higher term, no-op commit (§5.4.2); knobs crash/partition and randomized/identical timeouts |
+
+Added `last-mile-round-trip` (20 ms, HPBN citing the FCC) to the facts registry and HPBN's latency
+chapter to the reading list for it.
+
+**Design reset (P0):** IBM Plex Sans / Condensed / Mono replace the system stack and serif; one accent
+sitewide (per-track colours removed); radius scale replaced (4 px controls, 6 px regions) so the old
+`rounded-2xl` can't return; card shadows and fade-ups removed; the player is a dark instrument in both
+themes. Home opens on a running scenario and lists the curriculum as an index.
+
+**Still to do:** P4 — waves 2 and 3 (25 scenarios, catalogue in the plan); P5 — port the 27 React Flow
+diagrams to the stage renderer and remove React Flow, whose fit-to-view scaling still renders their
+labels near 6 px.

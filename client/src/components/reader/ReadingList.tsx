@@ -15,7 +15,7 @@ function TierBadge({ tier }: { tier: ReadingTier }) {
   return (
     <span
       className={cn(
-        'rounded-full px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide',
+        'rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide',
         tier === 'normative' && 'bg-violet-500/12 text-violet-500',
         tier === 'authoritative' && 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-400',
         tier === 'interview' && 'bg-amber-500/12 text-amber-600 dark:text-amber-500',
@@ -50,7 +50,7 @@ export function ReadingList({ topicSlug }: { topicSlug: string }) {
   return (
     <section
       id="reading-list"
-      className="mt-4 scroll-mt-20 rounded-2xl border border-line bg-raised p-5"
+      className="mt-4 scroll-mt-20 rounded-md border border-line bg-raised p-5"
     >
       <div className="mb-1 flex items-center gap-2">
         <BookOpen size={15} className="text-ink-faint" />
@@ -72,7 +72,7 @@ export function ReadingList({ topicSlug }: { topicSlug: string }) {
               checked={e.read}
               onChange={(ev) => toggle(e.url, ev.target.checked)}
               className="mt-1.5 h-3.5 w-3.5 shrink-0"
-              style={{ accentColor: 'var(--accent)' }}
+              style={{ accentColor: 'rgb(var(--accent))' }}
               aria-label={`Mark "${e.title}" as read`}
             />
             <div className="min-w-0 flex-1">

@@ -13,8 +13,9 @@
     "validate:links": "tsx validate-reading-list.ts --check-links",
     "validate:facts": "tsx validate-facts.ts",
     "validate:questions": "tsx validate-questions.ts",
-    "validate": "npm run validate:diagrams && npm run validate:code && npm run validate:reading && npm run validate:facts && npm run validate:questions",
-    "export:static": "tsx export-static.ts"
+    "validate": "npm run validate:diagrams && npm run validate:code && npm run validate:reading && npm run validate:facts && npm run validate:questions && npm run validate:scenarios",
+    "export:static": "tsx export-static.ts",
+    "validate:scenarios": "tsx validate-scenarios.ts"
   },
   "dependencies": {
     "ajv": "^8.17.1",

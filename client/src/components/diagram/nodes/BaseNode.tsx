@@ -36,7 +36,7 @@ export function stateWrapperClass(state: DiagramNodeData['state']): string {
   return cn(
     'transition-opacity',
     state === 'dimmed' && 'opacity-20',
-    state === 'highlighted' && 'drop-shadow-[0_0_10px_var(--accent)]',
+    state === 'highlighted' && 'drop-shadow-[0_0_10px_rgb(var(--accent))]',
   );
 }
 
@@ -74,7 +74,7 @@ export function BaseNode({ data, icon, accent, iconBoxClassName, stacked }: Base
             <span
               aria-hidden="true"
               className={cn(
-                'absolute rounded-xl border-2 bg-raised opacity-40',
+                'absolute rounded-md border-2 bg-raised opacity-40',
                 iconBoxClassName ?? 'h-14 w-14',
                 accent,
               )}
@@ -83,7 +83,7 @@ export function BaseNode({ data, icon, accent, iconBoxClassName, stacked }: Base
             <span
               aria-hidden="true"
               className={cn(
-                'absolute rounded-xl border-2 bg-raised opacity-70',
+                'absolute rounded-md border-2 bg-raised opacity-70',
                 iconBoxClassName ?? 'h-14 w-14',
                 accent,
               )}
@@ -93,7 +93,7 @@ export function BaseNode({ data, icon, accent, iconBoxClassName, stacked }: Base
         )}
         <div
           className={cn(
-            'relative flex items-center justify-center rounded-xl border-2 bg-raised',
+            'relative flex items-center justify-center rounded-md border-2 bg-raised',
             iconBoxClassName ?? 'h-14 w-14',
             failed ? 'border-red-500 text-red-500' : accent,
           )}

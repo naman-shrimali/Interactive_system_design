@@ -1,14 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import {
-  ArrowLeft,
-  ArrowRight,
-  BookOpen,
-  Clock,
-  Code2,
-  ExternalLink as LinkIcon,
-  HelpCircle,
-} from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { fetchTopic } from '../api/client';
 import { useAppStore } from '../store/useAppStore';
 import { MarkdownView } from '../components/reader/MarkdownView';
@@ -19,8 +11,10 @@ import { QuestionsPanel } from '../components/reader/QuestionsPanel';
 import { NotesPanel } from '../components/reader/NotesPanel';
 import { SectionDiagram } from '../components/diagram/SectionDiagram';
 import { CodeSidebar } from '../components/code/CodeSidebar';
-import { Badge, Skeleton } from '../components/ui';
-import { DIFFICULTY_LABEL, KIND_LABEL } from '../lib/cn';
+import { Skeleton } from '../components/ui';
+import { ScenarioPlayer } from '../sim/Player';
+import { scenariosFor } from '../sim/registry';
+import { DIFFICULTY_LABEL, KIND_LABEL, cn } from '../lib/cn';
 import type { TopicDetail } from '../types';
 
 type Phase =
@@ -34,12 +28,14 @@ export function TopicPage() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [codeOpen, setCodeOpen] = useState(false);
   const refresh = useAppStore((s) => s.refreshCurriculum);
-  const scrollRoot = useRef<HTMLDivElement | null>(null);
+  const scenarios = useMemo(() => (slug ? scenariosFor(slug) : []), [slug]);
+  const [scenarioIdx, setScenarioIdx] = useState(0);
 
   useEffect(() => {
     if (!slug) return;
     setState({ phase: 'loading' });
     setCodeOpen(false);
+    setScenarioIdx(0);
     let alive = true;
     fetchTopic(slug)
       .then((topic) => alive && setState({ phase: 'ready', topic }))
@@ -51,7 +47,7 @@ export function TopicPage() {
 
   const sections = state.phase === 'ready' ? state.topic.sections : [];
 
-  // Highlight the section currently in view for the sticky table of contents.
+  // Highlight the section currently in view for the table of contents.
   useEffect(() => {
     if (sections.length === 0) return;
     const observer = new IntersectionObserver(
@@ -77,99 +73,122 @@ export function TopicPage() {
     await refresh();
   };
 
-  const totalMinutes = useMemo(
-    () => (state.phase === 'ready' ? state.topic.estimatedMinutes : 0),
-    [state],
-  );
-
   if (state.phase === 'loading') {
     return (
-      <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8">
+      <div className="mx-auto max-w-[1180px] px-5 py-10 sm:px-8">
         <Skeleton className="mb-4 h-10 w-2/3" />
         <Skeleton className="mb-8 h-5 w-full" />
-        <Skeleton className="h-72" />
+        <Skeleton className="h-80" />
       </div>
     );
   }
   if (state.phase === 'error') {
     return (
       <div className="mx-auto max-w-3xl px-5 py-10">
-        <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-4 text-red-500">
-          {state.message}
-        </div>
+        <p className="rounded border border-fail/30 bg-fail/5 p-4 text-fail">{state.message}</p>
         <Link to="/" className="mt-4 inline-block text-sm text-ink-muted underline">
-          Back to all tracks
+          Back to all topics
         </Link>
       </div>
     );
   }
 
   const { topic } = state;
+  const scenario = scenarios[scenarioIdx];
+  const done = topic.sections.filter((s) => s.progressStatus === 'completed').length;
+  const tocExtras: { href: string; label: string }[] = [
+    { href: '#questions', label: 'Where this gets tested' },
+    { href: '#reading-list', label: 'Go to the source' },
+    ...(topic.links.length > 0 ? [{ href: '#resources', label: 'Further reading' }] : []),
+    { href: '#notes', label: 'My notes' },
+  ];
 
   return (
-    <div ref={scrollRoot} style={{ ['--accent' as string]: topic.accent }}>
-      {/* Hero */}
-      <header className="border-b border-line bg-surface/60">
-        <div className="mx-auto max-w-5xl px-5 py-9 sm:px-8">
-          <div className="mb-3 flex flex-wrap items-center gap-2 text-[12px] text-ink-faint">
-            <Link to="/" className="hover:text-ink">
-              {topic.trackTitle}
-            </Link>
-            <span aria-hidden="true">›</span>
-            <span className="text-ink-muted">{topic.title}</span>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{topic.title}</h1>
-          <p className="mt-3 max-w-3xl text-lg leading-relaxed text-ink-muted">{topic.summary}</p>
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            <Badge tone="accent" accent={topic.accent}>
-              {DIFFICULTY_LABEL[topic.difficulty]}
-            </Badge>
-            <Badge tone="neutral">
-              <Clock size={11} /> {totalMinutes} min
-            </Badge>
-            <Badge tone="neutral">
-              {topic.sections.length} {topic.sections.length === 1 ? 'section' : 'sections'}
-            </Badge>
-            {topic.status === 'stub' && <Badge tone="warn">Being expanded</Badge>}
-            {topic.codeWalkthroughs.length > 0 && (
-              <button
-                onClick={() => setCodeOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-medium text-white transition-opacity hover:opacity-90"
-                style={{ background: topic.accent }}
-              >
-                <Code2 size={12} />
-                Dry-run in code
-              </button>
-            )}
-          </div>
+    <div className="mx-auto max-w-[1180px] px-5 pb-20 pt-8 sm:px-8">
+      {/* ---- header ---- */}
+      <header className="mb-8">
+        <nav className="mb-4 font-mono text-[12px] text-ink-faint" aria-label="Breadcrumb">
+          <Link to="/" className="hover:text-ink">
+            {topic.trackTitle}
+          </Link>
+          <span className="mx-2" aria-hidden="true">
+            /
+          </span>
+          <span className="text-ink-muted">{topic.title}</span>
+        </nav>
+        <h1 className="max-w-[22ch] font-display text-[clamp(32px,4.4vw,46px)] font-semibold leading-[1.04] tracking-[-0.01em]">
+          {topic.title}
+        </h1>
+        <p className="mt-4 max-w-prose text-[17px] leading-relaxed text-ink-muted">{topic.summary}</p>
+        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[12px] text-ink-faint">
+          <span>{DIFFICULTY_LABEL[topic.difficulty]}</span>
+          <span>{topic.estimatedMinutes} min</span>
+          <span>
+            {done}/{topic.sections.length} sections done
+          </span>
+          {topic.status === 'stub' && <span className="text-cp">being expanded</span>}
+          {topic.codeWalkthroughs.length > 0 && (
+            <button
+              onClick={() => setCodeOpen(true)}
+              className="rounded border border-line px-2.5 py-1 text-ink hover:border-ink-faint"
+            >
+              Dry-run in code →
+            </button>
+          )}
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-5xl gap-10 px-5 py-9 sm:px-8">
-        {/* Reading column */}
-        <main className="min-w-0 flex-1">
+      {/* ---- scenario ---- */}
+      {scenario && (
+        <section className="mb-14" aria-label="Scenario">
+          {scenarios.length > 1 && (
+            <div className="mb-2 flex flex-wrap gap-1 font-mono text-[12px]" role="tablist">
+              {scenarios.map((s, k) => (
+                <button
+                  key={s.id}
+                  role="tab"
+                  aria-selected={k === scenarioIdx}
+                  onClick={() => setScenarioIdx(k)}
+                  className={cn(
+                    'rounded px-2.5 py-1',
+                    k === scenarioIdx ? 'bg-ink text-canvas' : 'text-ink-muted hover:bg-surface',
+                  )}
+                >
+                  {s.title}
+                </button>
+              ))}
+            </div>
+          )}
+          <ScenarioPlayer
+            key={scenario.id}
+            scenario={scenario}
+            syncHash
+            crumb={
+              <>
+                <span>{topic.title}</span>
+                <span className="mx-1.5 text-scope-ink-3">/</span>
+                <span className="text-scope-ink">{scenario.title}</span>
+              </>
+            }
+          />
+          <p className="mt-2.5 max-w-prose text-[13px] text-ink-faint">
+            {scenario.summary} Every number is computed by running the scenario; latencies come from the
+            project’s facts registry.
+          </p>
+        </section>
+      )}
+
+      {/* ---- lesson ---- */}
+      <div className="flex gap-12">
+        <main className="min-w-0 max-w-prose flex-1">
           {topic.sections.map((section) => (
-            <section
-              key={section.id}
-              id={`section-${section.slug}`}
-              className="mb-14 scroll-mt-20"
-            >
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
+            <section key={section.id} id={`section-${section.slug}`} className="mb-16 scroll-mt-20">
+              <div className="mb-5 flex flex-wrap items-end justify-between gap-3 border-t border-ink pt-3">
                 <div className="min-w-0">
-                  <span
-                    className="text-[11px] font-semibold uppercase tracking-wider"
-                    style={{ color: topic.accent }}
-                  >
-                    {KIND_LABEL[section.kind]}
-                  </span>
-                  <h2 className="text-2xl font-bold tracking-tight">{section.title}</h2>
+                  <p className="label mb-1.5">{KIND_LABEL[section.kind]}</p>
+                  <h2 className="font-display text-[26px] font-semibold leading-tight">{section.title}</h2>
                 </div>
-                <ProgressControls
-                  sectionId={section.id}
-                  status={section.progressStatus}
-                  accent={topic.accent}
-                  onChanged={reloadTopic}
-                />
+                <ProgressControls sectionId={section.id} status={section.progressStatus} onChanged={reloadTopic} />
               </div>
 
               {section.contentMarkdown.trim() ? (
@@ -183,14 +202,9 @@ export function TopicPage() {
               ))}
 
               {section.provenance === 'primer' && section.attributionUrl && (
-                <p className="mt-5 text-[11px] text-ink-faint">
+                <p className="mt-5 font-mono text-[11px] text-ink-faint">
                   Adapted from{' '}
-                  <a
-                    href={section.attributionUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline"
-                  >
+                  <a href={section.attributionUrl} target="_blank" rel="noopener noreferrer" className="underline">
                     The System Design Primer
                   </a>{' '}
                   — MIT © Donne Martin.
@@ -200,10 +214,10 @@ export function TopicPage() {
           ))}
 
           {topic.topicDiagrams.length > 0 && (
-            <section id="diagrams" className="mb-14 scroll-mt-20">
-              <h2 className="mb-4 border-b border-line pb-3 text-2xl font-bold tracking-tight">
-                Diagrams
-              </h2>
+            <section id="diagrams" className="mb-16 scroll-mt-20">
+              <div className="mb-5 border-t border-ink pt-3">
+                <p className="label mb-1.5">Diagrams</p>
+              </div>
               {topic.topicDiagrams.map((d) => (
                 <SectionDiagram key={d.id} meta={d} />
               ))}
@@ -215,95 +229,64 @@ export function TopicPage() {
           <LinksPanel links={topic.links} onChanged={refresh} />
           <NotesPanel anchor={{ topicId: topic.id }} />
 
-          {/* Prev / next */}
-          <nav className="mt-12 grid gap-3 border-t border-line pt-6 sm:grid-cols-2">
+          <nav className="mt-16 grid gap-px overflow-hidden rounded border border-line bg-line sm:grid-cols-2" aria-label="Neighbouring topics">
             {topic.prev ? (
-              <Link
-                to={`/topics/${topic.prev.slug}`}
-                className="group rounded-2xl border border-line p-4 hover:shadow-card"
-              >
-                <span className="flex items-center gap-1 text-[11px] text-ink-faint">
+              <Link to={`/topics/${topic.prev.slug}`} className="bg-canvas p-4 hover:bg-surface">
+                <span className="label flex items-center gap-1">
                   <ArrowLeft size={11} /> Previous
                 </span>
-                <span className="mt-1 block font-medium">{topic.prev.title}</span>
+                <span className="mt-1.5 block font-medium">{topic.prev.title}</span>
               </Link>
             ) : (
-              <span />
+              <span className="hidden bg-canvas sm:block" />
             )}
-            {topic.next && (
-              <Link
-                to={`/topics/${topic.next.slug}`}
-                className="group rounded-2xl border border-line p-4 text-right hover:shadow-card"
-              >
-                <span className="flex items-center justify-end gap-1 text-[11px] text-ink-faint">
+            {topic.next ? (
+              <Link to={`/topics/${topic.next.slug}`} className="bg-canvas p-4 text-right hover:bg-surface">
+                <span className="label flex items-center justify-end gap-1">
                   Next <ArrowRight size={11} />
                 </span>
-                <span className="mt-1 block font-medium">{topic.next.title}</span>
+                <span className="mt-1.5 block font-medium">{topic.next.title}</span>
               </Link>
+            ) : (
+              <span className="hidden bg-canvas sm:block" />
             )}
           </nav>
         </main>
 
-        {/* Sticky table of contents */}
-        <aside className="hidden w-56 shrink-0 xl:block">
+        <aside className="hidden w-56 shrink-0 xl:block" aria-label="On this page">
           <div className="sticky top-20">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-ink-faint">
-              On this page
-            </p>
-            <ul className="space-y-1 border-l border-line">
+            <p className="label mb-3">On this page</p>
+            <ul className="border-l border-line text-[13px]">
               {topic.sections.map((s) => {
                 const active = activeSection === `section-${s.slug}`;
                 return (
                   <li key={s.id}>
                     <a
                       href={`#section-${s.slug}`}
-                      className={`block border-l-2 py-1 pl-3 text-[13px] transition-colors ${
-                        active ? 'font-medium text-ink' : 'border-transparent text-ink-muted hover:text-ink'
-                      }`}
-                      style={active ? { borderColor: topic.accent, marginLeft: '-1px' } : undefined}
+                      className={cn(
+                        '-ml-px block border-l-2 py-1 pl-3',
+                        active ? 'border-ink font-medium text-ink' : 'border-transparent text-ink-muted hover:text-ink',
+                      )}
                     >
                       {s.title}
                     </a>
                   </li>
                 );
               })}
-              <li>
-                <a
-                  href="#questions"
-                  className="flex items-center gap-1.5 border-l-2 border-transparent py-1 pl-3 text-[13px] text-ink-muted hover:text-ink"
-                >
-                  <HelpCircle size={11} /> Where this gets tested
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#reading-list"
-                  className="flex items-center gap-1.5 border-l-2 border-transparent py-1 pl-3 text-[13px] text-ink-muted hover:text-ink"
-                >
-                  <BookOpen size={11} /> Go to the source
-                </a>
-              </li>
-              {topic.links.length > 0 && (
-                <li>
-                  <a
-                    href="#resources"
-                    className="flex items-center gap-1.5 border-l-2 border-transparent py-1 pl-3 text-[13px] text-ink-muted hover:text-ink"
-                  >
-                    <LinkIcon size={11} /> Resources
+              {tocExtras.map((x) => (
+                <li key={x.href}>
+                  <a href={x.href} className="-ml-px block border-l-2 border-transparent py-1 pl-3 text-ink-faint hover:text-ink">
+                    {x.label}
                   </a>
                 </li>
-              )}
+              ))}
             </ul>
           </div>
         </aside>
       </div>
 
       {topic.codeWalkthroughs.length > 0 && (
-        <CodeSidebar
-          meta={topic.codeWalkthroughs[0]}
-          open={codeOpen}
-          onClose={() => setCodeOpen(false)}
-        />
+        <CodeSidebar meta={topic.codeWalkthroughs[0]} open={codeOpen} onClose={() => setCodeOpen(false)} />
       )}
     </div>
   );

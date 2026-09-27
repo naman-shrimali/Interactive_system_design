@@ -21,7 +21,7 @@ export function SectionDiagram({ meta }: { meta: DiagramMeta }) {
 
   if (error) {
     return (
-      <div className="my-6 rounded-2xl border border-red-500/30 bg-red-500/5 p-3 text-[13px] text-red-500">
+      <div className="my-6 rounded-md border border-red-500/30 bg-red-500/5 p-3 text-[13px] text-red-500">
         Could not load diagram “{meta.title}”: {error}
       </div>
     );

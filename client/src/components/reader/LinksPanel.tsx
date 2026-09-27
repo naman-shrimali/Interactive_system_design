@@ -36,7 +36,7 @@ export function LinksPanel({
   };
 
   return (
-    <section id="resources" className="mt-4 scroll-mt-20 rounded-2xl border border-line bg-raised p-5">
+    <section id="resources" className="mt-4 scroll-mt-20 rounded-md border border-line bg-raised p-5">
       <div className="mb-4 flex items-center gap-2">
         <LinkIcon size={15} className="text-ink-faint" />
         <h2 className="font-semibold tracking-tight">External resources</h2>
@@ -52,7 +52,7 @@ export function LinksPanel({
               checked={link.completed}
               onChange={(e) => toggle(link.id, e.target.checked)}
               className="mt-1 h-3.5 w-3.5 shrink-0 accent-current"
-              style={{ accentColor: 'var(--accent)' }}
+              style={{ accentColor: 'rgb(var(--accent))' }}
               aria-label={`Mark "${link.title}" as read`}
             />
             <span className="min-w-0 text-[14px]">

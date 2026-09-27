@@ -58,7 +58,7 @@ export function NotesPanel({ anchor }: { anchor: NotesAnchor }) {
     });
 
   return (
-    <section className="mt-6 rounded-2xl border border-line bg-raised p-5">
+    <section id="notes" className="mt-6 scroll-mt-20 rounded-md border border-line bg-raised p-5">
       <div className="mb-4 flex items-center gap-2">
         <StickyNote size={15} className="text-ink-faint" />
         <h2 className="font-semibold tracking-tight">My notes</h2>
@@ -71,12 +71,12 @@ export function NotesPanel({ anchor }: { anchor: NotesAnchor }) {
           onChange={(e) => setDraft(e.target.value)}
           rows={4}
           placeholder="Write a note in markdown…"
-          className="w-full rounded-xl border border-line bg-canvas p-3 font-mono text-[13px] text-ink placeholder:text-ink-faint"
+          className="w-full rounded-md border border-line bg-canvas p-3 font-mono text-[13px] text-ink placeholder:text-ink-faint"
         />
         <button
           onClick={add}
           disabled={busy || draft.trim() === ''}
-          className="mt-2 rounded-full px-4 py-1.5 text-[13px] font-medium text-white disabled:opacity-50" style={{ background: 'var(--accent)' }}
+          className="mt-2 rounded bg-ink px-4 py-1.5 font-mono text-[12.5px] font-medium text-canvas disabled:opacity-50"
         >
           Add note
         </button>
@@ -91,19 +91,19 @@ export function NotesPanel({ anchor }: { anchor: NotesAnchor }) {
                   value={editDraft}
                   onChange={(e) => setEditDraft(e.target.value)}
                   rows={4}
-                  className="w-full rounded-xl border border-line bg-canvas p-3 font-mono text-[13px] text-ink placeholder:text-ink-faint"
+                  className="w-full rounded-md border border-line bg-canvas p-3 font-mono text-[13px] text-ink placeholder:text-ink-faint"
                 />
                 <div className="flex gap-2 mt-2">
                   <button
                     onClick={() => save(note.id)}
                     disabled={busy || editDraft.trim() === ''}
-                    className="rounded-full bg-emerald-600 px-3 py-1 text-[12px] text-white disabled:opacity-50"
+                    className="rounded bg-ok px-3 py-1 text-[12px] text-white disabled:opacity-50"
                   >
                     Save
                   </button>
                   <button
                     onClick={() => setEditingId(null)}
-                    className="rounded-full border border-line px-3 py-1 text-[12px] text-ink-muted"
+                    className="rounded border border-line px-3 py-1 text-[12px] text-ink-muted"
                   >
                     Cancel
                   </button>

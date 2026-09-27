@@ -4,25 +4,38 @@
 
 @layer base {
   :root {
-    --canvas: 255 255 255;
-    --surface: 248 250 252;
-    --raised: 255 255 255;
-    --line: 226 232 240;
-    --ink: 15 23 42;
-    --ink-muted: 71 85 105;
-    --ink-faint: 148 163 184;
-    --accent: #0ea5e9;
+    /* A cool, quiet paper. Neutrals lean slightly blue, toward the accent. */
+    --canvas: 243 244 246;
+    --surface: 234 236 240;
+    --raised: 250 251 252;
+    --line: 216 219 225;
+    --ink: 21 23 28;
+    --ink-muted: 75 81 93;
+    --ink-faint: 118 125 137;
+    --accent: 53 88 232;
+    --ok: 28 143 98;
+    --fail: 201 55 61;
+    --cp: 183 126 0;
+    --scope: 13 16 21;
+    --scope-2: 20 25 34;
     color-scheme: light;
   }
 
   .dark {
-    --canvas: 9 12 20;
-    --surface: 15 20 31;
-    --raised: 22 28 42;
-    --line: 38 47 66;
-    --ink: 237 242 249;
-    --ink-muted: 158 172 192;
-    --ink-faint: 108 122 143;
+    --canvas: 15 17 21;
+    --surface: 20 23 29;
+    --raised: 24 28 35;
+    --line: 38 43 52;
+    --ink: 231 234 240;
+    --ink-muted: 165 173 186;
+    --ink-faint: 118 126 139;
+    --accent: 117 147 255;
+    --ok: 63 199 142;
+    --fail: 255 107 112;
+    --cp: 242 182 50;
+    /* the instrument sits a step deeper than the page in dark mode */
+    --scope: 9 11 15;
+    --scope-2: 16 20 27;
     color-scheme: dark;
   }
 
@@ -34,63 +47,112 @@
 
   body {
     @apply bg-canvas text-ink font-sans antialiased;
+    font-size: 15px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
   }
 
   ::selection {
-    background: color-mix(in srgb, var(--accent) 28%, transparent);
+    background: rgb(var(--accent) / 0.24);
   }
 
-  /* Focus ring that works on both themes */
   :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid rgb(var(--accent));
     outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
   }
 }
 
 @layer components {
-  /* Reading column: serif body, generous leading — tuned for long-form study. */
+  /* Reading column. Sans at a 68ch measure — the product is an instrument,
+     and long lessons stay comfortable without switching to a serif. */
   .prose-reader {
-    @apply prose max-w-none font-serif;
+    @apply prose max-w-none font-sans;
     --tw-prose-body: rgb(var(--ink-muted));
     --tw-prose-headings: rgb(var(--ink));
     --tw-prose-bold: rgb(var(--ink));
-    --tw-prose-links: var(--accent);
+    --tw-prose-links: rgb(var(--accent));
     --tw-prose-quotes: rgb(var(--ink-muted));
     --tw-prose-code: rgb(var(--ink));
+    --tw-prose-counters: rgb(var(--ink-faint));
+    --tw-prose-bullets: rgb(var(--ink-faint));
+    --tw-prose-hr: rgb(var(--line));
     --tw-prose-th-borders: rgb(var(--line));
     --tw-prose-td-borders: rgb(var(--line));
-    font-size: 1.0625rem;
-    line-height: 1.75;
+    font-size: 1rem;
+    line-height: 1.7;
   }
-  .prose-reader :where(h3, h4, h5) {
-    @apply font-sans font-semibold tracking-tight;
+  .prose-reader :where(h2, h3, h4) {
+    @apply font-display font-semibold;
+    letter-spacing: -0.005em;
   }
   .prose-reader :where(code) {
-    @apply font-mono text-[0.85em] bg-surface border border-line rounded px-1 py-0.5;
+    @apply font-mono rounded-sm border border-line bg-surface px-1 py-0.5 text-[0.85em] font-normal;
   }
   .prose-reader :where(code)::before,
   .prose-reader :where(code)::after {
     content: '';
   }
   .prose-reader :where(pre) {
-    @apply bg-surface border border-line text-ink;
+    @apply rounded border border-line bg-surface text-ink;
   }
   .prose-reader :where(img) {
-    @apply rounded-xl border border-line bg-white max-w-full;
+    @apply max-w-full rounded border border-line bg-white;
   }
   .prose-reader :where(table) {
-    @apply block overflow-x-auto text-sm font-sans;
+    @apply block overflow-x-auto text-sm;
+    font-variant-numeric: tabular-nums;
+  }
+  .prose-reader :where(th) {
+    @apply font-mono text-[11px] font-semibold uppercase tracking-wider text-ink-faint;
   }
   .prose-reader :where(blockquote) {
-    border-left-color: var(--accent);
+    border-left-color: rgb(var(--line));
+    @apply font-normal not-italic;
   }
   .prose-reader :where(a) {
-    @apply underline underline-offset-2 decoration-1;
+    @apply underline decoration-1 underline-offset-2;
+  }
+
+  /* Small uppercase mono label: eyebrows, table heads, metric keys. */
+  .label {
+    @apply font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-ink-faint;
   }
 }
 
-@keyframes dash {
-  to {
-    stroke-dashoffset: -10;
+/* The player lays itself out by its own width, not the viewport: the
+   curriculum sidebar takes 19rem on large screens, so a viewport query would
+   put the code panel beside a stage too narrow to read. */
+.player {
+  container-type: inline-size;
+}
+.player-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.player-side {
+  border-top: 1px solid #242c38;
+}
+@container (min-width: 900px) {
+  .player-body {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+  .player-stage {
+    border-right: 1px solid #242c38;
+  }
+  .player-side {
+    border-top: 0;
   }
 }

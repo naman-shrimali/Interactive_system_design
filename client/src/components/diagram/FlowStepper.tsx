@@ -52,9 +52,9 @@ export function FlowStepper({
           <button
             key={f.id}
             onClick={() => onChange({ flowId: f.id, stepIndex: 0 })}
-            className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[12px] font-medium text-ink-muted transition-colors hover:bg-surface hover:text-ink"
+            className="inline-flex items-center gap-1.5 rounded border border-line px-3 py-1.5 text-[12px] font-medium text-ink-muted transition-colors hover:bg-surface hover:text-ink"
           >
-            <Play size={11} style={{ color: 'var(--accent)' }} />
+            <Play size={11} style={{ color: 'rgb(var(--accent))' }} />
             {f.name}
           </button>
         ))}
@@ -65,7 +65,7 @@ export function FlowStepper({
   const step = flow.steps[active.stepIndex];
 
   return (
-    <div className="mt-3 rounded-2xl border border-line bg-surface p-3">
+    <div className="mt-3 rounded-md border border-line bg-surface p-3">
       <div className="mb-2 flex items-center gap-2">
         <span className="text-[12px] font-semibold text-ink">{flow.name}</span>
         <span className="text-[11px] tabular-nums text-ink-faint">
@@ -86,7 +86,7 @@ export function FlowStepper({
         <button
           disabled={active.stepIndex === 0}
           onClick={() => onChange({ flowId: flow.id, stepIndex: active.stepIndex - 1 })}
-          className="inline-flex items-center gap-1 rounded-full border border-line px-3 py-1 text-[12px] text-ink-muted disabled:opacity-40"
+          className="inline-flex items-center gap-1 rounded border border-line px-3 py-1 text-[12px] text-ink-muted disabled:opacity-40"
         >
           <ChevronLeft size={12} /> Prev
         </button>
@@ -99,8 +99,7 @@ export function FlowStepper({
               onChange({ flowId: flow.id, stepIndex: active.stepIndex + 1 });
             }
           }}
-          className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[12px] font-medium text-white"
-          style={{ background: 'var(--accent)' }}
+          className="inline-flex items-center gap-1 rounded bg-ink px-3 py-1 font-mono text-[12px] font-medium text-canvas"
         >
           {isLast ? 'Finish ✓' : <>Next <ChevronRight size={12} /></>}
         </button>

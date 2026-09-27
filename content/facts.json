@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updated": "2026-08-18",
+  "updated": "2026-09-27",
   "facts": [
     {
       "id": "memory-read",
@@ -73,6 +73,15 @@
       "source": "https://sre.google/sre-book/service-level-objectives/",
       "lastVerified": "2026-08-18",
       "note": "5.26 minutes. Below any human reaction time, so it implies automated recovery with no manual step."
+    },
+    {
+      "id": "last-mile-round-trip",
+      "label": "Round trip from a user to the nearest ISP node",
+      "value": 20,
+      "unit": "ms",
+      "source": "https://hpbn.co/primer-on-latency-and-bandwidth/",
+      "lastVerified": "2026-09-27",
+      "note": "FCC Measuring Broadband America, via HPBN: fiber 10–20 ms, cable 15–40 ms, DSL 30–65 ms. 20 ms is a good wired broadband connection; mobile is usually worse. It is paid before a packet even leaves the user's city."
     }
   ],
   "derived": [

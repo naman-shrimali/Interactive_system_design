@@ -16,7 +16,7 @@ export function ServiceNode({ data }: P) {
       <NodeHandles />
       <div
         className={cn(
-          'min-w-28 rounded-xl border-2 px-4 py-2.5 text-center',
+          'min-w-28 rounded-md border-2 px-4 py-2.5 text-center',
           state === 'failed'
             ? 'border-red-600 bg-red-500 text-white'
             : 'border-indigo-700 bg-indigo-600 text-white',
@@ -37,7 +37,7 @@ export function TextBoxNode({ data }: P) {
     <div className={cn('relative', stateWrapperClass(data.state ?? 'normal'))}>
       {data.badge !== undefined && <Badge n={data.badge} />}
       <NodeHandles />
-      <div className="max-w-52 rounded-xl border-2 border-violet-400 bg-raised px-3 py-2">
+      <div className="max-w-52 rounded-md border-2 border-violet-400 bg-raised px-3 py-2">
         <div className="text-[11px] font-semibold leading-tight text-ink">{data.label}</div>
         {data.sublabel && (
           <div className="whitespace-pre-line text-[10px] leading-snug text-ink-muted">
@@ -54,7 +54,7 @@ export function TableNode({ data }: P) {
   const table = data.tableData;
   if (!table) {
     return (
-      <div className="rounded-lg border-2 border-red-500 bg-raised px-3 py-2 text-[11px] text-red-500">
+      <div className="rounded border-2 border-red-500 bg-raised px-3 py-2 text-[11px] text-red-500">
         table node “{data.label}” is missing tableData
       </div>
     );

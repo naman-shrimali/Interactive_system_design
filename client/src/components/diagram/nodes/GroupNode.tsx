@@ -26,7 +26,7 @@ const LABEL = {
  */
 export function GroupNode({ data }: { data: GroupNodeData }) {
   return (
-    <div className={cn('relative h-full w-full rounded-2xl', BOX[data.boxStyle])}>
+    <div className={cn('relative h-full w-full rounded-md', BOX[data.boxStyle])}>
       {data.label && (
         <span
           className={cn(
