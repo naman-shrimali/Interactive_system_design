@@ -18,7 +18,11 @@ export type Row =
   | { kind: 'kv'; label: string; value?: string; tone?: Tone }
   | { kind: 'bar'; value: number; max: number; tone?: Tone }
   | { kind: 'slots'; total: number; filled: number; tone?: Tone; label?: string }
-  | { kind: 'log'; entries: { text: string; tone?: Tone }[]; label?: string };
+  | { kind: 'log'; entries: { text: string; tone?: Tone }[]; label?: string }
+  /** Pre-wrapped prose lines, e.g. an annotation box. */
+  | { kind: 'text'; lines: string[]; tone?: Tone }
+  /** A small data table. Column widths are measured from the content. */
+  | { kind: 'table'; columns: string[]; rows: string[][] };
 
 export interface NodeState {
   tone?: Tone;
@@ -37,14 +41,40 @@ export interface Port {
   at?: number;
 }
 
+/** Glyphs a node can carry beside its title. Kept to what diagrams need. */
+export type NodeIcon =
+  | 'client'
+  | 'mobile'
+  | 'dns'
+  | 'cdn'
+  | 'lb'
+  | 'server'
+  | 'worker'
+  | 'database'
+  | 'nosql'
+  | 'cache'
+  | 'queue'
+  | 'service'
+  | 'note';
+
 export interface StageNode {
   id: string;
   label: string;
+  /** Static subtitle; long ones are wrapped to the node's width. */
   sub?: string;
   x: number;
   y: number;
   w: number;
   h: number;
+  icon?: NodeIcon;
+  /** Two offset outlines behind the box: "a cluster of these". */
+  stacked?: boolean;
+  /** Box outline. `queue` draws the arrow-ended message-queue shape. */
+  shape?: 'box' | 'queue' | 'note' | 'bare';
+  /** Numbered marker on the node's top-left corner. */
+  marker?: number;
+  /** Rows that never change, drawn under the subtitle (tables, notes). */
+  rows?: Row[];
 }
 
 export interface StageEdge {
@@ -57,6 +87,16 @@ export interface StageEdge {
   via?: [number, number][];
   /** Drawn fainter: a path that exists but isn't the one in use. */
   quiet?: boolean;
+  label?: string;
+  /** Numbered badge before the label: the order a request takes this edge. */
+  step?: number;
+  /** Author-chosen meaning of the connection. Default neutral. */
+  color?: 'blue' | 'green' | 'purple' | 'red' | 'gray';
+  dashed?: boolean;
+  /** Arrowheads. Scenarios default to none (packets show direction). */
+  arrow?: 'forward' | 'both' | 'none';
+  /** Resolved label position (see placeLabels); computed if absent. */
+  labelBox?: { x: number; y: number; w: number; h: number };
 }
 
 export interface StageRegion {
@@ -64,6 +104,11 @@ export interface StageRegion {
   x: number;
   y: number;
   anchor?: 'start' | 'end';
+  /** With a size, the region is drawn as a box and the label sits on it. */
+  w?: number;
+  h?: number;
+  style?: 'dashed' | 'solid' | 'filled';
+  labelAt?: 'top-left' | 'top-right' | 'right' | 'bottom';
 }
 
 /** Layout only. Everything that changes lives in frames. */
@@ -128,8 +173,8 @@ export interface Frame {
   packets?: Packet[];
   /** A complete snapshot: every node that draws state, every frame. */
   nodes: Record<string, NodeState>;
-  /** Edges that are severed (a partition) or emphasised this frame. */
-  links?: Record<string, 'cut' | 'hot'>;
+  /** Edges that are severed (a partition), emphasised, or pushed back this frame. */
+  links?: Record<string, 'cut' | 'hot' | 'dim'>;
   metrics: Metric[];
   /** What just happened, in one sentence. */
   say: string;

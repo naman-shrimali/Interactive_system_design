@@ -4,46 +4,203 @@
   "title": "Fan-out on write, and where it breaks",
   "description": "Precompute every follower's feed at post time so reads are a single cache lookup. Excellent until someone with ten million followers posts.",
   "nodes": [
-    { "id": "author", "type": "client", "label": "Author", "sublabel": "posts once", "position": { "x": 40, "y": 60 } },
-    { "id": "post_svc", "type": "service", "label": "Post service", "position": { "x": 300, "y": 65 } },
-    { "id": "post_db", "type": "database", "label": "Post store", "position": { "x": 300, "y": 350 } },
-    { "id": "queue", "type": "message_queue", "label": "Fan-out queue", "position": { "x": 620, "y": 70 }, "badge": 1 },
-    { "id": "workers", "type": "worker_stack", "label": "Fan-out workers", "position": { "x": 620, "y": 300 }, "badge": 2 },
-    { "id": "feeds", "type": "cache_stack", "label": "Feed caches", "sublabel": "one list per follower", "position": { "x": 900, "y": 300 }, "badge": 3 },
-    { "id": "readers", "type": "client_mobile", "label": "Followers", "sublabel": "read their feed", "position": { "x": 900, "y": 60 } },
-    { "id": "note", "type": "text_box", "label": "The celebrity problem", "sublabel": "10M followers = 10M writes\nfor one post. Hybrid: fan out\nnormal users, pull for\ncelebrities at read time.", "position": { "x": 30, "y": 330 } }
+    {
+      "id": "author",
+      "type": "client",
+      "label": "Author",
+      "sublabel": "posts once",
+      "position": {
+        "x": 40,
+        "y": 60
+      }
+    },
+    {
+      "id": "post_svc",
+      "type": "service",
+      "label": "Post service",
+      "position": {
+        "x": 300,
+        "y": 65
+      }
+    },
+    {
+      "id": "post_db",
+      "type": "database",
+      "label": "Post store",
+      "position": {
+        "x": 300,
+        "y": 350
+      }
+    },
+    {
+      "id": "queue",
+      "type": "message_queue",
+      "label": "Fan-out queue",
+      "position": {
+        "x": 620,
+        "y": 70
+      },
+      "badge": 1
+    },
+    {
+      "id": "workers",
+      "type": "worker_stack",
+      "label": "Fan-out workers",
+      "position": {
+        "x": 620,
+        "y": 300
+      },
+      "badge": 2
+    },
+    {
+      "id": "feeds",
+      "type": "cache_stack",
+      "label": "Feed caches",
+      "sublabel": "one list per follower",
+      "position": {
+        "x": 940,
+        "y": 300
+      },
+      "badge": 3
+    },
+    {
+      "id": "readers",
+      "type": "client_mobile",
+      "label": "Followers",
+      "sublabel": "read their feed",
+      "position": {
+        "x": 940,
+        "y": 60
+      }
+    },
+    {
+      "id": "note",
+      "type": "text_box",
+      "label": "The celebrity problem",
+      "sublabel": "10M followers = 10M writes\nfor one post. Hybrid: fan out\nnormal users, pull for\ncelebrities at read time.",
+      "position": {
+        "x": 30,
+        "y": 330
+      }
+    }
   ],
   "edges": [
-    { "id": "e_post", "source": "author", "target": "post_svc", "label": "publish", "step": 1, "sourceHandle": "right", "targetHandle": "left" },
-    { "id": "e_store", "source": "post_svc", "target": "post_db", "label": "persist", "step": 2, "color": "green", "sourceHandle": "bottom", "targetHandle": "top" },
-    { "id": "e_enq", "source": "post_svc", "target": "queue", "label": "enqueue fan-out", "step": 3, "color": "purple", "sourceHandle": "right", "targetHandle": "left" },
-    { "id": "e_work", "source": "queue", "target": "workers", "label": "consume", "step": 4, "color": "purple", "sourceHandle": "bottom", "targetHandle": "top" },
-    { "id": "e_fanout", "source": "workers", "target": "feeds", "label": "insert into N feeds", "step": 5, "color": "red", "sourceHandle": "right", "targetHandle": "left" },
-    { "id": "e_read", "source": "feeds", "target": "readers", "label": "single lookup", "step": 6, "color": "green", "sourceHandle": "right", "targetHandle": "left", "direction": "both" }
+    {
+      "id": "e_post",
+      "source": "author",
+      "target": "post_svc",
+      "label": "publish",
+      "step": 1,
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "e_store",
+      "source": "post_svc",
+      "target": "post_db",
+      "label": "persist",
+      "step": 2,
+      "color": "green",
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
+    },
+    {
+      "id": "e_enq",
+      "source": "post_svc",
+      "target": "queue",
+      "label": "enqueue fan-out",
+      "step": 3,
+      "color": "purple",
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "e_work",
+      "source": "queue",
+      "target": "workers",
+      "label": "consume",
+      "step": 4,
+      "color": "purple",
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
+    },
+    {
+      "id": "e_fanout",
+      "source": "workers",
+      "target": "feeds",
+      "label": "insert into N feeds",
+      "step": 5,
+      "color": "red",
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "e_read",
+      "source": "readers",
+      "target": "feeds",
+      "label": "single lookup",
+      "step": 6,
+      "color": "green",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "direction": "both"
+    }
   ],
   "flows": [
     {
       "id": "write-path",
       "name": "Posting (the expensive half)",
       "steps": [
-        { "edgeIds": ["e_post", "e_store"], "text": "The post is written once to the authoritative store. That part is cheap and bounded." },
-        { "edgeIds": ["e_enq"], "text": "Fan-out is enqueued rather than done inline — the author's request returns immediately instead of waiting for millions of writes." },
-        { "edgeIds": ["e_work", "e_fanout"], "text": "Workers insert the post ID into every follower's feed list. This is where the cost lives: one post becomes N writes, and N is the follower count." }
+        {
+          "edgeIds": [
+            "e_post",
+            "e_store"
+          ],
+          "text": "The post is written once to the authoritative store. That part is cheap and bounded."
+        },
+        {
+          "edgeIds": [
+            "e_enq"
+          ],
+          "text": "Fan-out is enqueued rather than done inline — the author's request returns immediately instead of waiting for millions of writes."
+        },
+        {
+          "edgeIds": [
+            "e_work",
+            "e_fanout"
+          ],
+          "text": "Workers insert the post ID into every follower's feed list. This is where the cost lives: one post becomes N writes, and N is the follower count."
+        }
       ]
     },
     {
       "id": "read-path",
       "name": "Reading a feed (the cheap half)",
       "steps": [
-        { "edgeIds": ["e_read"], "text": "A follower's feed is already assembled. Reading it is one cache lookup with no joins, no ranking across sources, and no fan-in — which is why this design wins for a read-heavy product." }
+        {
+          "edgeIds": [
+            "e_read"
+          ],
+          "text": "A follower's feed is already assembled. Reading it is one cache lookup with no joins, no ranking across sources, and no fan-in — which is why this design wins for a read-heavy product."
+        }
       ]
     },
     {
       "id": "celebrity",
       "name": "Where it breaks",
       "steps": [
-        { "edgeIds": ["e_fanout"], "text": "An account with ten million followers posts. That single action becomes ten million cache writes, saturating the workers and delaying fan-out for everyone else on the queue." },
-        { "edgeIds": ["e_read"], "text": "The standard fix is hybrid: fan out on write for ordinary accounts, and for the small set of very-high-follower accounts skip fan-out entirely — merge their recent posts in at read time. Most users pay nothing; the expensive case is handled by the path that scales with it." }
+        {
+          "edgeIds": [
+            "e_fanout"
+          ],
+          "text": "An account with ten million followers posts. That single action becomes ten million cache writes, saturating the workers and delaying fan-out for everyone else on the queue."
+        },
+        {
+          "edgeIds": [
+            "e_read"
+          ],
+          "text": "The standard fix is hybrid: fan out on write for ordinary accounts, and for the small set of very-high-follower accounts skip fan-out entirely — merge their recent posts in at read time. Most users pay nothing; the expensive case is handled by the path that scales with it."
+        }
       ]
     }
   ]

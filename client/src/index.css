@@ -146,10 +146,10 @@
   border-top: 1px solid #242c38;
 }
 @container (min-width: 900px) {
-  .player-body {
+  .player-body:not(.player-body--solo) {
     grid-template-columns: minmax(0, 1fr) 320px;
   }
-  .player-stage {
+  .player-body:not(.player-body--solo) .player-stage {
     border-right: 1px solid #242c38;
   }
   .player-side {

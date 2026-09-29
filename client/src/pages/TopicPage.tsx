@@ -25,7 +25,6 @@ type Phase =
 export function TopicPage() {
   const { slug } = useParams<{ slug: string }>();
   const [state, setState] = useState<Phase>({ phase: 'loading' });
-  const [activeSection, setActiveSection] = useState<string | null>(null);
   const [codeOpen, setCodeOpen] = useState(false);
   const refresh = useAppStore((s) => s.refreshCurriculum);
   const scenarios = useMemo(() => (slug ? scenariosFor(slug) : []), [slug]);
@@ -44,27 +43,6 @@ export function TopicPage() {
       alive = false;
     };
   }, [slug]);
-
-  const sections = state.phase === 'ready' ? state.topic.sections : [];
-
-  // Highlight the section currently in view for the table of contents.
-  useEffect(() => {
-    if (sections.length === 0) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
-        if (visible) setActiveSection(visible.target.id);
-      },
-      { rootMargin: '-72px 0px -60% 0px', threshold: 0 },
-    );
-    for (const s of sections) {
-      const el = document.getElementById(`section-${s.slug}`);
-      if (el) observer.observe(el);
-    }
-    return () => observer.disconnect();
-  }, [sections]);
 
   const reloadTopic = async () => {
     if (!slug) return;
@@ -138,6 +116,20 @@ export function TopicPage() {
         </div>
       </header>
 
+      <nav className="mb-10 flex flex-wrap items-baseline gap-x-4 gap-y-1.5 border-y border-line py-2.5 text-[13px]" aria-label="On this page">
+        <span className="label">On this page</span>
+        {topic.sections.map((s) => (
+          <a key={s.id} href={`#section-${s.slug}`} className="text-ink-muted hover:text-ink">
+            {s.title}
+          </a>
+        ))}
+        {tocExtras.map((x) => (
+          <a key={x.href} href={x.href} className="text-ink-faint hover:text-ink">
+            {x.label}
+          </a>
+        ))}
+      </nav>
+
       {/* ---- scenario ---- */}
       {scenario && (
         <section className="mb-14" aria-label="Scenario">
@@ -179,11 +171,10 @@ export function TopicPage() {
       )}
 
       {/* ---- lesson ---- */}
-      <div className="flex gap-12">
-        <main className="min-w-0 max-w-prose flex-1">
+      <main className="min-w-0">
           {topic.sections.map((section) => (
             <section key={section.id} id={`section-${section.slug}`} className="mb-16 scroll-mt-20">
-              <div className="mb-5 flex flex-wrap items-end justify-between gap-3 border-t border-ink pt-3">
+              <div className="mb-5 flex max-w-prose flex-wrap items-end justify-between gap-3 border-t border-ink pt-3">
                 <div className="min-w-0">
                   <p className="label mb-1.5">{KIND_LABEL[section.kind]}</p>
                   <h2 className="font-display text-[26px] font-semibold leading-tight">{section.title}</h2>
@@ -191,11 +182,13 @@ export function TopicPage() {
                 <ProgressControls sectionId={section.id} status={section.progressStatus} onChanged={reloadTopic} />
               </div>
 
-              {section.contentMarkdown.trim() ? (
-                <MarkdownView markdown={section.contentMarkdown} />
-              ) : (
-                <p className="italic text-ink-faint">This section is still being written.</p>
-              )}
+              <div className="max-w-prose">
+                {section.contentMarkdown.trim() ? (
+                  <MarkdownView markdown={section.contentMarkdown} />
+                ) : (
+                  <p className="italic text-ink-faint">This section is still being written.</p>
+                )}
+              </div>
 
               {section.diagrams.map((d) => (
                 <SectionDiagram key={d.id} meta={d} />
@@ -215,7 +208,7 @@ export function TopicPage() {
 
           {topic.topicDiagrams.length > 0 && (
             <section id="diagrams" className="mb-16 scroll-mt-20">
-              <div className="mb-5 border-t border-ink pt-3">
+              <div className="mb-5 max-w-prose border-t border-ink pt-3">
                 <p className="label mb-1.5">Diagrams</p>
               </div>
               {topic.topicDiagrams.map((d) => (
@@ -224,12 +217,14 @@ export function TopicPage() {
             </section>
           )}
 
-          <QuestionsPanel topicSlug={topic.slug} />
-          <ReadingList topicSlug={topic.slug} />
-          <LinksPanel links={topic.links} onChanged={refresh} />
-          <NotesPanel anchor={{ topicId: topic.id }} />
+          <div className="max-w-prose">
+            <QuestionsPanel topicSlug={topic.slug} />
+            <ReadingList topicSlug={topic.slug} />
+            <LinksPanel links={topic.links} onChanged={refresh} />
+            <NotesPanel anchor={{ topicId: topic.id }} />
+          </div>
 
-          <nav className="mt-16 grid gap-px overflow-hidden rounded border border-line bg-line sm:grid-cols-2" aria-label="Neighbouring topics">
+          <nav className="mt-16 grid max-w-prose gap-px overflow-hidden rounded border border-line bg-line sm:grid-cols-2" aria-label="Neighbouring topics">
             {topic.prev ? (
               <Link to={`/topics/${topic.prev.slug}`} className="bg-canvas p-4 hover:bg-surface">
                 <span className="label flex items-center gap-1">
@@ -251,39 +246,7 @@ export function TopicPage() {
               <span className="hidden bg-canvas sm:block" />
             )}
           </nav>
-        </main>
-
-        <aside className="hidden w-56 shrink-0 xl:block" aria-label="On this page">
-          <div className="sticky top-20">
-            <p className="label mb-3">On this page</p>
-            <ul className="border-l border-line text-[13px]">
-              {topic.sections.map((s) => {
-                const active = activeSection === `section-${s.slug}`;
-                return (
-                  <li key={s.id}>
-                    <a
-                      href={`#section-${s.slug}`}
-                      className={cn(
-                        '-ml-px block border-l-2 py-1 pl-3',
-                        active ? 'border-ink font-medium text-ink' : 'border-transparent text-ink-muted hover:text-ink',
-                      )}
-                    >
-                      {s.title}
-                    </a>
-                  </li>
-                );
-              })}
-              {tocExtras.map((x) => (
-                <li key={x.href}>
-                  <a href={x.href} className="-ml-px block border-l-2 border-transparent py-1 pl-3 text-ink-faint hover:text-ink">
-                    {x.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </aside>
-      </div>
+      </main>
 
       {topic.codeWalkthroughs.length > 0 && (
         <CodeSidebar meta={topic.codeWalkthroughs[0]} open={codeOpen} onClose={() => setCodeOpen(false)} />

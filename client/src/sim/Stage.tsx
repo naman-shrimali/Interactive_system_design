@@ -1,5 +1,8 @@
-import { useEffect, useRef } from 'react';
-import type { Frame, NodeState, Packet, Port, Row, Stage as StageSpec, StageNode, Tone } from './types';
+import { useEffect, useId, useMemo, useRef } from 'react';
+import { type LucideIcon, Braces, Boxes, Cloud, Cpu, Database, Globe, Mail, Monitor, Network, Server, Smartphone, Zap } from 'lucide-react';
+import type { Frame, NodeIcon, NodeState, Packet, Row, Stage as StageSpec, StageEdge, StageNode, Tone } from './types';
+import { EDGE_LABEL, LEAD, PAD, SIZE, along, edgeGeometry, midpoint, nodeLines, placeLabels, tableColumns } from './layout';
+export { edgeGeometry };
 
 /**
  * Fixed-scale SVG renderer for a scenario.
@@ -49,59 +52,6 @@ const CHAR_W_11 = 11 * 0.6;
 const CHAR_W_12 = 12 * 0.6;
 const CHAR_W_115 = 11.5 * 0.6;
 
-function portPoint(n: StageNode, p: Port | undefined, fallback: Port['side']): [number, number] {
-  const side = p?.side ?? fallback;
-  const at = p?.at ?? 0.5;
-  switch (side) {
-    case 'l':
-      return [n.x, n.y + n.h * at];
-    case 'r':
-      return [n.x + n.w, n.y + n.h * at];
-    case 't':
-      return [n.x + n.w * at, n.y];
-    case 'b':
-      return [n.x + n.w * at, n.y + n.h];
-  }
-}
-
-type Pt = [number, number];
-
-export function edgeGeometry(spec: StageSpec): Record<string, Pt[]> {
-  const byId = new Map(spec.nodes.map((n) => [n.id, n]));
-  const out: Record<string, Pt[]> = {};
-  for (const e of spec.edges) {
-    const a = byId.get(e.from);
-    const b = byId.get(e.to);
-    if (!a || !b) continue;
-    out[e.id] = [portPoint(a, e.fromPort, 'r'), ...(e.via ?? []), portPoint(b, e.toPort, 'l')];
-  }
-  return out;
-}
-
-/** Position at fraction u (0..1) of a polyline's length. */
-function along(pts: Pt[], u: number): Pt {
-  const seg: number[] = [];
-  let total = 0;
-  for (let i = 1; i < pts.length; i++) {
-    const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
-    seg.push(d);
-    total += d;
-  }
-  let want = u * total;
-  for (let i = 0; i < seg.length; i++) {
-    if (want <= seg[i] || i === seg.length - 1) {
-      const f = seg[i] === 0 ? 0 : Math.min(1, want / seg[i]);
-      return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * f, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * f];
-    }
-    want -= seg[i];
-  }
-  return pts[pts.length - 1];
-}
-
-function midpoint(pts: Pt[]): Pt {
-  return along(pts, 0.5);
-}
-
 function rowHeight(r: Row): number {
   switch (r.kind) {
     case 'kv':
@@ -112,6 +62,10 @@ function rowHeight(r: Row): number {
       return 36;
     case 'log':
       return 44;
+    case 'text':
+      return r.lines.length * LEAD.body + 4;
+    case 'table':
+      return (r.rows.length + 1) * LEAD.cell + 4;
   }
 }
 
@@ -217,13 +171,170 @@ function Rows({ node, rows, top }: { node: StageNode; rows: Row[]; top: number }
               </g>
             );
           }
+          case 'text':
+          case 'table':
+            return <StaticRow key={i} row={r} x={x0} y={at} />;
         }
       })}
     </>
   );
 }
 
+/** Prose lines and tables: rows that describe a component rather than track it. */
+function StaticRow({ row, x, y }: { row: Row; x: number; y: number }) {
+  if (row.kind === 'text') {
+    return (
+      <>
+        {row.lines.map((l, k) => (
+          <text key={k} x={x} y={y + 10.5 + k * LEAD.body} fill={row.tone ? TONE[row.tone] : SCOPE.ink2} fontFamily={MONO} fontSize={SIZE.body}>
+            {l}
+          </text>
+        ))}
+      </>
+    );
+  }
+  if (row.kind !== 'table') return null;
+  const cols = tableColumns(row);
+  const width = cols.reduce((a, b) => a + b, 0);
+  const lefts = cols.map((_, i) => x + cols.slice(0, i).reduce((a, b) => a + b, 0));
+  const all = [row.columns, ...row.rows];
+  return (
+    <g>
+      <rect x={x} y={y} width={width} height={LEAD.cell} fill="#161D27" />
+      {all.map((cells, r) =>
+        cells.map((c, i) => (
+          <text
+            key={`${r}-${i}`}
+            x={lefts[i] + 6}
+            y={y + r * LEAD.cell + 12.5}
+            fill={r === 0 ? SCOPE.ink : SCOPE.ink2}
+            fontFamily={MONO}
+            fontSize={SIZE.cell}
+            fontWeight={r === 0 ? 500 : 400}
+          >
+            {c}
+          </text>
+        )),
+      )}
+      {all.map((_, r) => (
+        <line key={`h${r}`} x1={x} x2={x + width} y1={y + (r + 1) * LEAD.cell} y2={y + (r + 1) * LEAD.cell} stroke="#232B37" />
+      ))}
+      {lefts.slice(1).map((lx, i) => (
+        <line key={`v${i}`} x1={lx} x2={lx} y1={y} y2={y + all.length * LEAD.cell} stroke="#232B37" />
+      ))}
+      <rect x={x} y={y} width={width} height={all.length * LEAD.cell} fill="none" stroke="#2A3340" />
+    </g>
+  );
+}
+
+const ICONS: Record<NodeIcon, LucideIcon | null> = {
+  client: Monitor,
+  mobile: Smartphone,
+  dns: Globe,
+  cdn: Cloud,
+  lb: Network,
+  server: Server,
+  worker: Cpu,
+  database: Database,
+  nosql: Braces,
+  cache: Zap,
+  queue: Mail,
+  service: Boxes,
+  note: null,
+};
+
+/**
+ * Component with an icon, a wrapped title and subtitle, and optional static
+ * rows. Geometry comes from nodeLines(), the function the layout validator
+ * uses, so what is checked is what is drawn.
+ */
+function RichNode({ node, state }: { node: StageNode; state: NodeState | undefined }) {
+  const tone = state?.tone ?? 'idle';
+  const L = nodeLines(node);
+  const { x, y, w, h } = node;
+  const shape = node.shape ?? 'box';
+  const failed = tone === 'fail';
+  const stroke = failed ? STROKE.fail : tone === 'active' ? STROKE.active : shape === 'note' ? '#3A4658' : STROKE.idle;
+  const width = tone === 'active' || failed ? 1.5 : 1;
+  const Icon = node.icon ? ICONS[node.icon] : null;
+  const body =
+    shape === 'queue' ? (
+      <polygon
+        points={`${x},${y} ${x + w - 12},${y} ${x + w},${y + h / 2} ${x + w - 12},${y + h} ${x},${y + h}`}
+        fill={SCOPE.node}
+        stroke={stroke}
+        strokeWidth={width}
+        strokeLinejoin="round"
+      />
+    ) : (
+      <rect
+        x={x}
+        y={y}
+        width={w}
+        height={h}
+        rx={4}
+        fill={shape === 'note' ? '#0F141B' : SCOPE.node}
+        stroke={stroke}
+        strokeWidth={width}
+        strokeDasharray={shape === 'note' ? '4 3' : undefined}
+      />
+    );
+  const subTop = y + PAD + L.titleLines.length * LEAD.title + 3;
+  return (
+    <g opacity={tone === 'dim' ? 0.32 : 1} style={{ transition: 'opacity 180ms' }}>
+      {node.stacked && (
+        <>
+          <rect x={x + 10} y={y - 10} width={w} height={h} rx={4} fill={SCOPE.node} stroke={stroke} strokeWidth={1} opacity={0.45} />
+          <rect x={x + 5} y={y - 5} width={w} height={h} rx={4} fill={SCOPE.node} stroke={stroke} strokeWidth={1} opacity={0.75} />
+        </>
+      )}
+      {body}
+      {Icon && (
+        <Icon
+          x={x + PAD - 1}
+          y={y + PAD - 1}
+          width={14}
+          height={14}
+          size={14}
+          color={tone === 'active' ? SCOPE.accent : failed ? SCOPE.fail : SCOPE.ink2}
+          strokeWidth={1.75}
+          aria-hidden="true"
+        />
+      )}
+      {L.titleLines.map((t, i) => (
+        <text key={`t${i}`} x={x + L.titleX} y={y + PAD + 11 + i * LEAD.title} fill={failed ? SCOPE.fail : SCOPE.ink} fontFamily={MONO} fontSize={SIZE.title} fontWeight={500}>
+          {t}
+        </text>
+      ))}
+      {L.subLines.map((t, i) => (
+        <text key={`s${i}`} x={x + PAD} y={subTop + 10.5 + i * LEAD.sub} fill={SCOPE.ink2} fontFamily={MONO} fontSize={SIZE.sub}>
+          {t}
+        </text>
+      ))}
+      {node.rows?.map((r, i) => {
+        const top = y + L.rowsTop + (node.rows ?? []).slice(0, i).reduce((a, b) => a + rowHeight(b), 0);
+        return <StaticRow key={`r${i}`} row={r} x={x + PAD} y={top} />;
+      })}
+      {node.marker !== undefined && (
+        <g>
+          <rect x={x - 8} y={y - 8} width={16} height={16} rx={2} fill="#1A212B" stroke={tone === 'active' ? STROKE.active : '#3A4658'} />
+          <text x={x} y={y + 3.5} textAnchor="middle" fill={SCOPE.ink} fontFamily={MONO} fontSize={10} fontWeight={600}>
+            {node.marker}
+          </text>
+        </g>
+      )}
+      {failed && (
+        <g>
+          <rect x={x + w - 8} y={y - 8} width={16} height={16} rx={2} fill={SCOPE.ground} stroke={SCOPE.fail} />
+          <path d={`M${x + w - 4} ${y - 4} L${x + w + 4} ${y + 4} M${x + w + 4} ${y - 4} L${x + w - 4} ${y + 4}`} stroke={SCOPE.fail} strokeWidth={1.5} />
+        </g>
+      )}
+    </g>
+  );
+}
+
 function Node({ node, state }: { node: StageNode; state: NodeState | undefined }) {
+  if (node.icon || node.shape || node.rows) return <RichNode node={node} state={state} />;
   const tone = state?.tone ?? 'idle';
   const compact = node.h <= 46;
   const titleY = compact ? node.y + node.h / 2 + 4 : node.y + 20;
@@ -267,6 +378,15 @@ function Node({ node, state }: { node: StageNode; state: NodeState | undefined }
   );
 }
 
+/** Authored edge colours, muted at rest and full strength when lit. */
+const EDGE_TONE: Record<NonNullable<StageEdge['color']>, { base: string; hot: string }> = {
+  blue: { base: '#3B4C86', hot: '#7593FF' },
+  green: { base: '#28604B', hot: '#3FC78E' },
+  purple: { base: '#524684', hot: '#B69CFF' },
+  red: { base: '#7E3B40', hot: '#FF6B70' },
+  gray: { base: '#37404D', hot: '#8C96A5' },
+};
+
 const PACKET_FILL: Record<Packet['kind'], string> = {
   req: SCOPE.accent,
   ok: SCOPE.ok,
@@ -286,8 +406,14 @@ export function Stage({
   animate,
   speed,
   onSettled,
+  minScale = 0.9,
+  maxScale,
 }: {
   spec: StageSpec;
+  /** Below this fraction of drawn size the container scrolls instead of shrinking. */
+  minScale?: number;
+  /** Cap on how far the drawing may grow to fill a wide container. */
+  maxScale?: number;
   frame: Frame;
   /** Interpolate this frame's packets. False when stepping back or jumping. */
   animate: boolean;
@@ -296,7 +422,13 @@ export function Stage({
   onSettled?: () => void;
 }) {
   const layer = useRef<SVGGElement | null>(null);
-  const geom = edgeGeometry(spec);
+  const uid = useId().replace(/:/g, '');
+  const geom = useMemo(() => edgeGeometry(spec), [spec]);
+  // Diagrams arrive with labels already placed; anything else is placed here.
+  const labels = useMemo(() => {
+    const need = spec.edges.some((e) => (e.label || e.step !== undefined) && !e.labelBox);
+    return need ? placeLabels(spec) : {};
+  }, [spec]);
   // The animation outlives renders; always call the latest callback, not the
   // one captured when the step started (the learner may have paused since).
   const settledRef = useRef(onSettled);
@@ -383,33 +515,129 @@ export function Stage({
       className="block h-auto w-full"
       // Below 90% of drawn size the 11px labels would drop under 10px, so the
       // container scrolls instead.
-      style={{ minWidth: Math.round(spec.width * 0.9) }}
+      style={{
+        minWidth: Math.round(spec.width * minScale),
+        maxWidth: maxScale ? Math.round(spec.width * maxScale) : undefined,
+        margin: '0 auto',
+      }}
       role="img"
       aria-label={`Architecture: ${spec.nodes.map((n) => n.label).join(', ')}`}
     >
       <defs>
-        <pattern id="scope-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+        <pattern id={`${uid}-grid`} width="20" height="20" patternUnits="userSpaceOnUse">
           <path d="M20 0H0V20" fill="none" stroke={SCOPE.grid} strokeWidth="1" />
         </pattern>
+        {Object.entries(EDGE_TONE).flatMap(([name, c]) =>
+          (['base', 'hot'] as const).map((k) => (
+            <marker
+              key={`${name}-${k}`}
+              id={`${uid}-arrow-${name}-${k}`}
+              viewBox="0 0 10 10"
+              refX="9"
+              refY="5"
+              markerWidth="7"
+              markerHeight="7"
+              orient="auto-start-reverse"
+            >
+              <path d="M0 1 L10 5 L0 9 z" fill={c[k]} />
+            </marker>
+          )),
+        )}
       </defs>
-      <rect x={0} y={0} width={spec.width} height={spec.height} fill="url(#scope-grid)" />
+      <rect x={0} y={0} width={spec.width} height={spec.height} fill={`url(#${uid}-grid)`} />
 
-      {spec.regions?.map((r) => (
-        <text key={r.label} x={r.x} y={r.y} textAnchor={r.anchor ?? 'start'} fill={SCOPE.ink3} fontFamily={MONO} fontSize={10.5} letterSpacing="0.08em">
-          {r.label}
-        </text>
-      ))}
+      {spec.regions?.map((r, i) => {
+        if (r.w === undefined || r.h === undefined) {
+          return (
+            <text key={i} x={r.x} y={r.y} textAnchor={r.anchor ?? 'start'} fill={SCOPE.ink3} fontFamily={MONO} fontSize={10.5} letterSpacing="0.08em">
+              {r.label}
+            </text>
+          );
+        }
+        const at = r.labelAt ?? 'top-left';
+        const lx = at === 'top-right' ? r.x + r.w - 10 : at === 'right' ? r.x + r.w + 8 : at === 'bottom' ? r.x + r.w / 2 : r.x + 10;
+        const ly = at === 'right' ? r.y + r.h / 2 + 4 : at === 'bottom' ? r.y + r.h + 16 : r.y + 16;
+        const anchor = at === 'top-right' ? 'end' : at === 'bottom' ? 'middle' : 'start';
+        return (
+          <g key={i}>
+            <rect
+              x={r.x}
+              y={r.y}
+              width={r.w}
+              height={r.h}
+              rx={6}
+              fill={r.style === 'filled' ? '#121821' : 'none'}
+              stroke={r.style === 'filled' ? '#1E2631' : '#2F3A4A'}
+              strokeDasharray={r.style === 'dashed' ? '6 5' : undefined}
+            />
+            {r.label && (
+              <text x={lx} y={ly} textAnchor={anchor} fill={SCOPE.ink3} fontFamily={MONO} fontSize={10.5} letterSpacing="0.08em">
+                {r.label}
+              </text>
+            )}
+          </g>
+        );
+      })}
 
       {spec.edges.map((e) => {
         const pts = geom[e.id];
         if (!pts) return null;
         const state = frame.links?.[e.id];
+        const points = pts.map((p) => p.join(',')).join(' ');
+
+        if (e.color) {
+          const c = EDGE_TONE[e.color];
+          const hot = state === 'hot';
+          const key = hot ? 'hot' : 'base';
+          const marker = `url(#${uid}-arrow-${e.color}-${key})`;
+          const arrow = e.arrow ?? 'forward';
+          const box = e.labelBox ?? labels[e.id];
+          return (
+            <g key={e.id} opacity={state === 'dim' ? 0.18 : 1} style={{ transition: 'opacity 180ms' }}>
+              <polyline
+                points={points}
+                fill="none"
+                stroke={c[key]}
+                strokeWidth={hot ? 2 : 1.4}
+                strokeDasharray={e.dashed ? '5 4' : undefined}
+                strokeLinejoin="round"
+                markerEnd={arrow !== 'none' ? marker : undefined}
+                markerStart={arrow === 'both' ? marker : undefined}
+              />
+              {box && (
+                <g>
+                  <rect x={box.x} y={box.y} width={box.w} height={box.h} rx={2} fill={SCOPE.ground} stroke={hot ? c.hot : '#1E2631'} strokeWidth={1} />
+                  {e.step !== undefined && (
+                    <>
+                      <rect x={box.x + 2} y={box.y + 2} width={14} height={12} rx={1.5} fill={hot ? c.hot : c.base} />
+                      <text x={box.x + 9} y={box.y + 11.5} textAnchor="middle" fill={SCOPE.ground} fontFamily={MONO} fontSize={9.5} fontWeight={600}>
+                        {e.step}
+                      </text>
+                    </>
+                  )}
+                  {e.label && (
+                    <text
+                      x={box.x + (e.step !== undefined ? 18 : 0) + 5}
+                      y={box.y + 11.5}
+                      fill={hot ? SCOPE.ink : SCOPE.ink2}
+                      fontFamily={MONO}
+                      fontSize={EDGE_LABEL}
+                    >
+                      {e.label}
+                    </text>
+                  )}
+                </g>
+              )}
+            </g>
+          );
+        }
+
         const [mx, my] = midpoint(pts);
         const quiet = e.quiet && state !== 'hot';
         return (
           <g key={e.id}>
             <polyline
-              points={pts.map((p) => p.join(',')).join(' ')}
+              points={points}
               fill="none"
               stroke={state === 'cut' ? '#5A2A30' : state === 'hot' ? '#5670C9' : quiet ? '#1C232D' : SCOPE.line}
               strokeWidth={state === 'hot' ? 1.75 : 1.25}

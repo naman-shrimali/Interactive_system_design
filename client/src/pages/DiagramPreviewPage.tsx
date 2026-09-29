@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
-import { DiagramViewer } from '../components/diagram/DiagramViewer';
+import { DiagramFigure } from '../components/diagram/DiagramFigure';
 import { fetchDiagramFile, fetchDiagramFiles } from '../api/client';
 import { EmptyState, Skeleton } from '../components/ui';
 import type { InteractiveDiagram } from '../types';
@@ -39,7 +39,7 @@ export function DiagramPreviewPage() {
   }, [selected]);
 
   return (
-    <div className="mx-auto max-w-4xl px-5 py-10 sm:px-8" style={{ ['--accent' as string]: '#0ea5e9' }}>
+    <div className="mx-auto max-w-[1180px] px-5 py-10 sm:px-8">
       <h1 className="mb-1 text-2xl font-bold tracking-tight">Diagram preview</h1>
       <p className="mb-6 text-sm text-ink-muted">
         Renders files straight from <code className="font-mono text-[12px]">content/diagrams/</code>.
@@ -76,7 +76,7 @@ export function DiagramPreviewPage() {
         />
       )}
       {!spec && !error && files && files.length > 0 && <Skeleton className="h-[420px]" />}
-      {spec && <DiagramViewer spec={spec} />}
+      {spec && <DiagramFigure spec={spec} />}
     </div>
   );
 }

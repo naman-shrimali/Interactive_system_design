@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DiagramViewer } from './DiagramViewer';
+import { DiagramFigure } from './DiagramFigure';
 import { fetchDiagram } from '../../api/client';
 import { Skeleton } from '../ui';
 import type { DiagramMeta, InteractiveDiagram } from '../../types';
@@ -21,12 +21,12 @@ export function SectionDiagram({ meta }: { meta: DiagramMeta }) {
 
   if (error) {
     return (
-      <div className="my-6 rounded-md border border-red-500/30 bg-red-500/5 p-3 text-[13px] text-red-500">
+      <div className="my-8 rounded border border-fail/30 bg-fail/5 p-3 text-[13px] text-fail">
         Could not load diagram “{meta.title}”: {error}
       </div>
     );
   }
-  if (!spec) return <Skeleton className="my-6 h-[420px]" />;
+  if (!spec) return <Skeleton className="my-8 h-[420px]" />;
 
-  return <DiagramViewer spec={spec} diagramId={meta.id} viewed={meta.viewed} />;
+  return <DiagramFigure spec={spec} diagramId={meta.id} viewed={meta.viewed} />;
 }

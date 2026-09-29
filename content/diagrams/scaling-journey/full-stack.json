@@ -29,7 +29,7 @@
         "height": 160
       },
       "style": "dashed",
-      "labelPosition": "right"
+      "labelPosition": "top-left"
     },
     {
       "id": "g_data",
@@ -83,7 +83,7 @@
       "sublabel": "static assets",
       "position": {
         "x": 800,
-        "y": 40
+        "y": 180
       },
       "badge": 1
     },
@@ -195,7 +195,7 @@
       "source": "browser",
       "target": "cdn",
       "label": "static assets",
-      "sourceHandle": "right",
+      "sourceHandle": "bottom",
       "targetHandle": "left",
       "direction": "both"
     },

@@ -125,8 +125,8 @@
       "label": "write renditions",
       "step": 5,
       "color": "purple",
-      "sourceHandle": "bottom",
-      "targetHandle": "left"
+      "sourceHandle": "top",
+      "targetHandle": "bottom"
     },
     {
       "id": "e_origin",

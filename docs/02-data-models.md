@@ -249,8 +249,11 @@ Top level: `{ schemaVersion: 1, id, title, description?, groups?, nodes, edges, 
   `state ∈ normal | highlighted | failed | dimmed`. A node's `position` is relative to its group.
 - **edge** — `{ id, source, target, label?, step?, lineStyle?, color?, direction?, sourceHandle?, targetHandle? }`.
   `color ∈ blue|green|purple|red|gray`, `direction ∈ forward|both|none`.
-  **Handle rule:** `sourceHandle ∈ {bottom,right}`, `targetHandle ∈ {top,left}` — nodes expose source
-  handles only on bottom/right and targets only on top/left. The validator enforces this.
+  **Handle rule:** `sourceHandle ∈ {bottom,right,top}`, `targetHandle ∈ {top,left,bottom}`, and an
+  edge leaving from `top` must enter at `bottom` — the form for an edge that goes *up* the page
+  (a write back to storage, a loop back to the start). The validator enforces this.
+  Edges are routed orthogonally by `client/src/sim/fromDiagram.ts`; several edges on one side of a
+  node are spread along it automatically, so authors pick sides, not positions.
 - **group** — `{ id, label?, position, size:{width,height}, style: dashed|solid|filled, labelPosition? }`.
 - **flow** — `{ id, name, description?, steps: [{ edgeIds[], text }] }`, powering the step-through walkthrough.
 

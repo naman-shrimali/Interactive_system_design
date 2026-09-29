@@ -18,7 +18,7 @@
 | 11. Curated reading list — primary sources per topic | ✅ shipped — 47 entries, 30 of 30 topics |
 | 12. Facts registry — canonical numbers, cross-checked | ✅ shipped |
 | 13. Questions, misconceptions, traps | ✅ shipped — 73 entries, 30 of 30 topics |
-| 14. Systems in Motion — redesign + scenario engine | 🟡 P0–P2 shipped: design reset, engine, 3 flagship scenarios; P3 partly, P4–P5 to do |
+| 14. Systems in Motion — redesign + scenario engine | 🟡 P0–P3 and P5 shipped: design reset, engine, 3 flagship scenarios, all 27 diagrams on the new renderer; P4 (25 scenarios) to do |
 
 The original phases 1–3 were re-cut when the curriculum moved from a source-first to a topic-first
 model ([docs/06-topic-model.md](06-topic-model.md)). Task files for that shipped work are kept as
@@ -249,6 +249,27 @@ sitewide (per-track colours removed); radius scale replaced (4 px controls, 6 px
 `rounded-2xl` can't return; card shadows and fade-ups removed; the player is a dark instrument in both
 themes. Home opens on a running scenario and lists the curriculum as an index.
 
-**Still to do:** P4 — waves 2 and 3 (25 scenarios, catalogue in the plan); P5 — port the 27 React Flow
-diagrams to the stage renderer and remove React Flow, whose fit-to-view scaling still renders their
-labels near 6 px.
+**P5 — one renderer (shipped).** The 27 authored diagrams now run on the scenario engine and React
+Flow is gone (bundle 659 → 481 KB). The old canvas fitted a 1,000–1,300 px drawing into a 650 px
+column *and* capped its height at 560 px, which is why labels rendered near 6 px. Now:
+
+- `sim/fromDiagram.ts` turns a diagram spec into a Scenario: each walkthrough is an option of one
+  knob, each flow step a frame that lights its edges, dims the rest and sends a packet along them.
+  Authored positions are kept (nodes in a group are offset by it; icon nodes keep their old centre).
+- `sim/layout.ts` is the single source of box sizes, text wrapping, ports and label placement,
+  shared by the renderer and the validator, so what is checked is what is drawn.
+- Boxes hug their content; edges route orthogonally, spread across a node's side when several share
+  it, and are nudged apart when two would run along the same line; labels are placed at the first
+  spot clear of every node, label, region label and other edge.
+- Diagrams break out of the 68ch reading column to full width and never render below 85% scale —
+  below that they scroll inside their frame. The side table of contents became an inline row.
+
+`npm run validate:diagrams` now also checks the layout as drawn: overlapping boxes, nodes spilling
+out of their group, labels over nodes or each other, region labels crossed by edges, edges running
+through any node (their own endpoints included), and two edges along one line. Turning it on flagged
+15 of 27 diagrams. Most were renderer issues fixed generally; the rest were real defects the old
+renderer hid behind shrinking and beziers — an edge through an unrelated node in all three
+scaling-journey diagrams, replication drawn through the region-2 web tier, a loop edge drawn through
+both its endpoints — each fixed in content without changing any step's wording.
+
+**Still to do:** P4 — waves 2 and 3 (25 scenarios, catalogue in the plan).

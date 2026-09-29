@@ -12,7 +12,7 @@
         "y": 20
       },
       "size": {
-        "width": 900,
+        "width": 1000,
         "height": 220
       },
       "style": "dashed",
@@ -26,7 +26,7 @@
         "y": 380
       },
       "size": {
-        "width": 900,
+        "width": 1000,
         "height": 220
       },
       "style": "filled",
@@ -73,7 +73,7 @@
       "label": "Safety filter",
       "sublabel": "applied at serving time,\nso a blocklist update takes\neffect in seconds",
       "position": {
-        "x": 720,
+        "x": 805,
         "y": 50
       },
       "groupId": "g_serve"
@@ -95,7 +95,7 @@
       "label": "Aggregation",
       "sublabel": "counts per window",
       "position": {
-        "x": 280,
+        "x": 240,
         "y": 55
       },
       "groupId": "g_build"
@@ -106,7 +106,7 @@
       "label": "Ranking",
       "sublabel": "time-decayed score",
       "position": {
-        "x": 480,
+        "x": 440,
         "y": 55
       },
       "groupId": "g_build"
@@ -117,7 +117,7 @@
       "label": "Trie builder",
       "sublabel": "bottom-up top-k",
       "position": {
-        "x": 700,
+        "x": 660,
         "y": 55
       },
       "groupId": "g_build"

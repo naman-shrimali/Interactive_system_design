@@ -52,7 +52,7 @@
       "type": "client",
       "label": "Web browser",
       "position": {
-        "x": 40,
+        "x": 220,
         "y": 40
       },
       "groupId": "g_user"
@@ -62,7 +62,7 @@
       "type": "client_mobile",
       "label": "Mobile app",
       "position": {
-        "x": 220,
+        "x": 40,
         "y": 40
       },
       "groupId": "g_user"

@@ -207,12 +207,19 @@ export function ScenarioPlayer({
   crumb,
   autoPlay = false,
   syncHash = false,
+  onStep,
+  minScale,
+  maxScale,
 }: {
   scenario: Scenario;
   crumb?: ReactNode;
   autoPlay?: boolean;
   /** Mirror the step into `#step-N` so a step can be linked to. */
   syncHash?: boolean;
+  /** Called whenever the visible step changes. */
+  onStep?: (step: number, total: number, knobs: KnobValues) => void;
+  minScale?: number;
+  maxScale?: number;
 }) {
   const [knobs, setKnobs] = useState<KnobValues>(() => defaultKnobs(scenario));
   const frames = useMemo(() => scenario.run(knobs), [scenario, knobs]);
@@ -317,6 +324,12 @@ export function ScenarioPlayer({
     }
   }, [idx, syncHash]);
 
+  const stepRef = useRef(onStep);
+  stepRef.current = onStep;
+  useEffect(() => {
+    stepRef.current?.(idx, frames.length, knobs);
+  }, [idx, frames.length, knobs]);
+
   useEffect(() => {
     if (tab !== 'code') return;
     codeBox.current?.querySelector('[data-hot]')?.scrollIntoView({ block: 'nearest' });
@@ -376,6 +389,12 @@ export function ScenarioPlayer({
   }
 
   const pct = frames.length > 1 ? (idx / (frames.length - 1)) * 100 : 0;
+
+  // A diagram walkthrough has no code, reasoning, metrics or checkpoints; the
+  // panels that would sit empty are left out rather than drawn blank.
+  const hasSide = code.length > 0 || frames.some((f) => f.why || f.checkpoint);
+  const hasCheckpoints = frames.some((f) => f.checkpoint);
+  const hasLegend = frames.some((f) => f.packets?.some((p) => p.kind === 'nil'));
 
   return (
     <div
@@ -490,12 +509,21 @@ export function ScenarioPlayer({
       </div>
 
       {/* ---- body ---- */}
-      <div className="player-body">
+      <div className={cn('player-body', !hasSide && 'player-body--solo')}>
         <div className="player-stage min-w-0">
           <div className="relative overflow-x-auto">
-            <Stage spec={scenario.stage} frame={frame} animate={animate} speed={speed} onSettled={onSettled} />
+            <Stage
+              spec={scenario.stage}
+              frame={frame}
+              animate={animate}
+              speed={speed}
+              onSettled={onSettled}
+              minScale={minScale}
+              maxScale={maxScale}
+            />
           </div>
 
+          {frame.metrics.length > 0 && (
           <div className="grid grid-cols-2 border-t border-scope-line sm:grid-cols-4">
             {frame.metrics.map((m, k) => (
               <div key={m.label} className={cn('min-w-0 border-scope-line px-3 py-2.5', k % 2 === 0 && 'border-r', k % 4 === 1 && 'sm:border-r', k >= 2 && 'border-t sm:border-t-0')}>
@@ -506,12 +534,14 @@ export function ScenarioPlayer({
               </div>
             ))}
           </div>
+          )}
 
           <p className="min-h-[68px] border-t border-scope-line px-4 py-3 text-[14px] leading-relaxed" aria-live="polite">
             <span className="mr-2 font-mono text-[12px] font-semibold tabular-nums text-scope-cp">{String(idx + 1).padStart(2, '0')}</span>
             {frame.say}
           </p>
 
+          {hasLegend && (
           <div className="flex flex-wrap gap-x-4 gap-y-1.5 border-t border-scope-line px-3 py-2 font-mono text-[11.5px] text-scope-ink-3">
             <span className="flex items-center gap-1.5">
               <i className="inline-block h-2 w-2 rounded-full bg-scope-accent" /> request or command
@@ -522,12 +552,16 @@ export function ScenarioPlayer({
             <span className="flex items-center gap-1.5">
               <i className="inline-block h-2 w-2 rounded-full border-[1.5px] border-scope-ink-2" /> miss or nil
             </span>
-            <span className="flex items-center gap-1.5">
-              <i className="inline-block h-2 w-2 rotate-45 rounded-[1px] bg-scope-cp" /> checkpoint
-            </span>
+            {hasCheckpoints && (
+              <span className="flex items-center gap-1.5">
+                <i className="inline-block h-2 w-2 rotate-45 rounded-[1px] bg-scope-cp" /> checkpoint
+              </span>
+            )}
           </div>
+          )}
         </div>
 
+        {hasSide && (
         <div className="player-side flex min-w-0 flex-col">
           <div className="flex border-b border-scope-line" role="tablist">
             {(['why', 'code'] as const).map((t) => (
@@ -631,6 +665,7 @@ export function ScenarioPlayer({
             </span>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
