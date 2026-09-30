@@ -73,6 +73,8 @@ export function staticRowHeight(r: Row): number {
       return r.lines.length * LEAD.body + 4;
     case 'table':
       return (r.rows.length + 1) * LEAD.cell + 4;
+    case 'ring':
+      return r.size;
     default:
       return 0;
   }

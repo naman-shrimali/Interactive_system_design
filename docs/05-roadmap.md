@@ -18,7 +18,7 @@
 | 11. Curated reading list — primary sources per topic | ✅ shipped — 47 entries, 30 of 30 topics |
 | 12. Facts registry — canonical numbers, cross-checked | ✅ shipped |
 | 13. Questions, misconceptions, traps | ✅ shipped — 73 entries, 30 of 30 topics |
-| 14. Systems in Motion — redesign + scenario engine | 🟡 P0–P3 and P5 shipped: design reset, engine, 3 flagship scenarios, all 27 diagrams on the new renderer; P4 (25 scenarios) to do |
+| 14. Systems in Motion — redesign + scenario engine | 🟡 P0–P3 and P5 shipped, P4 wave 2 shipped: design reset, engine, 10 scenarios, all 27 diagrams on the new renderer; P4 wave 3 (18 scenarios) to do |
 
 The original phases 1–3 were re-cut when the curriculum moved from a source-first to a topic-first
 model ([docs/06-topic-model.md](06-topic-model.md)). Task files for that shipped work are kept as
@@ -272,4 +272,22 @@ renderer hid behind shrinking and beziers — an edge through an unrelated node 
 scaling-journey diagrams, replication drawn through the region-2 web tier, a loop edge drawn through
 both its endpoints — each fixed in content without changing any step's wording.
 
-**Still to do:** P4 — waves 2 and 3 (25 scenarios, catalogue in the plan).
+**P4 wave 2 (shipped).** Seven scenarios, one per topic. Each answers its prediction from a small
+model that runs independently of the frames (`simulate()`), and `run` throws if the two disagree.
+
+| Scenario | Topic | Knobs → what the model computes |
+|---|---|---|
+| Token bucket, then two gateways | rate-limiter | one bucket / two local / shared via GET+SET / shared via Lua → 5, 10, 10, 5 requests pass a burst of 10 |
+| Hash ring vs modulo | consistent-hashing | modulo / ring / 8 vnodes → keys moved when a server leaves (12, 5, 3 of 12), using FNV-1a + Murmur3 fmix32; honest about vnode variance at 8 points |
+| Quorum, sloppy quorum, read repair | key-value-store | W1R1 / W2R2, sloppy on/off → stale read, read repair, and a stale read *despite* R+W>N with hinted handoff |
+| Replication lag | consistency-patterns | round robin / sticky / by LSN → new-then-old (monotonic reads broken), old-old (no read-your-writes), new-new |
+| Consumer crash and rebalance | asynchronism | commit before / after / after + idempotent write → 2 lost, 3 doubled, exactly once; 45 s session timeout |
+| Retry storm | performance-and-latency | 3 attempts per layer vs 10% retry budget, deadline dropping on/off → never recovers (720 req/s vs 100), 7 s, 138 s, immediate |
+| Failover and fencing | availability-patterns | storage accepts every write / fences by epoch → split-brain lost withdrawal (120) vs stale write refused (90) |
+
+The Stage gained a `ring` row (hash ring with arcs, server squares, key dots, stacked labels) and
+`sim/kit.ts` holds shared helpers (`lineOf`, `list`, `burst`, `hash32`). The retry-storm model is a
+per-second fluid model: FIFO queue at B, work older than A's timeout is useless, and each second's
+failure rate drives the next second's retries — crude, but it reproduces the metastable shape.
+
+**Still to do:** P4 wave 3 (18 scenarios, catalogue in the plan).

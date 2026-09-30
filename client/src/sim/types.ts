@@ -22,7 +22,15 @@ export type Row =
   /** Pre-wrapped prose lines, e.g. an annotation box. */
   | { kind: 'text'; lines: string[]; tone?: Tone }
   /** A small data table. Column widths are measured from the content. */
-  | { kind: 'table'; columns: string[]; rows: string[][] };
+  | { kind: 'table'; columns: string[]; rows: string[][] }
+  /** A hash ring: points placed by angle (0..1 of a turn, clockwise from 12 o'clock). */
+  | {
+      kind: 'ring';
+      size: number;
+      points: { at: number; label?: string; mark: 'server' | 'key'; tone?: Tone }[];
+      /** Arcs owned by a server, drawn just inside the ring. */
+      arcs?: { from: number; to: number; tone?: Tone }[];
+    };
 
 export interface NodeState {
   tone?: Tone;

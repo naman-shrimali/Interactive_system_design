@@ -66,6 +66,8 @@ function rowHeight(r: Row): number {
       return r.lines.length * LEAD.body + 4;
     case 'table':
       return (r.rows.length + 1) * LEAD.cell + 4;
+    case 'ring':
+      return r.size;
   }
 }
 
@@ -174,9 +176,78 @@ function Rows({ node, rows, top }: { node: StageNode; rows: Row[]; top: number }
           case 'text':
           case 'table':
             return <StaticRow key={i} row={r} x={x0} y={at} />;
+          case 'ring':
+            return <Ring key={i} row={r} x={x0} y={at} w={inner} />;
         }
       })}
     </>
+  );
+}
+
+/**
+ * A hash ring. Servers are squares, keys are dots; an arc just inside the ring
+ * shows the range a server owns (from its predecessor, clockwise, to itself).
+ */
+function Ring({ row, x, y, w }: { row: Extract<Row, { kind: 'ring' }>; x: number; y: number; w: number }) {
+  const cx = x + w / 2;
+  const cy = y + row.size / 2;
+  const r = row.size / 2 - 26;
+  const pt = (at: number, rad: number): [number, number] => [
+    cx + rad * Math.sin(at * 2 * Math.PI),
+    cy - rad * Math.cos(at * 2 * Math.PI),
+  ];
+  const arc = (from: number, to: number, rad: number) => {
+    const span = (((to - from) % 1) + 1) % 1 || 1;
+    const [x0, y0] = pt(from, rad);
+    const [x1, y1] = pt(from + span, rad);
+    return `M ${x0} ${y0} A ${rad} ${rad} 0 ${span > 0.5 ? 1 : 0} 1 ${x1} ${y1}`;
+  };
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#2A3340" strokeWidth={1.5} />
+      {row.arcs?.map((a, i) => (
+        <path key={`a${i}`} d={arc(a.from, a.to, r - 7)} fill="none" stroke={TONE[a.tone ?? 'active']} strokeWidth={3} strokeLinecap="round" opacity={0.85} />
+      ))}
+      {(() => {
+        // Labels that would crowd step outward, one ring per collision, so
+        // two points 1° apart stay readable instead of printing on each other.
+        const servers = row.points.filter((p) => p.mark === 'server').length;
+        const half = servers > 12 ? 4 : 5;
+        const order = row.points.map((p, i) => ({ p, i })).sort((a, b) => a.p.at - b.p.at);
+        const level = new Map<number, number>();
+        const lastAt: number[] = [];
+        for (const { p, i } of order) {
+          if (!p.label) continue;
+          const base = r + (p.mark === 'server' ? 16 : 13);
+          let lv = 0;
+          // Minimum angular gap for labels at this radius: ~16px of arc.
+          while (lastAt[lv] !== undefined && (p.at - lastAt[lv]) * 2 * Math.PI * (base + lv * 13) < 16) lv++;
+          lastAt[lv] = p.at;
+          level.set(i, lv);
+        }
+        return row.points.map((p, i) => {
+          const [px, py] = pt(p.at, r);
+          const c = TONE[p.tone ?? (p.mark === 'server' ? 'idle' : 'dim')];
+          const lv = level.get(i) ?? 0;
+          const [lx, ly] = pt(p.at, r + (p.mark === 'server' ? 16 : 13) + lv * 13);
+          const anchor = Math.abs(lx - cx) < 8 ? 'middle' : lx > cx ? 'start' : 'end';
+          return (
+            <g key={i}>
+              {p.mark === 'server' ? (
+                <rect x={px - half} y={py - half} width={half * 2} height={half * 2} rx={1.5} fill={SCOPE.ground} stroke={c} strokeWidth={1.75} />
+              ) : (
+                <circle cx={px} cy={py} r={3.5} fill={c} />
+              )}
+              {p.label && (
+                <text x={lx} y={ly + 3.5} textAnchor={anchor} fill={c} fontFamily={MONO} fontSize={p.mark === 'server' ? 11 : 9.5} fontWeight={p.mark === 'server' ? 600 : 400}>
+                  {p.label}
+                </text>
+              )}
+            </g>
+          );
+        });
+      })()}
+    </g>
   );
 }
 
