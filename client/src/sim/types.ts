@@ -172,6 +172,19 @@ export interface Source {
   url: string;
 }
 
+/**
+ * A labelled chip that lives in a node — a key on a server, a job on a worker.
+ * Tokens are laid out in a grid below the node's rows, in array order. The
+ * same id in two consecutive frames glides from its old slot to its new one,
+ * so moving a key from one server to another is something you watch happen.
+ */
+export interface Token {
+  id: string;
+  label: string;
+  node: string;
+  tone?: Tone;
+}
+
 export interface Frame {
   /** Simulated time in milliseconds. */
   t: number;
@@ -181,6 +194,8 @@ export interface Frame {
   packets?: Packet[];
   /** A complete snapshot: every node that draws state, every frame. */
   nodes: Record<string, NodeState>;
+  /** Chips placed in nodes; see Token. */
+  tokens?: Token[];
   /** Edges that are severed (a partition), emphasised, or pushed back this frame. */
   links?: Record<string, 'cut' | 'hot' | 'dim'>;
   metrics: Metric[];

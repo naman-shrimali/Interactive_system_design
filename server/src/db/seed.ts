@@ -97,6 +97,9 @@ const upsertDiagram = db.prepare(`
     spec_json = excluded.spec_json, sort_order = excluded.sort_order
 `);
 
+const listDiagramSlugs = db.prepare(`SELECT slug FROM diagrams WHERE topic_id = ?`);
+const deleteDiagram = db.prepare(`DELETE FROM diagrams WHERE topic_id = ? AND slug = ?`);
+
 function main(): void {
   if (!fs.existsSync(CURRICULUM)) {
     throw new Error(
@@ -133,6 +136,12 @@ function main(): void {
 
       // Diagram files live at content/diagrams/<topicSlug>/<slug>.json
       const dir = path.join(DIAGRAMS_DIR, topic.slug);
+      // Seeding upserts, so a diagram deleted from content would otherwise linger in an existing database.
+      const diagramFiles = fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith('.json')) : [];
+      const keep = new Set(diagramFiles.map((f) => f.replace(/\.json$/, '')));
+      for (const row of listDiagramSlugs.all(topicId) as { slug: string }[]) {
+        if (!keep.has(row.slug)) deleteDiagram.run(topicId, row.slug);
+      }
       if (fs.existsSync(dir)) {
         let order = 0;
         for (const file of fs.readdirSync(dir).sort()) {

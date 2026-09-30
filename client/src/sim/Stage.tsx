@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef } from 'react';
 import { type LucideIcon, Braces, Boxes, Cloud, Cpu, Database, Globe, Mail, Monitor, Network, Server, Smartphone, Zap } from 'lucide-react';
 import type { Frame, NodeIcon, NodeState, Packet, Row, Stage as StageSpec, StageEdge, StageNode, Tone } from './types';
-import { EDGE_LABEL, LEAD, PAD, SIZE, along, edgeGeometry, midpoint, nodeLines, placeLabels, tableColumns } from './layout';
+import { EDGE_LABEL, LEAD, PAD, SIZE, TOKEN, along, edgeGeometry, midpoint, nodeLines, placeLabels, rowHeight, tableColumns, tokenBoxes } from './layout';
 export { edgeGeometry };
 
 /**
@@ -51,25 +51,6 @@ const MONO = '"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
 const CHAR_W_11 = 11 * 0.6;
 const CHAR_W_12 = 12 * 0.6;
 const CHAR_W_115 = 11.5 * 0.6;
-
-function rowHeight(r: Row): number {
-  switch (r.kind) {
-    case 'kv':
-      return 20;
-    case 'bar':
-      return 12;
-    case 'slots':
-      return 36;
-    case 'log':
-      return 44;
-    case 'text':
-      return r.lines.length * LEAD.body + 4;
-    case 'table':
-      return (r.rows.length + 1) * LEAD.cell + 4;
-    case 'ring':
-      return r.size;
-  }
-}
 
 function Rows({ node, rows, top }: { node: StageNode; rows: Row[]; top: number }) {
   let y = top;
@@ -213,33 +194,38 @@ function Ring({ row, x, y, w }: { row: Extract<Row, { kind: 'ring' }>; x: number
         // two points 1° apart stay readable instead of printing on each other.
         const servers = row.points.filter((p) => p.mark === 'server').length;
         const half = servers > 12 ? 4 : 5;
+        // Server labels sit outside the circle and step outward; key labels sit
+        // inside and step inward, so the two never compete for the same space.
+        const radius = (p: (typeof row.points)[number], lv: number) =>
+          p.mark === 'server' ? r + 16 + lv * 13 : r - 14 - lv * 12;
         const order = row.points.map((p, i) => ({ p, i })).sort((a, b) => a.p.at - b.p.at);
         const level = new Map<number, number>();
-        const lastAt: number[] = [];
+        const lastAt: Record<'server' | 'key', number[]> = { server: [], key: [] };
         for (const { p, i } of order) {
           if (!p.label) continue;
-          const base = r + (p.mark === 'server' ? 16 : 13);
+          const used = lastAt[p.mark];
+          const need = 6 + p.label.length * (p.mark === 'server' ? 11 : 9.5) * 0.6;
           let lv = 0;
-          // Minimum angular gap for labels at this radius: ~16px of arc.
-          while (lastAt[lv] !== undefined && (p.at - lastAt[lv]) * 2 * Math.PI * (base + lv * 13) < 16) lv++;
-          lastAt[lv] = p.at;
+          // Step to the next level while this label would touch the previous one on it.
+          while (used[lv] !== undefined && (p.at - used[lv]) * 2 * Math.PI * radius(p, lv) < need) lv++;
+          used[lv] = p.at;
           level.set(i, lv);
         }
         return row.points.map((p, i) => {
           const [px, py] = pt(p.at, r);
           const c = TONE[p.tone ?? (p.mark === 'server' ? 'idle' : 'dim')];
           const lv = level.get(i) ?? 0;
-          const [lx, ly] = pt(p.at, r + (p.mark === 'server' ? 16 : 13) + lv * 13);
-          const anchor = Math.abs(lx - cx) < 8 ? 'middle' : lx > cx ? 'start' : 'end';
+          const [lx, ly] = pt(p.at, radius(p, lv));
+          const anchor = Math.abs(lx - cx) < 10 ? 'middle' : (lx > cx) === (p.mark === 'server') ? 'start' : 'end';
           return (
             <g key={i}>
               {p.mark === 'server' ? (
                 <rect x={px - half} y={py - half} width={half * 2} height={half * 2} rx={1.5} fill={SCOPE.ground} stroke={c} strokeWidth={1.75} />
               ) : (
-                <circle cx={px} cy={py} r={3.5} fill={c} />
+                <circle cx={px} cy={py} r={4} fill={c} />
               )}
               {p.label && (
-                <text x={lx} y={ly + 3.5} textAnchor={anchor} fill={c} fontFamily={MONO} fontSize={p.mark === 'server' ? 11 : 9.5} fontWeight={p.mark === 'server' ? 600 : 400}>
+                <text x={lx} y={ly + 3.5} textAnchor={p.mark === 'server' ? anchor : 'middle'} fill={c} fontFamily={MONO} fontSize={p.mark === 'server' ? 11 : 9.5} fontWeight={p.mark === 'server' ? 600 : 400}>
                   {p.label}
                 </text>
               )}
@@ -257,7 +243,8 @@ function StaticRow({ row, x, y }: { row: Row; x: number; y: number }) {
     return (
       <>
         {row.lines.map((l, k) => (
-          <text key={k} x={x} y={y + 10.5 + k * LEAD.body} fill={row.tone ? TONE[row.tone] : SCOPE.ink2} fontFamily={MONO} fontSize={SIZE.body}>
+          // Keep runs of spaces: text rows use them to line columns up.
+          <text key={k} x={x} y={y + 10.5 + k * LEAD.body} fill={row.tone ? TONE[row.tone] : SCOPE.ink2} fontFamily={MONO} fontSize={SIZE.body} xmlSpace="preserve" style={{ whiteSpace: 'pre' }}>
             {l}
           </text>
         ))}
@@ -458,6 +445,17 @@ const EDGE_TONE: Record<NonNullable<StageEdge['color']>, { base: string; hot: st
   gray: { base: '#37404D', hot: '#8C96A5' },
 };
 
+/** How long a token takes to glide to a new slot, at 1× speed. */
+const TOKEN_GLIDE = 750;
+const TOKEN_FILL: Record<Tone, string> = {
+  idle: '#141B25',
+  active: '#18203A',
+  ok: '#153326',
+  warn: '#2B2412',
+  fail: '#2E1719',
+  dim: '#10151D',
+};
+
 const PACKET_FILL: Record<Packet['kind'], string> = {
   req: SCOPE.accent,
   ok: SCOPE.ok,
@@ -505,6 +503,19 @@ export function Stage({
   const settledRef = useRef(onSettled);
   settledRef.current = onSettled;
 
+  // Token chips: where each one sits this frame, and whether any moved since the last.
+  const tokens = useMemo(() => tokenBoxes(spec, frame.tokens ?? [], frame.nodes), [spec, frame]);
+  const prevTokens = useRef(tokens);
+  const tokenMoved = useMemo(() => {
+    const prev = prevTokens.current;
+    return Object.entries(tokens).some(([id, b]) => prev[id] && (prev[id].x !== b.x || prev[id].y !== b.y));
+  }, [tokens]);
+  useEffect(() => {
+    prevTokens.current = tokens;
+  }, [tokens]);
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const glide = animate && !reducedMotion ? TOKEN_GLIDE / speed : 0;
+
   useEffect(() => {
     const g = layer.current;
     if (!g) return;
@@ -512,6 +523,11 @@ export function Stage({
     const packets = frame.packets ?? [];
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!animate || reduced || packets.length === 0) {
+      // Let moving tokens land before the player counts the step as done.
+      if (glide && tokenMoved) {
+        const t = window.setTimeout(() => settledRef.current?.(), glide);
+        return () => window.clearTimeout(t);
+      }
       settledRef.current?.();
       return;
     }
@@ -728,6 +744,23 @@ export function Stage({
       {spec.nodes.map((n) => (
         <Node key={n.id} node={n} state={frame.nodes[n.id]} />
       ))}
+
+      {(frame.tokens ?? []).map((t) => {
+        const b = tokens[t.id];
+        if (!b) return null;
+        const tone = t.tone ?? 'idle';
+        return (
+          <g
+            key={t.id}
+            style={{ transform: `translate(${b.x}px, ${b.y}px)`, transition: glide ? `transform ${glide}ms cubic-bezier(.45,0,.2,1)` : undefined }}
+          >
+            <rect width={b.w} height={b.h} rx={3} fill={TOKEN_FILL[tone]} stroke={STROKE[tone === 'idle' ? 'idle' : tone]} strokeWidth={1} />
+            <text x={b.w / 2} y={b.h / 2 + 3.6} textAnchor="middle" fill={TONE[tone]} fontFamily={MONO} fontSize={TOKEN.size}>
+              {t.label}
+            </text>
+          </g>
+        );
+      })}
 
       <g ref={layer} />
     </svg>

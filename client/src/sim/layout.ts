@@ -8,7 +8,7 @@
  * All text is IBM Plex Mono, which advances exactly 0.6em per character, so
  * widths are computed rather than measured.
  */
-import type { Port, Row, Stage, StageEdge, StageNode } from './types';
+import type { NodeState, Port, Row, Stage, StageEdge, StageNode, Token } from './types';
 
 export const ADVANCE = 0.6;
 export const SIZE = { title: 12, sub: 11, body: 10.5, cell: 10.5 } as const;
@@ -78,6 +78,60 @@ export function staticRowHeight(r: Row): number {
     default:
       return 0;
   }
+}
+
+/** Height of a row drawn inside a scenario node (the renderer and token layout agree on it). */
+export function rowHeight(r: Row): number {
+  switch (r.kind) {
+    case 'kv':
+      return 20;
+    case 'bar':
+      return 12;
+    case 'slots':
+      return 36;
+    case 'log':
+      return 44;
+    default:
+      return staticRowHeight(r);
+  }
+}
+
+/** Token chips: one width per stage, so a key keeps its size wherever it goes. */
+export const TOKEN = { h: 20, gap: 6, size: 10.5 } as const;
+
+export function tokenWidth(tokens: Token[]): number {
+  const chars = Math.max(1, ...tokens.map((t) => t.label.length));
+  return Math.ceil(chars * charW(TOKEN.size) + 14);
+}
+
+/** Where each token sits: a grid inside its node, below the title, subtitle and rows. */
+export function tokenBoxes(
+  stage: Stage,
+  tokens: Token[],
+  states: Record<string, NodeState | undefined>,
+): Record<string, Box & { node: string }> {
+  const w = tokenWidth(tokens);
+  const out: Record<string, Box & { node: string }> = {};
+  const seen = new Map<string, number>();
+  for (const t of tokens) {
+    const n = stage.nodes.find((x) => x.id === t.node);
+    if (!n) continue;
+    const st = states[n.id];
+    const sub = st?.sub ?? n.sub;
+    const rowsH = (st?.rows ?? []).reduce((h, r) => h + rowHeight(r), 0);
+    const top = n.y + (sub ? 46 : 32) + rowsH;
+    const cols = Math.max(1, Math.floor((n.w - 2 * 12 + TOKEN.gap) / (w + TOKEN.gap)));
+    const i = seen.get(n.id) ?? 0;
+    seen.set(n.id, i + 1);
+    out[t.id] = {
+      node: n.id,
+      x: n.x + 12 + (i % cols) * (w + TOKEN.gap),
+      y: top + Math.floor(i / cols) * (TOKEN.h + TOKEN.gap),
+      w,
+      h: TOKEN.h,
+    };
+  }
+  return out;
 }
 
 export interface NodeLines {

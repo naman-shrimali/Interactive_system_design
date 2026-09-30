@@ -361,7 +361,7 @@ export function ScenarioPlayer({
 
   const onKey = (e: React.KeyboardEvent) => {
     const el = e.target as HTMLElement;
-    if (el.closest('input, textarea, select')) return;
+    if (el.closest('input, textarea, select, [role="radiogroup"]')) return;
     if (e.key === ' ') {
       e.preventDefault();
       if (playing) stop();
@@ -486,6 +486,30 @@ export function ScenarioPlayer({
                   checked={knobs[k.id] === true}
                   onChange={(v) => setKnob(k.id, v)}
                 />
+              ) : k.options.length <= 4 ? (
+                // A few options: show them all, so the alternatives are visible rather than hidden in a menu.
+                <div key={k.id} className="flex items-center gap-2 font-mono text-[12px] text-scope-ink-2">
+                  <span id={`${scenario.id}-${k.id}-label`}>{k.label}</span>
+                  <div role="radiogroup" aria-labelledby={`${scenario.id}-${k.id}-label`} className="flex rounded border border-scope-line p-0.5">
+                    {k.options.map((o) => {
+                      const on = String(knobs[k.id]) === o.value;
+                      return (
+                        <button
+                          key={o.value}
+                          role="radio"
+                          aria-checked={on}
+                          onClick={() => setKnob(k.id, o.value)}
+                          className={cn(
+                            'whitespace-nowrap rounded-[3px] px-2 py-1',
+                            on ? 'bg-scope-ink text-scope' : 'text-scope-ink-2 hover:text-scope-ink',
+                          )}
+                        >
+                          {o.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               ) : (
                 <label key={k.id} className="flex items-center gap-2 font-mono text-[12px] text-scope-ink-2">
                   {k.label}

@@ -492,9 +492,7 @@
             "title": "The rehashing problem",
             "kind": "overview"
           },
-          "diagrams": [
-            "rehashing-problem"
-          ]
+          "diagrams": []
         },
         {
           "from": "authored",

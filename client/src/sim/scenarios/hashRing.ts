@@ -1,4 +1,4 @@
-import type { Checkpoint, Frame, KnobValues, Metric, NodeState, Row, Scenario, Tone } from '../types';
+import type { Checkpoint, Frame, KnobValues, Metric, NodeState, Row, Scenario, Token, Tone } from '../types';
 import { hash32, lineOf, list } from '../kit';
 
 /*
@@ -11,6 +11,10 @@ import { hash32, lineOf, list } from '../kit';
  *   modulo   owner = servers[hash % N]          N changes, nearly every key moves
  *   ring     one point per server on the ring   only S1's keys move, to one neighbour
  *   vnodes   eight points per server            only S1's keys move, spread out
+ *
+ * The keys are drawn as chips inside the server that holds them. When S1
+ * leaves, the chips that change server glide to their new one, so what moved
+ * is something you see rather than read off a table.
  */
 
 const SERVERS = ['S0', 'S1', 'S2', 'S3'];
@@ -34,6 +38,8 @@ const points = (servers: string[], v: number): Point[] =>
     .sort((a, b) => a.at - b.at);
 
 const clockwise = (at: number, ring: Point[]) => ring.find((p) => p.at >= at) ?? ring[0];
+const deg = (at: number) => `${Math.floor(at * 360)}°`;
+const short = (key: string) => key.slice(5); // "user:28" → "28"
 
 function owner(scheme: Scheme, key: string, servers: string[]): string {
   if (scheme === 'modulo') return servers[hash32(key) % servers.length];
@@ -84,6 +90,7 @@ function run(k: KnobValues): Frame[] {
   const src = source(k);
   const at = (a: string) => lineOf(src, a);
   const after = SERVERS.filter((s) => s !== LEAVES);
+  const v = scheme === 'vnodes' ? VNODES : 1;
 
   const before = new Map(KEYS.map((key) => [key, owner(scheme, key, SERVERS)]));
   const now = new Map(KEYS.map((key) => [key, owner(scheme, key, after)]));
@@ -102,41 +109,49 @@ function run(k: KnobValues): Frame[] {
   };
   const sliver = scheme === 'ring' ? empty.filter((s) => gapBefore(s) < 0.02) : [];
 
+  // The key the narration follows: for modulo, one that was never on S1 and
+  // still moves (the surprise); for a ring, one of S1's (the one that must move).
+  const example =
+    scheme === 'modulo'
+      ? (moved.find((key) => before.get(key) !== LEAVES) ?? KEYS[0])
+      : (KEYS.find((key) => before.get(key) === LEAVES) ?? KEYS[0]);
+  const exAt = hash32(example) / TURN;
+
   // ---- view state ----
   let t = 0;
-  let removed = false;
+  let placed = false; // keys shown
+  let removed = false; // S1 gone
+  let focus = false; // highlight the example key
 
-  const keyTable = (): Row => {
-    if (scheme === 'modulo') {
-      return {
-        kind: 'table',
-        columns: ['key', '%4', 'owner', '%3', 'now'],
-        rows: KEYS.map((key) => {
-          const h = hash32(key);
-          const changed = before.get(key) !== now.get(key);
-          return [key, String(h % 4), before.get(key)!, removed ? String(h % 3) : '', removed ? `${now.get(key)}${changed ? ' ←' : ''}` : ''];
-        }),
-      };
-    }
-    return {
-      kind: 'table',
-      columns: ['key', 'angle', 'owner', 'now'],
-      rows: KEYS.map((key) => {
-        const changed = before.get(key) !== now.get(key);
-        return [key, `${Math.floor((hash32(key) / TURN) * 360)}°`, before.get(key)!, removed ? `${now.get(key)}${changed ? ' ←' : ''}` : ''];
-      }),
-    };
+  const keyTone = (key: string): Tone => {
+    if (focus && key === example) return 'active';
+    if (!removed) return 'idle';
+    return before.get(key) !== now.get(key) ? 'warn' : 'dim';
   };
 
-  const ringRow = (): Row[] => {
+  const tokens = (): Token[] =>
+    placed ? KEYS.map((key) => ({ id: key, label: key, node: (removed ? now : before).get(key)!, tone: keyTone(key) })) : [];
+
+  const placementRows = (): Row[] => {
     if (scheme === 'modulo') {
+      const servers = removed ? after : SERVERS;
+      const h = hash32(example);
+      const lines = [
+        `index   ${servers.map((_, i) => String(i).padEnd(4)).join('')}`.trimEnd(),
+        `server  ${servers.map((s) => s.padEnd(4)).join('')}`.trimEnd(),
+        '',
+      ];
+      if (placed) {
+        lines.push(`${example}`);
+        lines.push(`  hash % 4 = ${h % 4}  →  ${before.get(example)}`);
+        if (removed) lines.push(`  hash % 3 = ${h % 3}  →  ${now.get(example)}`);
+      }
       return [
-        { kind: 'kv', label: 'owner', value: 'hash % N', tone: 'idle' },
-        { kind: 'kv', label: 'N', value: removed ? '4 → 3' : '4', tone: removed ? 'warn' : 'idle' },
-        { kind: 'text', lines: ['', 'No ring: a key\'s position means', 'nothing, only its remainder.'], tone: 'dim' },
+        { kind: 'kv', label: 'owner', value: 'servers[hash % N]', tone: 'idle' },
+        { kind: 'kv', label: 'N', value: removed ? '3' : '4', tone: removed ? 'warn' : 'idle' },
+        { kind: 'text', lines: ['', ...lines], tone: 'idle' },
       ];
     }
-    const v = scheme === 'ring' ? 1 : VNODES;
     const ring = points(removed ? after : SERVERS, v);
     const leaverRing = points(SERVERS, v);
     // Arcs: the ranges the leaving server owned (from each predecessor to it).
@@ -144,38 +159,56 @@ function run(k: KnobValues): Frame[] {
       .map((p, i) => ({ p, prev: leaverRing[(i - 1 + leaverRing.length) % leaverRing.length] }))
       .filter(({ p }) => p.server === LEAVES)
       .map(({ p, prev }) => ({ from: prev.at, to: p.at, tone: (removed ? 'warn' : 'active') as Tone }));
+    // Where S1's point was, faintly — only for a single point; with many they are just clutter.
+    const gone = removed && v === 1 ? leaverRing.filter((p) => p.server === LEAVES) : [];
     return [
       {
         kind: 'ring',
-        size: 250,
+        size: 296,
         arcs,
         points: [
           ...ring.map((p) => ({
             at: p.at,
             mark: 'server' as const,
-            label: v === 1 ? p.server : p.server.slice(1),
+            // With many points per server, labels would bury the ring: S1's points are told apart by colour.
+            label: v === 1 ? p.server : undefined,
             tone: (p.server === LEAVES ? 'active' : 'idle') as Tone,
           })),
-          ...KEYS.map((key) => ({
-            at: hash32(key) / TURN,
-            mark: 'key' as const,
-            tone: (!removed ? 'idle' : before.get(key) !== now.get(key) ? 'warn' : 'ok') as Tone,
-          })),
+          ...gone.map((p) => ({ at: p.at, mark: 'server' as const, tone: 'dim' as Tone })),
+          ...(placed
+            ? KEYS.map((key) => ({ at: hash32(key) / TURN, mark: 'key' as const, label: short(key), tone: keyTone(key) }))
+            : []),
+        ],
+      },
+      {
+        kind: 'text',
+        tone: 'dim',
+        lines: [
+          '',
+          '□ server point   ● key',
+          ...(v > 1 && !removed ? [`□ in blue: S1's ${VNODES} points`] : []),
+          removed ? `▬ the range S1 owned` : `▬ the range S1 owns`,
+          'A key belongs to the first server',
+          'point clockwise from it.',
         ],
       },
     ];
   };
 
-  const loadTable = (): Row => ({
-    kind: 'table',
-    columns: ['server', 'keys', 'after'],
-    rows: SERVERS.map((s) => [s, String(count(before, s)), !removed ? '' : s === LEAVES ? 'gone' : String(count(now, s))]),
-  });
+  const bucket = (s: string): NodeState => {
+    const m = removed ? now : before;
+    const n = placed && !(removed && s === LEAVES) ? count(m, s) : 0;
+    const gained = removed && s !== LEAVES ? KEYS.filter((key) => now.get(key) === s && before.get(key) !== s).length : 0;
+    return {
+      tone: removed && s === LEAVES ? 'dim' : 'idle',
+      badge: removed && s === LEAVES ? 'gone' : placed ? `${n} ${n === 1 ? 'key' : 'keys'}${gained ? ` · +${gained}` : ''}` : undefined,
+      badgeTone: removed && s === LEAVES ? 'fail' : gained ? 'warn' : 'idle',
+    };
+  };
 
   const nodes = (): Record<string, NodeState> => ({
-    keys: { rows: [keyTable()] },
-    ring: { tone: removed ? 'warn' : 'idle', rows: ringRow(), sub: scheme === 'vnodes' ? `${VNODES} points per server` : scheme === 'ring' ? '1 point per server' : 'hash(key) % N' },
-    load: { rows: [loadTable()] },
+    ring: { rows: placementRows(), tone: removed ? 'warn' : 'idle' },
+    ...Object.fromEntries(SERVERS.map((s) => [s, bucket(s)])),
   });
 
   const metrics = (): Metric[] => [
@@ -186,67 +219,86 @@ function run(k: KnobValues): Frame[] {
   ];
 
   const frames: Frame[] = [];
-  const push = (f: Omit<Frame, 't' | 'nodes' | 'metrics'>) => frames.push({ ...f, t, nodes: nodes(), metrics: metrics() });
+  const push = (f: Omit<Frame, 't' | 'nodes' | 'metrics' | 'tokens'>) =>
+    frames.push({ ...f, t, nodes: nodes(), metrics: metrics(), tokens: tokens() });
 
-  // ---- 0. setting ----
+  // ---- 0. the servers ----
   push({
-    line: at('function owner('),
+    line: scheme === 'modulo' ? at('const servers') : at('function build('),
     say:
       scheme === 'modulo'
-        ? `Four cache servers and twelve keys, placed by hash(key) % 4. The table shows each key's remainder and the server it maps to.`
-        : `Four cache servers and twelve keys on a hash ring, ${scheme === 'ring' ? 'one point per server' : `${VNODES} points per server`}. Each key belongs to the next server point clockwise.`,
+        ? 'Four cache servers in a list. A key\'s server is the one at position hash(key) % 4.'
+        : scheme === 'ring'
+          ? 'Four cache servers, each hashed to one point on a ring of 2³² positions.'
+          : `Four cache servers, each hashed to ${VNODES} points on the ring — ${VNODES * SERVERS.length} in all. S1's are the blue ones.`,
     why:
       scheme === 'modulo'
-        ? ['Modulo placement is simple and perfectly even — until N changes. The remainder depends on N, so changing N changes the answer for almost every key.']
+        ? ['Modulo placement is simple and spreads keys evenly — until N changes. The remainder depends on N, so changing N changes the answer for almost every key.']
         : [
-            'On a ring, a key\'s owner depends only on where the nearest server point sits, not on how many servers there are. Take a point away and only the keys that pointed at it need a new home.',
+            'On a ring, a key\'s owner depends only on where the nearest server point sits, not on how many servers there are.',
             scheme === 'ring'
               ? 'With one point per server, the arcs between points are as uneven as the hash makes them.'
               : 'Many points per server average the arc lengths out, and scatter each server\'s ranges around the ring.',
           ],
   });
 
-  // ---- 1. predict ----
+  // ---- 1. the keys ----
+  placed = true;
+  focus = true;
+  const exOwner = before.get(example)!;
+  push({
+    line: at('function owner('),
+    vars: { key: example, owner: exOwner },
+    say:
+      scheme === 'modulo'
+        ? `Twelve keys go to their servers. ${example}: hash % 4 = ${hash32(example) % 4}, so it lives on ${exOwner}.`
+        : `Twelve keys are hashed onto the same ring. Each belongs to the first server point clockwise: ${example} sits at ${deg(exAt)}, and the next point round is ${exOwner}'s.`,
+  });
+
+  // ---- 2. predict ----
+  focus = false;
   const frac = moved.length / KEYS.length;
   push({
     say: 'Checkpoint — predict before S1 leaves.',
     checkpoint: {
       kind: 'predict',
-      prompt: `S1 is removed — it crashed, or the cluster is scaling down. How many of the ${KEYS.length} keys will now map to a different server?`,
-      options: [`Around a quarter — only S1's keys`, 'Around half', 'Nearly all of them'],
+      prompt: `S1 is removed — it crashed, or the cluster is scaling down. It holds ${leaverHad} of the ${KEYS.length} keys. How many keys will end up on a different server?`,
+      options: [`Only S1's ${leaverHad}`, 'About half', 'Nearly all of them'],
       answer: frac <= 0.42 ? 0 : frac <= 0.66 ? 1 : 2,
       reveal:
         scheme === 'modulo'
-          ? `${moved.length} of ${KEYS.length}. S1 held only ${leaverHad}, but every key's owner is its hash modulo N, and N just went from 4 to 3 — so remainders change for keys that never touched S1. In general about (N−1)/N of keys move: 75% here, 90% with ten servers.`
-          : `${moved.length} of ${KEYS.length} — exactly the keys S1 owned. Every other key still finds the same point clockwise, because nothing else on the ring moved.${
+          ? `${moved.length} of ${KEYS.length}. S1 held only ${leaverHad}, but every key's server is its hash modulo N, and N just went from 4 to 3 — so remainders change for keys that never touched S1. In general about (N−1)/N of keys move: 75% here, 90% with ten servers.`
+          : `Only S1's ${leaverHad} — exactly the keys between S1's point${v > 1 ? 's' : ''} and the point${v > 1 ? 's' : ''} before. Every other key still finds the same server clockwise, because nothing else on the ring moved.${
               scheme === 'ring' && leaverHad > KEYS.length / 4
-                ? ` S1 happened to own ${Math.round((leaverHad / KEYS.length) * 100)}%, not 25%: with one point per server the arcs are uneven. Twelve keys is a small sample; the expectation is 1/N.`
-                : ' Twelve keys is a small sample; the expectation is 1/N of the keys.'
+                ? ` S1 happened to hold ${Math.round((leaverHad / KEYS.length) * 100)}%, not 25%: with one point per server the arcs are uneven.`
+                : ''
             }`,
       source: { title: 'DeCandia et al. — Dynamo', url: 'https://www.amazon.science/publications/dynamo-amazons-highly-available-key-value-store' },
     },
   });
 
-  // ---- 2. S1 leaves ----
+  // ---- 3. S1 leaves ----
   t = 1000;
   removed = true;
+  focus = true;
   push({
     line: scheme === 'modulo' ? at('servers.splice(') : at('ring = build('),
     vars: { moved: `${moved.length} of ${KEYS.length}` },
     say:
       scheme === 'modulo'
-        ? `S1 leaves and N becomes 3. ${moved.length} of ${KEYS.length} keys now map somewhere else — ${moved.length - leaverHad} of them were never on S1.`
-        : `S1's point${scheme === 'vnodes' ? 's are' : ' is'} removed. Only its ${leaverHad} keys move, to ${list(receivers)} — ${
+        ? `S1 leaves and N becomes 3. ${moved.length} of ${KEYS.length} keys change server — ${moved.length - leaverHad} of them were never on S1. ${example} now computes hash % 3 = ${hash32(example) % 3} and moves to ${now.get(example)}.`
+        : `S1's point${v > 1 ? 's are' : ' is'} removed. Its ${leaverHad} keys move to ${list(receivers)} — ${
             scheme === 'ring' ? 'the next server clockwise' : 'whichever server comes next after each of S1\'s points'
-          }. Every other key stays put.`,
+          }. Every other key stays exactly where it was.`,
   });
 
-  // ---- 3. what it costs ----
+  // ---- 4. what it costs ----
+  focus = false;
   t = 1100;
   push({
     say:
       scheme === 'modulo'
-        ? `Each moved key is now a miss on a cold server, so ${moved.length} of ${KEYS.length} lookups fall through to the database at once — for losing one server out of four.`
+        ? `Each moved key is now looked up on a server that doesn't have it, so ${moved.length} of ${KEYS.length} lookups miss and fall through to the database at once — for losing one server out of four.`
         : scheme === 'ring'
           ? `Load after: ${after.map((s) => `${s} ${count(now, s)}`).join(', ')}. ${busiest} took all of S1's keys${
               sliver.length
@@ -269,12 +321,12 @@ function run(k: KnobValues): Frame[] {
             ],
   });
 
-  // ---- 4. checkpoint ----
+  // ---- 5. checkpoint ----
   const closing: Checkpoint =
     scheme === 'modulo'
       ? {
           kind: 'break',
-          prompt: 'Losing one server of four remapped most of the cache. What placement changes only the keys that belonged to the server that left?',
+          prompt: 'Losing one server of four remapped nearly the whole cache. What placement moves only the keys that belonged to the server that left?',
           reveal: 'Consistent hashing. Put servers and keys on the same circle of hash values and give each key to the next server clockwise. Removing a server removes only its point, so only the keys between it and its predecessor move — about 1/N of them, instead of (N−1)/N.',
           source: { title: 'DeCandia et al. — Dynamo', url: 'https://www.amazon.science/publications/dynamo-amazons-highly-available-key-value-store' },
           knob: { id: 'scheme', value: 'ring', label: 'Use a hash ring' },
@@ -282,7 +334,7 @@ function run(k: KnobValues): Frame[] {
       : scheme === 'ring'
         ? {
             kind: 'break',
-            prompt: `${busiest} absorbed all of S1's keys${empty.length ? ` and ${list(empty)} owns nothing` : ''}. How do you even out a ring without giving up its property?`,
+            prompt: `${busiest} absorbed all of S1's keys${empty.length ? ` and ${list(empty)} holds nothing` : ''}. How do you even out a ring without giving up its property?`,
             reveal: `Give each server many points — virtual nodes — by hashing "S0#0", "S0#1" and so on. Arc lengths average out as the count grows, so load evens, and a leaving server's ranges are scattered around the ring, so its keys spread across many survivors. Dynamo also used them to give bigger machines more points.`,
             source: { title: 'DeCandia et al. — Dynamo', url: 'https://www.amazon.science/publications/dynamo-amazons-highly-available-key-value-store' },
             knob: { id: 'scheme', value: 'vnodes', label: `Use ${VNODES} virtual nodes each` },
@@ -298,18 +350,20 @@ function run(k: KnobValues): Frame[] {
   return frames;
 }
 
+const BUCKET_H = 92;
+const GAP = 10;
+
 export const hashRing: Scenario = {
   id: 'hash-ring',
   topic: 'consistent-hashing',
   title: 'Hash ring vs modulo',
-  summary: 'Twelve keys, four servers, one leaves — placed by hash % N, by a ring, and by a ring with virtual nodes.',
+  summary: 'Twelve keys, four servers, one leaves — watch which keys move under hash % N, a ring, and a ring with virtual nodes.',
   stage: {
     width: 648,
-    height: 462,
+    height: 16 * 2 + 4 * BUCKET_H + 3 * GAP,
     nodes: [
-      { id: 'keys', label: 'KEYS', x: 16, y: 16, w: 244, h: 290 },
-      { id: 'ring', label: 'PLACEMENT', x: 276, y: 16, w: 356, h: 300 },
-      { id: 'load', label: 'LOAD', x: 276, y: 328, w: 356, h: 126 },
+      { id: 'ring', label: 'PLACEMENT', x: 16, y: 16, w: 300, h: 4 * BUCKET_H + 3 * GAP },
+      ...SERVERS.map((s, i) => ({ id: s, label: s, x: 332, y: 16 + i * (BUCKET_H + GAP), w: 300, h: BUCKET_H })),
     ],
     edges: [],
   },

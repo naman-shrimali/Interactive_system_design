@@ -10,6 +10,7 @@
  *   determinism  two runs with the same knobs produce identical frames
  *   references   nodes, edges and packets refer to things on the stage
  *   checkpoints  predict answers are valid options; sources are curated
+ *   tokens       every chip names a real node, has a unique id, and fits inside its node
  *   coverage     every drawn edge carries a packet in some run
  *   facts        no latency literal (ms / µs / ns) in a scenario's text —
  *                timings come from content/facts.json via factMs()
@@ -18,6 +19,7 @@ import fs from 'fs';
 import path from 'path';
 import { SCENARIOS } from '../client/src/sim/registry';
 import type { Frame, Knob, KnobValues, Scenario } from '../client/src/sim/types';
+import { tokenBoxes } from '../client/src/sim/layout';
 
 const ROOT = path.join(__dirname, '..');
 const SCEN_DIR = path.join(ROOT, 'client', 'src', 'sim', 'scenarios');
@@ -75,6 +77,22 @@ function checkRun(s: Scenario, k: KnobValues, frames: Frame[], errors: string[],
     for (const p of f.packets ?? []) {
       if (!edgeIds.has(p.edge)) errors.push(`${at}: packet on unknown edge "${p.edge}"`);
       else usedEdges.add(p.edge);
+    }
+
+    if (f.tokens?.length) {
+      const ids = new Set<string>();
+      for (const t of f.tokens) {
+        if (ids.has(t.id)) errors.push(`${at}: token id "${t.id}" appears twice`);
+        ids.add(t.id);
+        if (!nodeIds.has(t.node)) errors.push(`${at}: token "${t.id}" in unknown node "${t.node}"`);
+      }
+      const boxes = tokenBoxes(s.stage, f.tokens, f.nodes);
+      for (const [id, b] of Object.entries(boxes)) {
+        const n = s.stage.nodes.find((x) => x.id === b.node)!;
+        if (b.x + b.w > n.x + n.w - 6 || b.y + b.h > n.y + n.h - 6) {
+          errors.push(`${at}: token "${id}" spills out of node "${n.id}" — make the node bigger or the labels shorter`);
+        }
+      }
     }
 
     const cp = f.checkpoint;

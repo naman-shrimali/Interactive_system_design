@@ -290,4 +290,18 @@ The Stage gained a `ring` row (hash ring with arcs, server squares, key dots, st
 per-second fluid model: FIFO queue at B, work older than A's timeout is useless, and each second's
 failure rate drives the next second's retries — crude, but it reproduces the metastable shape.
 
-**Still to do:** P4 wave 3 (18 scenarios, catalogue in the plan).
+**Visual audit (2026-10-01).** One scenario per topic was the wrong target. `docs/06-visual-audit.md`
+sets the test a scenario must pass (state changes over time; a knob changes the outcome; most people
+would predict it wrong) and gives every topic a verdict. Wave 3 shrinks from 18 scenarios to 5; three
+diagrams that duplicate a scenario are retired; commentary-only diagram flows become notes.
+
+**Hash ring rebuilt.** The first version opened on a setting with no ring, animated nothing, and left
+the ring's dots unlabelled. It now draws one large ring with labelled keys beside four server boxes
+holding the keys as chips; when S1 leaves, the chips that change server glide to their new one. The
+engine gained `Frame.tokens` for this (keyed chips laid out by `layout.tokenBoxes`, checked by the
+validator to fit their node), choice knobs with up to four options render as a visible segmented
+control instead of a menu, and the old rehashing diagram is retired.
+
+**Still to do:** the rest of the audit — retire the replication-lag and quorum diagrams, move
+commentary flows to notes, still figures for Snowflake and the protocols comparison — then the five
+wave-3 scenarios that passed.

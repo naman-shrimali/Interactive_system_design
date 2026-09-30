@@ -567,9 +567,7 @@
           "attributionNote": null,
           "contentRef": "authored:content/authored/consistent-hashing/00-overview.md",
           "sortOrder": 0,
-          "diagrams": [
-            "rehashing-problem"
-          ]
+          "diagrams": []
         },
         {
           "slug": "the-ring",
