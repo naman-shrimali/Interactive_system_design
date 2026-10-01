@@ -38,6 +38,7 @@
     {
       "id": "costs",
       "name": "The bill",
+      "kind": "notes",
       "steps": [
         { "edgeIds": ["e_s1", "e_s2", "e_s3"], "text": "Joins across shards stop being a database feature and become application code. Transactions spanning shards need two-phase commit or sagas with compensating actions." },
         { "edgeIds": ["e_s2"], "text": "AUTO_INCREMENT no longer gives global uniqueness — which is precisely why distributed ID generation becomes a problem you have to solve." },

@@ -302,6 +302,13 @@ engine gained `Frame.tokens` for this (keyed chips laid out by `layout.tokenBoxe
 validator to fit their node), choice knobs with up to four options render as a visible segmented
 control instead of a menu, and the old rehashing diagram is retired.
 
-**Still to do:** the rest of the audit — retire the replication-lag and quorum diagrams, move
-commentary flows to notes, still figures for Snowflake and the protocols comparison — then the five
-wave-3 scenarios that passed.
+**Audit applied to diagrams.** Diagram flows now carry `kind: "path" | "notes"`. Path flows are
+stepped through; notes (commentary such as "the bill" or "what decomposition costs") are listed under
+the figure; a diagram with no path flows (Snowflake's bit layout, the real-time protocols comparison)
+is a still figure without player controls. The replication-lag and quorum diagrams are retired —
+their scenarios cover them and the lesson prose already carries the R/W table — and the caching
+diagram loses the stampede flow its scenario replaces. 24 diagrams remain.
+
+**Still to do:** the five wave-3 scenarios that passed the audit (news-feed fan-out, chat delivery,
+Snowflake clock, DNS TTL mid-incident, MapReduce skew), then the still figures it calls for (JWT
+revocation timeline, autocomplete trie, NoSQL hot partition) and the back-of-envelope calculator.

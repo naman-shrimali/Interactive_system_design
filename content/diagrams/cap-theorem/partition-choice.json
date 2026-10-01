@@ -43,6 +43,7 @@
     {
       "id": "per-operation",
       "name": "It's per operation, not per database",
+      "kind": "notes",
       "steps": [
         { "edgeIds": ["e_write"], "text": "Within one product the answer differs by feature. Adding to a cart should stay available — losing it loses a sale." },
         { "edgeIds": ["e_read"], "text": "Decrementing the last unit of inventory should favour consistency — overselling costs money and trust. Same system, opposite choices, and saying that is what shows you understand the theorem rather than reciting it." }

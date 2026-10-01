@@ -33,6 +33,7 @@
     {
       "id": "sticky",
       "name": "Why sticky sessions ruin this",
+      "kind": "notes",
       "steps": [
         { "edgeIds": ["e_s2"], "text": "If sessions were pinned to Server 2, its users do not fail over gracefully — their session state died with the machine and they are logged out." },
         { "edgeIds": ["e_s1", "e_s3"], "text": "With a stateless tier and session state in a shared store, any server can serve any request, so a failure costs capacity rather than user sessions. That is the whole argument for statelessness." }

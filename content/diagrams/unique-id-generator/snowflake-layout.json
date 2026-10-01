@@ -35,6 +35,7 @@
     {
       "id": "generate",
       "name": "Generating an ID",
+      "kind": "notes",
       "steps": [
         { "edgeIds": ["e_layout"], "text": "Every generator uses the identical bit layout. Because the timestamp occupies the high bits, comparing two IDs as integers compares them by time — sortability falls out of the layout rather than needing an index." },
         { "edgeIds": ["e_a1", "e_a2", "e_a3"], "text": "Each generator holds a distinct machine ID, so two machines cannot produce the same integer even in the same millisecond. That is the whole collision argument — structural, not probabilistic." },
@@ -44,6 +45,7 @@
     {
       "id": "assignment",
       "name": "Where the coordination actually is",
+      "kind": "notes",
       "steps": [
         { "edgeIds": ["e_a1", "e_a2", "e_a3"], "text": "The one piece of genuine coordination: handing out machine IDs. Two generators sharing an ID produce identical IDs whenever their clocks and sequences align — the exact failure the design exists to prevent." },
         { "edgeIds": ["e_a2"], "text": "A ZooKeeper or etcd ephemeral lease is the robust answer: claim the lowest free ID at startup, and the claim disappears if the process dies. A StatefulSet ordinal is free if you already run one. Static config is fine at small scale and quietly dangerous at large, because someone will copy a config file." },
@@ -53,6 +55,7 @@
     {
       "id": "clock",
       "name": "When the clock moves backwards",
+      "kind": "notes",
       "steps": [
         { "edgeIds": ["e_layout"], "text": "NTP corrections step clocks backwards. VMs resume with a corrected clock. Someone fixes a 'wrong' clock by hand. If the timestamp rewinds and the sequence has reset, you regenerate IDs you already issued." },
         { "edgeIds": ["e_a1"], "text": "The practical answer: never trust the wall clock directly. Keep the last issued timestamp and advance monotonically — now = max(system_clock, last_timestamp) — so a rewind is absorbed by the sequence while real time catches up." },

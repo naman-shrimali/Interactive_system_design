@@ -175,6 +175,7 @@
     {
       "id": "traps",
       "name": "What breaks a naive crawler",
+      "kind": "notes",
       "steps": [
         {
           "edgeIds": [

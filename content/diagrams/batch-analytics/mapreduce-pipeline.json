@@ -244,6 +244,7 @@
     {
       "id": "why-batch",
       "name": "Batch versus streaming",
+      "kind": "notes",
       "steps": [
         {
           "edgeIds": [

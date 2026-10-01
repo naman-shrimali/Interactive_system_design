@@ -400,9 +400,7 @@
             "title": "Choosing a model in practice",
             "kind": "tradeoffs"
           },
-          "diagrams": [
-            "replication-lag"
-          ]
+          "diagrams": []
         },
         {
           "from": "primer",
@@ -1092,9 +1090,7 @@
             "title": "Replication & quorum",
             "kind": "deep-dive"
           },
-          "diagrams": [
-            "quorum"
-          ]
+          "diagrams": []
         },
         {
           "from": "primer",

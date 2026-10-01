@@ -39,6 +39,7 @@
     {
       "id": "mitigations",
       "name": "Living with it",
+      "kind": "notes",
       "steps": [
         { "edgeIds": ["e_s1"], "text": "Denormalise the adjacency list so the common one-hop query never joins. Storage is cheap; cross-shard reads are not." },
         { "edgeIds": ["e_s3"], "text": "Replicate very-high-degree nodes — the accounts everyone follows — onto every shard, so traversals through them stay local. The same celebrity asymmetry as the news feed, solved the same way: handle the small expensive set differently." },

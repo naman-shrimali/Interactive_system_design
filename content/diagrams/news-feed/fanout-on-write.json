@@ -188,6 +188,7 @@
     {
       "id": "celebrity",
       "name": "Where it breaks",
+      "kind": "notes",
       "steps": [
         {
           "edgeIds": [

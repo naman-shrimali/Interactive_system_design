@@ -166,6 +166,7 @@
     {
       "id": "walk",
       "name": "Why each one exists",
+      "kind": "notes",
       "steps": [
         {
           "edgeIds": [
@@ -196,6 +197,7 @@
     {
       "id": "consequence",
       "name": "What a persistent connection costs",
+      "kind": "notes",
       "steps": [
         {
           "edgeIds": [

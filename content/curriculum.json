@@ -469,9 +469,7 @@
           "attributionNote": null,
           "contentRef": "authored:content/authored/consistency-patterns/01-in-practice.md",
           "sortOrder": 2,
-          "diagrams": [
-            "replication-lag"
-          ]
+          "diagrams": []
         }
       ],
       "links": [
@@ -1761,9 +1759,7 @@
           "attributionNote": null,
           "contentRef": "authored:content/authored/key-value-store/01-quorum.md",
           "sortOrder": 2,
-          "diagrams": [
-            "quorum"
-          ]
+          "diagrams": []
         },
         {
           "slug": "core-components",

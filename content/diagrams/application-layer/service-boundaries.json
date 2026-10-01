@@ -197,6 +197,7 @@
     {
       "id": "ownership",
       "name": "Each service owns its data",
+      "kind": "notes",
       "steps": [
         {
           "edgeIds": [
@@ -223,6 +224,7 @@
     {
       "id": "cost",
       "name": "What decomposition costs",
+      "kind": "notes",
       "steps": [
         {
           "edgeIds": [

@@ -262,6 +262,7 @@
     {
       "id": "decoupled",
       "name": "Why the split matters",
+      "kind": "notes",
       "steps": [
         {
           "edgeIds": [

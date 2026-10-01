@@ -137,6 +137,7 @@
     {
       "id": "prewarm",
       "name": "Why you pre-warm a launch",
+      "kind": "notes",
       "steps": [
         {
           "edgeIds": [

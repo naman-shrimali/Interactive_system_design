@@ -32,6 +32,7 @@
     {
       "id": "backlog",
       "name": "When consumers fall behind",
+      "kind": "notes",
       "steps": [
         { "edgeIds": ["e_pub"], "text": "Producers keep publishing at the arrival rate. Nothing upstream knows or cares that consumers are struggling." },
         { "edgeIds": ["e_con"], "text": "Consumers drain more slowly than jobs arrive. The queue grows. Time-through-queue climbs from milliseconds toward hours, and by the time anyone notices, the backlog itself takes hours to clear." },

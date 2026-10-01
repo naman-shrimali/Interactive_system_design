@@ -65,6 +65,11 @@ follow something through the system (**path**) or are commentary pinned to an ar
 Result: 3 diagrams retired, 2 become still figures, 22 stay as walkthroughs — 12 of them with their
 commentary moved out of the step controls into notes.
 
+**Done (2026-10-01).** Flows carry `kind: "path" | "notes"` (default path). The player steps through
+path flows only; `DiagramFigure` lists notes flows under the figure and draws a diagram with no path
+flows as a still figure without transport controls. The three duplicate diagrams are retired and the
+caching diagram's stampede flow is gone.
+
 ## Scenarios
 
 ### Shipped (10)

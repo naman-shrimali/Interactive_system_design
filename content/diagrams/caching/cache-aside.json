@@ -28,15 +28,6 @@
         { "edgeIds": ["e_query"], "text": "It falls back to the database, which is authoritative but slower." },
         { "edgeIds": ["e_lookup"], "text": "It writes the value into the cache with a TTL, so the next reader hits. Note the application does this — the cache is passive, which is what makes this 'cache-aside' rather than read-through." }
       ]
-    },
-    {
-      "id": "stampede",
-      "name": "The failure mode: stampede",
-      "steps": [
-        { "edgeIds": ["e_lookup"], "text": "A popular key expires. Not one request misses — every concurrent request for that key misses at the same moment." },
-        { "edgeIds": ["e_query"], "text": "All of them fall through to the database simultaneously. A key that was absorbing thousands of reads per second now sends thousands of queries at once, which is how a cache expiry becomes a database outage." },
-        { "edgeIds": ["e_lookup"], "text": "Fixes: let only one request rebuild the key while others serve stale, add jitter to TTLs so keys don't expire together, or refresh hot keys before they expire." }
-      ]
     }
   ]
 }

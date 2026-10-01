@@ -211,6 +211,8 @@ export interface DiagramFlow {
   id: string;
   name: string;
   description?: string;
+  /** 'path' (default) is stepped through; 'notes' is commentary listed under the figure. */
+  kind?: 'path' | 'notes';
   steps: FlowStep[];
 }
 export interface InteractiveDiagram {

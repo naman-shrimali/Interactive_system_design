@@ -461,7 +461,8 @@ const PACKET_KIND: Record<string, Packet['kind']> = { green: 'ok', red: 'fail' }
 
 export function diagramScenario(spec: InteractiveDiagram): Scenario {
   const stage = diagramStage(spec);
-  const flows = spec.flows ?? [];
+  // Only path flows are stepped through; notes flows are listed under the figure (DiagramFigure).
+  const flows = (spec.flows ?? []).filter((f) => f.kind !== 'notes');
   const edgeById = new Map(spec.edges.map((e) => [e.id, e]));
 
   const knobs: Knob[] =

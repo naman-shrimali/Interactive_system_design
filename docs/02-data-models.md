@@ -255,7 +255,11 @@ Top level: `{ schemaVersion: 1, id, title, description?, groups?, nodes, edges, 
   Edges are routed orthogonally by `client/src/sim/fromDiagram.ts`; several edges on one side of a
   node are spread along it automatically, so authors pick sides, not positions.
 - **group** — `{ id, label?, position, size:{width,height}, style: dashed|solid|filled, labelPosition? }`.
-- **flow** — `{ id, name, description?, steps: [{ edgeIds[], text }] }`, powering the step-through walkthrough.
+- **flow** — `{ id, name, description?, kind?, steps: [{ edgeIds[], text }] }`. `kind: "path"` (the
+  default) is a walkthrough: the steps follow a request or message hop by hop and the player steps
+  through them. `kind: "notes"` is commentary about the picture — "what it costs", "why the split
+  matters" — rendered as a numbered list under the figure, not stepped. A diagram with no path flows
+  renders as a still figure with no player controls (see `docs/06-visual-audit.md`).
 
 Beyond the JSON Schema, the validator also checks: unique ids, every `groupId`/`source`/`target`/
 `flow.steps[].edgeIds` resolves, `table` nodes have `tableData` (and non-table nodes don't), handle
