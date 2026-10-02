@@ -184,25 +184,6 @@
           "text": "A follower's feed is already assembled. Reading it is one cache lookup with no joins, no ranking across sources, and no fan-in — which is why this design wins for a read-heavy product."
         }
       ]
-    },
-    {
-      "id": "celebrity",
-      "name": "Where it breaks",
-      "kind": "notes",
-      "steps": [
-        {
-          "edgeIds": [
-            "e_fanout"
-          ],
-          "text": "An account with ten million followers posts. That single action becomes ten million cache writes, saturating the workers and delaying fan-out for everyone else on the queue."
-        },
-        {
-          "edgeIds": [
-            "e_read"
-          ],
-          "text": "The standard fix is hybrid: fan out on write for ordinary accounts, and for the small set of very-high-follower accounts skip fan-out entirely — merge their recent posts in at read time. Most users pay nothing; the expensive case is handled by the path that scales with it."
-        }
-      ]
     }
   ]
 }

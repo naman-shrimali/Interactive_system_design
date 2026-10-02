@@ -309,6 +309,13 @@ is a still figure without player controls. The replication-lag and quorum diagra
 their scenarios cover them and the lesson prose already carries the R/W table — and the caching
 diagram loses the stampede flow its scenario replaces. 24 diagrams remain.
 
-**Still to do:** the five wave-3 scenarios that passed the audit (news-feed fan-out, chat delivery,
-Snowflake clock, DNS TTL mid-incident, MapReduce skew), then the still figures it calls for (JWT
+**Fan-out (news-feed, wave 3).** @star (30M followers) posts a second before @bob (200), against
+the lesson's load of 3,000 posts/s × 200 followers on workers sized for 800k writes/s. One FIFO queue:
+@bob's post lands 37.3 s late and every post is late for 2.5 min. A big-account lane: @bob is instant
+but @star's last follower waits 2.5 min and it is still 30M writes. Hybrid: one write, merged at read
+time. The engine gained `Scenario.stageFor(knobs)` so a setting can add or remove components instead
+of leaving an unused box; the validator checks every layout the knobs can select.
+
+**Still to do:** the four remaining wave-3 scenarios (chat delivery, Snowflake clock, DNS TTL
+mid-incident, MapReduce skew), then the still figures it calls for (JWT
 revocation timeline, autocomplete trie, NoSQL hot partition) and the back-of-envelope calculator.

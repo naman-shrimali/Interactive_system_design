@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Stage, TONE } from './Stage';
-import { defaultKnobs } from './types';
+import { defaultKnobs, stageOf } from './types';
 import type { Checkpoint, Frame, KnobValue, KnobValues, Scenario } from './types';
 import { cn } from '../lib/cn';
 
@@ -223,6 +223,7 @@ export function ScenarioPlayer({
 }) {
   const [knobs, setKnobs] = useState<KnobValues>(() => defaultKnobs(scenario));
   const frames = useMemo(() => scenario.run(knobs), [scenario, knobs]);
+  const stage = useMemo(() => stageOf(scenario, knobs), [scenario, knobs]);
   const code = useMemo(() => scenario.source(knobs), [scenario, knobs]);
   const [i, setI] = useState(() => {
     if (!syncHash || typeof location === 'undefined') return 0;
@@ -537,7 +538,7 @@ export function ScenarioPlayer({
         <div className="player-stage min-w-0">
           <div className="relative overflow-x-auto">
             <Stage
-              spec={scenario.stage}
+              spec={stage}
               frame={frame}
               animate={animate}
               speed={speed}

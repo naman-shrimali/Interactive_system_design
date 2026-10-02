@@ -18,7 +18,7 @@
 import fs from 'fs';
 import path from 'path';
 import { SCENARIOS } from '../client/src/sim/registry';
-import type { Frame, Knob, KnobValues, Scenario } from '../client/src/sim/types';
+import { stageOf, type Frame, type Knob, type KnobValues, type Scenario, type Stage } from '../client/src/sim/types';
 import { tokenBoxes } from '../client/src/sim/layout';
 
 const ROOT = path.join(__dirname, '..');
@@ -48,8 +48,9 @@ function combos(knobs: Knob[]): KnobValues[] {
 function checkRun(s: Scenario, k: KnobValues, frames: Frame[], errors: string[], usedEdges: Set<string>): void {
   const tag = `[${Object.entries(k).map(([a, b]) => `${a}=${b}`).join(' ') || 'defaults'}]`;
   const src = s.source(k);
-  const nodeIds = new Set(s.stage.nodes.map((n) => n.id));
-  const edgeIds = new Set(s.stage.edges.map((e) => e.id));
+  const stage = stageOf(s, k);
+  const nodeIds = new Set(stage.nodes.map((n) => n.id));
+  const edgeIds = new Set(stage.edges.map((e) => e.id));
   const knobIds = new Map(s.knobs.map((x) => [x.id, x]));
 
   if (frames.length < 3) errors.push(`${tag} only ${frames.length} frames`);
@@ -86,9 +87,9 @@ function checkRun(s: Scenario, k: KnobValues, frames: Frame[], errors: string[],
         ids.add(t.id);
         if (!nodeIds.has(t.node)) errors.push(`${at}: token "${t.id}" in unknown node "${t.node}"`);
       }
-      const boxes = tokenBoxes(s.stage, f.tokens, f.nodes);
+      const boxes = tokenBoxes(stage, f.tokens, f.nodes);
       for (const [id, b] of Object.entries(boxes)) {
-        const n = s.stage.nodes.find((x) => x.id === b.node)!;
+        const n = stage.nodes.find((x) => x.id === b.node)!;
         if (b.x + b.w > n.x + n.w - 6 || b.y + b.h > n.y + n.h - 6) {
           errors.push(`${at}: token "${id}" spills out of node "${n.id}" — make the node bigger or the labels shorter`);
         }
@@ -153,16 +154,24 @@ function main(): void {
     ids.add(s.id);
     if (!TOPICS.has(s.topic)) errors.push(`unknown topic "${s.topic}"`);
 
-    const nodeIds = new Set<string>();
-    for (const n of s.stage.nodes) {
-      if (nodeIds.has(n.id)) errors.push(`duplicate node "${n.id}"`);
-      nodeIds.add(n.id);
-      if (n.x < 0 || n.y < 0 || n.x + n.w > s.stage.width || n.y + n.h > s.stage.height) {
-        errors.push(`node "${n.id}" is outside the ${s.stage.width}×${s.stage.height} stage`);
-      }
+    // Every layout the knobs can select, each checked once.
+    const stages = new Map<string, Stage>();
+    for (const k of combos(s.knobs)) {
+      const st = stageOf(s, k);
+      stages.set(JSON.stringify(st), st);
     }
-    for (const e of s.stage.edges) {
-      if (!nodeIds.has(e.from) || !nodeIds.has(e.to)) errors.push(`edge "${e.id}" joins an unknown node`);
+    for (const st of stages.values()) {
+      const nodeIds = new Set<string>();
+      for (const n of st.nodes) {
+        if (nodeIds.has(n.id)) errors.push(`duplicate node "${n.id}"`);
+        nodeIds.add(n.id);
+        if (n.x < 0 || n.y < 0 || n.x + n.w > st.width || n.y + n.h > st.height) {
+          errors.push(`node "${n.id}" is outside the ${st.width}×${st.height} stage`);
+        }
+      }
+      for (const e of st.edges) {
+        if (!nodeIds.has(e.from) || !nodeIds.has(e.to)) errors.push(`edge "${e.id}" joins an unknown node`);
+      }
     }
 
     const usedEdges = new Set<string>();
@@ -176,8 +185,10 @@ function main(): void {
       }
       checkRun(s, k, a, errors, usedEdges);
     }
-    for (const e of s.stage.edges) {
-      if (!usedEdges.has(e.id)) errors.push(`edge "${e.id}" is drawn but no packet ever travels it`);
+    for (const st of stages.values()) {
+      for (const e of st.edges) {
+        if (!usedEdges.has(e.id)) errors.push(`edge "${e.id}" is drawn but no packet ever travels it`);
+      }
     }
 
     lintLiterals(s, errors);

@@ -228,10 +228,17 @@ export interface Scenario {
   /** One sentence for catalogue cards. */
   summary: string;
   stage: Stage;
+  /** A different layout for some knob settings — when an option adds or removes a component,
+   *  rather than leaving an unused box on screen. Defaults to `stage`. */
+  stageFor?: (k: KnobValues) => Stage;
   knobs: Knob[];
   /** The code the learner reads — what generated the frames. */
   source: (k: KnobValues) => string[];
   run: (k: KnobValues) => Frame[];
+}
+
+export function stageOf(s: Scenario, k: KnobValues): Stage {
+  return s.stageFor?.(k) ?? s.stage;
 }
 
 export function defaultKnobs(s: Scenario): KnobValues {
