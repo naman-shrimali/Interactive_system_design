@@ -82,6 +82,15 @@
       "source": "https://hpbn.co/primer-on-latency-and-bandwidth/",
       "lastVerified": "2026-09-27",
       "note": "FCC Measuring Broadband America, via HPBN: fiber 10–20 ms, cable 15–40 ms, DSL 30–65 ms. 20 ms is a good wired broadband connection; mobile is usually worse. It is paid before a packet even leaves the user's city."
+    },
+    {
+      "id": "tcp-keepalive-idle-linux",
+      "label": "Idle time before Linux TCP starts keepalive probes",
+      "value": 2,
+      "unit": "hours",
+      "source": "https://man7.org/linux/man-pages/man7/tcp.7.html",
+      "lastVerified": "2026-10-02",
+      "note": "tcp_keepalive_time defaults to 7200 seconds, and keepalives are only sent on sockets that enable SO_KEEPALIVE. After that, 9 probes 75 seconds apart before the connection is declared dead. A phone that loses signal without closing its socket can look connected for hours as far as TCP is concerned."
     }
   ],
   "derived": [

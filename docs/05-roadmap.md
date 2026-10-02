@@ -316,6 +316,14 @@ but @star's last follower waits 2.5 min and it is still 30M writes. Hybrid: one 
 time. The engine gained `Scenario.stageFor(knobs)` so a setting can add or remove components instead
 of leaving an unused box; the validator checks every layout the knobs can select.
 
-**Still to do:** the four remaining wave-3 scenarios (chat delivery, Snowflake clock, DNS TTL
-mid-incident, MapReduce skew), then the still figures it calls for (JWT
+**A phone in a tunnel (chat-system, wave 3).** Bob's phone loses signal without closing its
+WebSocket; Alice sends three messages; Bob reconnects a minute later. Two settings: what "delivered"
+means (the socket write succeeded, or the device acked and resumes from its cursor) and whether presence
+is a heartbeat TTL or open/close. Write + heartbeats: #41 and #42 vanish while Alice sees ✓✓. Write
+without heartbeats: all three vanish and Bob shows online throughout. Cursor: all three arrive either
+way — heartbeats are for presence and push notifications, not correctness. Adds the Linux
+`tcp_keepalive_time` default (2 hours) to the facts registry, sourced from tcp(7).
+
+**Still to do:** the three remaining wave-3 scenarios (Snowflake clock, DNS TTL mid-incident,
+MapReduce skew), then the still figures it calls for (JWT
 revocation timeline, autocomplete trie, NoSQL hot partition) and the back-of-envelope calculator.

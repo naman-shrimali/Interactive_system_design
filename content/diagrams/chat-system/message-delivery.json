@@ -29,16 +29,6 @@
         { "edgeIds": ["e_forward"], "text": "The message is forwarded to server B over an internal hop." },
         { "edgeIds": ["e_push"], "text": "Server B writes it to Bob's socket. Bob's device acknowledges and advances its cursor." }
       ]
-    },
-    {
-      "id": "offline-delivery",
-      "name": "Bob is offline",
-      "steps": [
-        { "edgeIds": ["e_send", "e_persist"], "text": "Identical up to here: the message is stored regardless of whether anyone can receive it right now." },
-        { "edgeIds": ["e_lookup"], "text": "The registry has no live entry for Bob — either he disconnected cleanly, or his heartbeat TTL expired after his phone lost signal. Both look the same, which is the point of using a TTL." },
-        { "edgeIds": ["e_persist"], "text": "Nothing more happens. There is no separate offline queue: the message is already durable in the conversation, and a mobile push notification is triggered as a side channel." },
-        { "edgeIds": ["e_push"], "text": "When Bob reconnects, his device sends its last-seen cursor and pulls everything after it. The same mechanism handles a two-second blip and a two-week absence." }
-      ]
     }
   ]
 }
