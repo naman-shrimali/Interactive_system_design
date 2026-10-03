@@ -11,9 +11,10 @@ import { retryStorm } from './scenarios/retryStorm';
 import { failover } from './scenarios/failover';
 import { fanout } from './scenarios/fanout';
 import { chatDelivery } from './scenarios/chatDelivery';
+import { snowflakeClock } from './scenarios/snowflakeClock';
 
 /** Every shipped scenario. The validator runs each one under every knob combination. */
-export const SCENARIOS: Scenario[] = [cacheStampede, requestAnatomy, raft, tokenBucket, hashRing, quorum, replicationLag, consumerRebalance, retryStorm, failover, fanout, chatDelivery];
+export const SCENARIOS: Scenario[] = [cacheStampede, requestAnatomy, raft, tokenBucket, hashRing, quorum, replicationLag, consumerRebalance, retryStorm, failover, fanout, chatDelivery, snowflakeClock];
 
 export function scenariosFor(topic: string): Scenario[] {
   return SCENARIOS.filter((s) => s.topic === topic);

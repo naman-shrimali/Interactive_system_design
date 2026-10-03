@@ -197,7 +197,9 @@ function divergence(a: Frame[], b: Frame[]): number {
   for (let i = 0; i < n; i++) {
     const x = a[i];
     const y = b[i];
-    if (x.say !== y.say || x.line?.n !== y.line?.n || x.checkpoint?.prompt !== y.checkpoint?.prompt) return i;
+    // Compare the line by its anchor, not its number: a knob that adds a line of code shifts every
+    // number below it without changing which statement is running.
+    if (x.say !== y.say || x.line?.anchor !== y.line?.anchor || x.checkpoint?.prompt !== y.checkpoint?.prompt) return i;
   }
   return n;
 }

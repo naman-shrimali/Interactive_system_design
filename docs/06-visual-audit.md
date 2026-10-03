@@ -98,7 +98,7 @@ can you see what changed between two steps?*
 |---|---|---|---|
 | Fan-out on write vs read | news-feed | **built** (2026-10-02) | A celebrity post backs up the queue for everyone behind it; the follower threshold flips it; people underestimate the backlog. |
 | Delivery and per-device cursors | chat-system | **built** (2026-10-02) | A socket that dies without a close frame looks online; messages "delivered" to it are lost unless the device's cursor drives delivery. Timing-dependent and counter-intuitive. |
-| Snowflake and the clock | unique-id-generator | **build** (small) | The clock steps back and two IDs collide; the monotonic-clock fix is a knob. |
+| Snowflake and the clock | unique-id-generator | **built** (2026-10-03) | The clock steps back and two IDs collide; the monotonic-clock fix is a knob. |
 | Changing a record mid-incident | dns | **build** (small) | Lowering the TTL after the outage starts doesn't help for the old TTL's duration — a classic wrong prediction. |
 | Map, shuffle, skew | batch-analytics | **build** | One hot key makes one reducer the whole job; adding machines doesn't help, salting does. |
 | Cache key and purge at the edge | cdn | later, maybe | Real bug, but a single event — a before/after figure may do. |
@@ -132,7 +132,7 @@ registry, not a scenario), security, nosql-databases, and every topic above mark
 | consistency-patterns | replication lag | — |
 | availability-patterns | raft, failover and fencing | walkthrough |
 | consistent-hashing | hash ring (rebuilt) | — |
-| unique-id-generator | snowflake and the clock (to build) | still figure + notes |
+| unique-id-generator | when the clock steps back | still figure + notes (clock notes dropped — the scenario shows it) |
 | dns | TTL mid-incident (to build) | walkthrough + notes |
 | cdn | — | walkthrough + notes |
 | load-balancing | — | walkthrough + notes |

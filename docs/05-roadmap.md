@@ -324,6 +324,15 @@ without heartbeats: all three vanish and Bob shows online throughout. Cursor: al
 way — heartbeats are for presence and push notifications, not correctness. Adds the Linux
 `tcp_keepalive_time` default (2 hours) to the facts registry, sourced from tcp(7).
 
-**Still to do:** the three remaining wave-3 scenarios (Snowflake clock, DNS TTL mid-incident,
-MapReduce skew), then the still figures it calls for (JWT
+**When the clock steps back (unique-id-generator, wave 3).** A Snowflake generator issuing two IDs
+a millisecond has its clock stepped back 3 ms. Every ID comes from running the nextId() on the code
+panel: trusting the clock reissues 6 IDs (duplicate primary keys); refusing — what Twitter's original
+Snowflake did — fails 4 requests, and a 2-second step would fail every request for 2 s; max(clock,
+lastMs) keeps counting inside the last millisecond. The closing question: lastMs lives in memory, so a
+restart while the clock is behind can still repeat IDs.
+
+The player now keeps your place across knob changes by comparing which code line is running by its
+anchor, not its number — a setting that adds a line no longer sends learners back to step 1.
+
+**Still to do:** the two remaining wave-3 scenarios (DNS TTL mid-incident, MapReduce skew), then the still figures it calls for (JWT
 revocation timeline, autocomplete trie, NoSQL hot partition) and the back-of-envelope calculator.

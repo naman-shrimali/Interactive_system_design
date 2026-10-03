@@ -51,16 +51,6 @@
         { "edgeIds": ["e_a2"], "text": "A ZooKeeper or etcd ephemeral lease is the robust answer: claim the lowest free ID at startup, and the claim disappears if the process dies. A StatefulSet ordinal is free if you already run one. Static config is fine at small scale and quietly dangerous at large, because someone will copy a config file." },
         { "edgeIds": ["e_a3"], "text": "The property that matters is that an ID is never reused while its original holder is still running. Autoscaling churn can exhaust 1,024 IDs faster than expected, so make them reclaimable." }
       ]
-    },
-    {
-      "id": "clock",
-      "name": "When the clock moves backwards",
-      "kind": "notes",
-      "steps": [
-        { "edgeIds": ["e_layout"], "text": "NTP corrections step clocks backwards. VMs resume with a corrected clock. Someone fixes a 'wrong' clock by hand. If the timestamp rewinds and the sequence has reset, you regenerate IDs you already issued." },
-        { "edgeIds": ["e_a1"], "text": "The practical answer: never trust the wall clock directly. Keep the last issued timestamp and advance monotonically — now = max(system_clock, last_timestamp) — so a rewind is absorbed by the sequence while real time catches up." },
-        { "edgeIds": ["e_layout"], "text": "Alarm if the gap is large, and configure NTP to slew rather than step. Prevention beats detection, and duplicate primary keys are not a failure you want to discover downstream." }
-      ]
     }
   ]
 }
